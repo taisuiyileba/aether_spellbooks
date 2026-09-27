@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "entries": [
+    "aether_spellbooks:bronze_dungeon",
+    "aether_spellbooks:bronze_dungeon_reward",
+    "aether_spellbooks:silver_dungeon",
+    "aether_spellbooks:silver_dungeon_reward",
+    "aether_spellbooks:gold_dungeon_reward",
+    "aether_spellbooks:valkyrie",
+    "aether_spellbooks:zephyr"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": {
+    "item": "aether_spellbooks:aether_arcane_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "aether:phoenix_helmet"
+  },
+  "addition": {
+    "item": "irons_spellbooks:fire_rune"
+  },
+  "result": {
+    "item": "aether_spellbooks:phoenix_mage_helmet"
+  }
+}

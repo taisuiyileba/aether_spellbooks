@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "aether:zanite_ring"
+    },
+    {
+      "item": "aether:ambrosium_shard"
+    },
+    {
+      "item": "aether:ambrosium_shard"
+    },
+    {
+      "item": "aether:ambrosium_shard"
+    },
+    {
+      "item": "aether:ambrosium_shard"
+    },
+    {
+      "item": "irons_spellbooks:arcane_essence"
+    }
+  ],
+  "result": {
+    "item": "aether_spellbooks:ambrosium_ring"
+  }
+}

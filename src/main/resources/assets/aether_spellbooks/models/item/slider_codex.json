@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:item/handheld",
+  "loader": "forge:separate_transforms",
+  "base": {
+    "parent": "irons_spellbooks:item/template_spell_book_model",
+    "textures": {
+      "book": "aether_spellbooks:item/spell_book_models/slider_codex",
+      "particle": "aether_spellbooks:item/spell_book_models/slider_codex"
+    }
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "minecraft:item/generated",
+      "textures": {
+        "layer0": "aether_spellbooks:item/slider_codex"
+      }
+    },
+    "head": {
+      "parent": "irons_spellbooks:item/template_spell_book_model_open",
+      "textures": {
+        "book": "aether_spellbooks:item/spell_book_models/slider_codex",
+        "particle": "aether_spellbooks:item/spell_book_models/slider_codex"
+      }
+    }
+  }
+}

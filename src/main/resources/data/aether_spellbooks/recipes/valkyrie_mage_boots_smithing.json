@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": {
+    "item": "aether_spellbooks:aether_arcane_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "aether:valkyrie_boots"
+  },
+  "addition": {
+    "item": "irons_spellbooks:holy_rune"
+  },
+  "result": {
+    "item": "aether_spellbooks:valkyrie_mage_boots"
+  }
+}

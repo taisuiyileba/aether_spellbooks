@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "aether_spellbooks:item/sunfire_spellblade"
+  }
+}

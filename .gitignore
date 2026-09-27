@@ -1,0 +1,58 @@
+# Gradle build outputs
+.gradle/
+build/
+out/
+bin/
+*.class
+
+# Keep Gradle wrapper jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Logs and Crash Reports
+*.log
+logs/
+crash-reports/
+
+# Minecraft Dev & Runtime Runs
+run/
+run-data/
+run-client/
+run-server/
+run-gametest/
+run-gameTestServer/
+.cache/
+
+# IDE & Editor files
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.classpath
+.project
+.settings/
+*.launch
+*.sublime-project
+*.sublime-workspace
+
+# Python cache & virtual environments (for tools scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.bak
+*.tmp
+*~
+
+# Local configuration & credentials
+local.properties
+*.keystore
+*.jks

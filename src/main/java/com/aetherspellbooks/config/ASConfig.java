@@ -1,0 +1,73 @@
+package com.aetherspellbooks.config;
+
+import net.minecraftforge.common.ForgeConfigSpec;
+
+public class ASConfig {
+    public static final ForgeConfigSpec SPEC;
+
+    public static final ForgeConfigSpec.BooleanValue AETHER_EXCLUSIVE_SPELLS;
+    public static final ForgeConfigSpec.DoubleValue AERCLOUD_DURATION_MULTIPLIER;
+    public static final ForgeConfigSpec.DoubleValue FIRE_MINION_DAMAGE;
+    public static final ForgeConfigSpec.IntValue MOA_DISMOUNT_UNSUMMON_SECONDS;
+    public static final ForgeConfigSpec.DoubleValue PENDANT_MIN_SPELL_POWER;
+    public static final ForgeConfigSpec.DoubleValue PENDANT_MAX_SPELL_POWER;
+    public static final ForgeConfigSpec.IntValue VALKYRIE_SORCERESS_SPAWN_WEIGHT;
+    public static final ForgeConfigSpec.IntValue SOLAR_ACOLYTE_SPAWN_WEIGHT;
+
+    static {
+        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+
+        builder.push("loot");
+        AETHER_EXCLUSIVE_SPELLS = builder
+                .comment("If true, spells from this mod only drop from Aether loot (dungeons, Aether mobs) and never from Iron's Spells' generic loot.")
+                .define("aetherExclusiveSpells", true);
+        builder.pop();
+
+        builder.push("spells");
+        AERCLOUD_DURATION_MULTIPLIER = builder
+                .comment("Multiplier for how long Aercloud Step platforms last.")
+                .defineInRange("aercloudDurationMultiplier", 1.0, 0.1, 10.0);
+        FIRE_MINION_DAMAGE = builder
+                .comment("Base melee damage of summoned Fire Minions (scaled by fire spell power).")
+                .defineInRange("fireMinionDamage", 6.0, 0.0, 100.0);
+        MOA_DISMOUNT_UNSUMMON_SECONDS = builder
+                .comment("Seconds a summoned Moa waits without a rider before vanishing.")
+                .defineInRange("moaDismountUnsummonSeconds", 5, 1, 600);
+        builder.pop();
+
+        builder.push("accessories");
+        PENDANT_MIN_SPELL_POWER = builder
+                .comment("Spell power bonus of the Zanite Focus Pendant when fully repaired (0.05 = +5%).")
+                .defineInRange("pendantMinSpellPower", 0.05, 0.0, 10.0);
+        PENDANT_MAX_SPELL_POWER = builder
+                .comment("Spell power bonus of the Zanite Focus Pendant just before it is fully worn.")
+                .defineInRange("pendantMaxSpellPower", 0.20, 0.0, 10.0);
+        builder.pop();
+
+        builder.comment("Natural spawning in Aether biomes, in the Aether's surface monster category.",
+                "For reference, the Aether gives Whirlwinds 3, Blue Swets 6 and Aechor Plants 7. 0 disables the spawn. Applied when a world loads.")
+                .push("mobs");
+        VALKYRIE_SORCERESS_SPAWN_WEIGHT = builder
+                .comment("Spawn weight of the Valkyrie Sorceress.")
+                .defineInRange("valkyrieSorceressSpawnWeight", 3, 0, 100);
+        SOLAR_ACOLYTE_SPAWN_WEIGHT = builder
+                .comment("Spawn weight of the Solar Acolyte.")
+                .defineInRange("solarAcolyteSpawnWeight", 2, 0, 100);
+        builder.pop();
+
+        SPEC = builder.build();
+    }
+
+    public static int valkyrieSorceressWeight() {
+        return SPEC.isLoaded() ? VALKYRIE_SORCERESS_SPAWN_WEIGHT.get() : VALKYRIE_SORCERESS_SPAWN_WEIGHT.getDefault();
+    }
+
+    public static int solarAcolyteWeight() {
+        return SPEC.isLoaded() ? SOLAR_ACOLYTE_SPAWN_WEIGHT.get() : SOLAR_ACOLYTE_SPAWN_WEIGHT.getDefault();
+    }
+
+    public static boolean aetherExclusive() {
+        // Config may be queried before it is loaded (e.g. during registry scans); default to exclusive.
+        return !SPEC.isLoaded() || AETHER_EXCLUSIVE_SPELLS.get();
+    }
+}

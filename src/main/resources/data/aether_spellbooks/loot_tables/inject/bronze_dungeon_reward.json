@@ -1,0 +1,53 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.3
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:slider_codex"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.5
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:scroll",
+          "functions": [
+            {
+              "function": "irons_spellbooks:randomize_spell",
+              "quality": {
+                "type": "minecraft:uniform",
+                "min": 0.2,
+                "max": 0.8
+              },
+              "spell_filter": {
+                "spells": [
+                  "aether_spellbooks:aercloud_step",
+                  "aether_spellbooks:stonebreaker_shard",
+                  "aether_spellbooks:zephyr_blast"
+                ],
+                "force": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

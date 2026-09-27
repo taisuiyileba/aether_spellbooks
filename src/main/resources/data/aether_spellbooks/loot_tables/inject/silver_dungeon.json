@@ -1,0 +1,68 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.2
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:scroll",
+          "functions": [
+            {
+              "function": "irons_spellbooks:randomize_spell",
+              "quality": {
+                "type": "minecraft:uniform",
+                "min": 0.0,
+                "max": 0.6
+              },
+              "spell_filter": {
+                "spells": [
+                  "aether_spellbooks:aercloud_step",
+                  "aether_spellbooks:stonebreaker_shard",
+                  "aether_spellbooks:zephyr_blast",
+                  "aether_spellbooks:thunder_crystal",
+                  "aether_spellbooks:summon_moa",
+                  "aether_spellbooks:valkyrie_lunge",
+                  "aether_spellbooks:cloud_sentinels",
+                  "aether_spellbooks:aether_whirlwind"
+                ],
+                "force": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.15
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:uncommon_ink",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
