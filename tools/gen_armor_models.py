@@ -780,8 +780,8 @@ def generate(save):
         write_json(os.path.join(ASSETS, "animations", model.name + "_armor.animation.json"), model.animation())
         built.append((model, atlas))
     save(valkyrie_cape(), "models", "armor", "valkyrie_mage_cape.png")
-    save(phoenix_cape(), "models", "armor", "phoenix_mage_cape.png")
-    for name, img in {**valkyrie_icons(), **phoenix_icons()}.items():
+    import custom_item_art
+    for name, img in {**custom_item_art.valkyrie_mage_icons(), **custom_item_art.phoenix_mage_icons()}.items():
         save(img, "item", name + ".png")
     save(template_icon(), "item", "aether_arcane_upgrade_smithing_template.png")
     save(empty_rune_slot(), "item", "empty_slot_rune.png")

@@ -1437,11 +1437,14 @@ def preview():
 
 
 def main():
+    import custom_item_art
     for name, spec in BOOKS.items():
-        save(book_icon_iso(name, spec), "item", name + ".png")
+        book_fn = getattr(custom_item_art, name, None)
+        icon_img = book_fn() if book_fn else book_icon_iso(name, spec)
+        save(icon_img, "item", name + ".png")
         save(book_model_texture(name, spec), "item", "spell_book_models", name + ".png")
     save(ambrosium_ring(), "item", "ambrosium_ring.png")
-    save(zanite_pendant(), "item", "zanite_focus_pendant.png")
+    save(custom_item_art.zanite_focus_pendant(), "item", "zanite_focus_pendant.png")
     save(gravitite_gloves(), "item", "gravitite_casting_gloves.png")
     save(valkyrie_mantle(), "item", "valkyrie_mantle.png")
     for name, fn in SPELL_ICONS.items():
