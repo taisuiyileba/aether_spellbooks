@@ -11,7 +11,8 @@ and item icons, plus build/armor_preview.png (software render on a mannequin) fo
 
 Bone names follow GeckoLib's armour renderer (armorHead, armorBody, armorRightArm, ... armorRightBoot) and
 Iron's Spells' GenericCustomArmorRenderer extras (armorLeggingTorsoLayer follows the body for the leggings,
-armorTorsoExtensionRight/LeftLeg follow the legs for the chestplate's robe skirt). All geometry and art is original.
+armorTorsoExtensionRight/LeftLeg follow the legs for the chestplate's hip tassets). The chestplate stops at the
+waist and the leggings' sash sits over its hem, so the leggings stay visible between the sash and the boots. All geometry and art is original.
 """
 import json
 import math
@@ -207,6 +208,18 @@ def flame_tongues(rmp, faces=SIDES, max_height=3, seed=0):
     return paint
 
 
+def flames_up(rmp, base, max_height=3, faces=SIDES, seed=0.0, below=None):
+    """Flames rising from row `base` (tongue heights vary per column); rows under the base take `below` (ramp, level)."""
+    def paint(net):
+        for f, x, y, fw, fh, X, Y in net.each(faces):
+            hgt = 1 + int((math.sin(x * 2.1 + seed) * 0.5 + 0.5) * (max_height - 1) + 0.5)
+            if y > base and below:
+                net.px[X, Y] = pick(below[0], below[1] + FACE_SHIFT[f], X, Y)
+            elif base - hgt < y <= base:
+                net.px[X, Y] = pick(rmp, len(rmp) - 1.4 - (base - y) * 1.2 + FACE_SHIFT[f], X, Y)
+    return paint
+
+
 # ============================================================================ model description
 class Cube:
     def __init__(self, origin, size, inflate=0.0, paint=(), mirror=False):
@@ -396,31 +409,34 @@ def valkyrie_mage():
     m.add_bone(Bone("pauldronRight", "armorRightArm", (-5, 23, 0), (0, 0, -10), [
         Cube((-9.5, 21.5, -3), (6, 3, 6), 0, [shade(S, 3.0, 1.0), band(G, [-1], 2.6), shade(S, 3.6, 0, faces=("top",)), edges(G, 2.6, faces=("top",))]),
         Cube((-10, 19.8, -3.5), (5, 2, 7), 0, [shade(S, 2.6, 0.6), band(G, [-1], 2.4)])]), mirror=True)
-    # --- leggings: gold-and-blue belt with a buckle, white leggings, silver knee cops
+    # --- leggings: a gold-edged sky-blue sash worn over the chestplate's hem, blue breeches, silver greaves and knee cops.
+    # The chestplate stops at the waist, so everything between the sash and the boots belongs to the leggings.
     m.add("armorLeggingTorsoLayer",
-          Cube((-4.5, 11, -2.5), (9, 2, 5), 0, [shade(B, 2.4, 0.2), band(G, [0], 2.8, faces=ALL)]),
-          Cube((-1.5, 10.8, -3.1), (3, 2, 1), 0, [shade(G, 2.8, 0.4), stamp("front", ["GYG", "gPg"], VP)]))
+          Cube((-5, 11, -3), (10, 3, 6), 0.1, [shade(B, 2.4, 0.3), band(G, [0], 2.9), band(G, [-1], 2.0, highlight=False),
+                                                columns(B, [2, 5, 8], 1.6, faces=("front", "back"), rows=[1]), shade(G, 2.8, 0, faces=("top", "bottom"))]),
+          Cube((-1.5, 11.3, -3.75), (3, 2, 1), 0, [shade(G, 2.8, 0.4), stamp("front", ["GYG", "gPg"], VP)]))
     m.add("armorRightLeg",
-          Cube((-4, 0, -2), (4, 12, 4), 0.5, [shade(W, 2.5, 0.9), band(G, [6], 2.4), band(S, [7, 8, 9, 10, 11], 2.4, highlight=False)]),
-          Cube((-4.2, 5.8, -2.9), (4, 2, 1), 0, [shade(S, 3.0, 0.6), band(G, [-1], 2.6, faces=ALL)]),
+          Cube((-4, 0, -2), (4, 12, 4), 0.5, [
+              shade(S, 2.9, 1.2), band(B, [0, 1, 2, 3], 2.5, highlight=False), band(B, [0], 2.0, highlight=False),
+              columns(B, [1], 1.7, faces=("front", "back"), rows=range(1, 4)), band(G, [4], 2.7),
+              stamp("right", ["....", ".Y..", ".G..", ".g.."], VP), stamp("left", ["....", "..Y.", "..G.", "..g."], VP)]),
+          Cube((-4.2, 5.6, -2.95), (4, 2, 1), 0, [shade(S, 3.1, 0.6), band(G, [0], 2.8, faces=SIDES), stamp("front", [".PP.", "...."], VP)]),
           mirror=True)
-    # --- chestplate skirt: pleated sky-blue tassets with a gold hem and fringe, following the legs
+    # --- chestplate tassets: short silver plates at the outer hips; the front of the legs stays uncovered
     m.add("armorTorsoExtensionRightLeg",
-          Cube((-5, 5, -3), (5, 7, 6), 0, [
-              shade(B, 2.6, 0.6), columns(B, [1, 3, 5], 1.7), band(S, [0], 2.8), band(G, [5], 2.8, highlight=False), band(B, [6], 2.0, highlight=False),
-              cut(("bottom", "top", "left"), lambda x, y, fw, fh: True),
-              cut(SIDES, lambda x, y, fw, fh: y == fh - 1 and x % 2 == 1)]),
+          Cube((-5.45, 8.5, -2.5), (1, 3, 5), 0, [shade(S, 3.0, 0.8), edges(G, 2.6, faces=("right",)), band(G, [-1], 2.4, faces=("front", "back")),
+                                                   shade(B, 1.8, 0, faces=("left", "top", "bottom"))]),
           mirror=True)
     # --- boots: silver with gold toe caps and rims, small feathered wings at the heels
     m.add("armorRightBoot",
-          Cube((-4, 0, -2), (4, 6, 4), 0.75, [
+          Cube((-4, 0, -2), (4, 5, 4), 0.75, [
               shade(S, 2.8, 0.8), band(G, [0], 2.8), band(S, [-1], 1.2, highlight=False),
-              stamp("front", ["....", "....", "....", "GYYG", "GGGG", "...."], VP), shade(S, 0.6, 0, faces=("bottom",))]),
-          Cube((-4.5, 5.4, -2.5), (5, 1, 5), 0.25, [shade(G, 2.8, 0)]),
+              stamp("front", ["....", "....", "GYYG", "GGGG", "...."], VP), shade(S, 0.6, 0, faces=("bottom",))]),
+          Cube((-4.5, 4.4, -2.5), (5, 1, 5), 0.25, [shade(G, 2.8, 0)]),
           mirror=True)
     heel = [feather_stripes(F, 2.4, faces=("right", "left"), width=2), band(G, [0], 2.8, faces=("right", "left")), shade(F, 2.4, 0, faces=("top", "front", "back", "bottom"))]
-    m.add_bone(Bone("bootWingRight", "armorRightBoot", (-4.8, 3.5, 1.5), (0, -20, 0), [
-        Cube((-5.8, 2.5, 1), (1, 2, 3), 0, heel), Cube((-5.8, 4, 2.5), (1, 2, 2), 0, heel)], anim=sway(1, 5, 2.0, 1.0)), mirror=True)
+    m.add_bone(Bone("bootWingRight", "armorRightBoot", (-4.8, 3, 1.5), (0, -20, 0), [
+        Cube((-5.8, 2, 1), (1, 2, 3), 0, heel), Cube((-5.8, 3.5, 2.5), (1, 2, 2), 0, heel)], anim=sway(1, 5, 2.0, 1.0)), mirror=True)
     return m
 
 
@@ -484,31 +500,37 @@ def phoenix_mage():
         Cube((-9.5, 21, -3), (6, 3, 6), 0, [feather_stripes(F, 3.2, width=2, tip=(F, 1, 2.0)), zigzag(), shade(G, 3.0, 0, faces=("top",)), edges(G, 2.6, faces=("top",))]),
         Cube((-10, 18.8, -3), (5, 3, 6), 0, [feather_stripes(F, 2.4, width=2, tip=(R, 1, 2.0)), zigzag(), shade(C, 2.2, 0, faces=("top", "bottom"))])]),
         mirror=True)
-    # --- leggings: gold belt with a ruby buckle, dark crimson leggings with a gold flame stripe
+    # --- leggings: a gold sash with a ruby buckle worn over the robe's hem, crimson plumage legs with a gold flame
+    # stripe and flames licking up from the boots
     m.add("armorLeggingTorsoLayer",
-          Cube((-4.5, 11, -2.5), (9, 2, 5), 0, [shade(G, 2.6, 0.4), band(G, [0], 3.2, faces=ALL, highlight=False)]),
-          Cube((-1.5, 10.8, -3.1), (3, 2, 1), 0, [shade(G, 2.8, 0.2), stamp("front", ["GEG", "gEg"], {"G": (G, 2.8), "g": (G, 1.8), "E": (R, 2.4)})]))
+          Cube((-5, 11, -3), (10, 3, 6), 0.1, [shade(G, 2.6, 0.3), band(G, [0], 3.2), band(C, [1], 2.2, highlight=False), band(G, [-1], 1.9, highlight=False),
+                                                shade(G, 2.8, 0, faces=("top", "bottom"))]),
+          Cube((-1.5, 11.3, -3.75), (3, 2, 1), 0, [shade(G, 2.8, 0.2), stamp("front", ["GEG", "gEg"], {"G": (G, 2.8), "g": (G, 1.8), "E": (R, 2.4)})]))
     m.add("armorRightLeg",
-          Cube((-4, 0, -2), (4, 12, 4), 0.5, [shade(C, 1.9, 0.6), stamp("right", ["....", ".G..", ".GY.", "..G.", ".GY.", ".G..", "GY..", ".G..", "....", "....", "....", "...."], XP),
-                                              stamp("front", ["....", "....", "....", "....", "....", "gGGg", "....", "....", "....", "....", "....", "...."], XP)]),
+          Cube((-4, 0, -2), (4, 12, 4), 0.5, [
+              scales(C, 2.2), flames_up(F, 7, 3, seed=0.7, below=(F, 1.2)),
+              stamp("right", ["....", ".G..", ".GY.", "..G.", ".G..", "....", "....", "....", "....", "....", "....", "...."], XP),
+              stamp("left", ["....", "..G.", ".YG.", ".G..", "..G.", "....", "....", "....", "....", "....", "....", "...."], XP),
+              band(G, [0], 2.0, faces=SIDES, highlight=False)]),
           mirror=True)
-    # --- chestplate robe skirt: crimson melting into flame at the hem, gold trim at the opening
+    # --- chestplate robe: short flame-feather tassets at the outer hips and a split coat-tail behind; the front of
+    # the legs stays open so the leggings show
     m.add("armorTorsoExtensionRightLeg",
-          Cube((-5, 3, -3), (5, 9, 6), 0, [
-              gradient([(C, 2.6), (C, 2.2), (F, 2.2), (F, 3.4)], faces=SIDES, seed=3),
-              columns(C, [1, 4], 1.6, faces=("right", "back"), rows=range(0, 5)),
-              columns(G, [-1], 2.8, faces=("front",)), band(G, [0], 2.6, highlight=False),
-              flame_tongues(F, max_height=3, seed=1),
-              cut(SIDES, lambda x, y, fw, fh: y >= fh - int((math.sin(x * 1.9) * 0.5 + 0.5) * 2.4)),
-              cut(("bottom", "top", "left"), lambda x, y, fw, fh: True)]),
+          Cube((-5.45, 8, -2.5), (1, 4, 5), 0, [feather_stripes(F, 3.0, width=2, tip=(R, 1, 2.2)), zigzag(),
+                                                 shade(G, 2.8, 0, faces=("top",)), shade(C, 1.4, 0, faces=("bottom", "left"))]),
+          Cube((-4.5, 7, 2.55), (4, 4, 1), 0, [
+              gradient([(C, 2.6), (C, 2.2), (F, 2.4), (F, 3.4)], faces=("back", "right", "left"), seed=3),
+              band(G, [0], 2.6, faces=("back",), highlight=False),
+              cut(("back", "right", "left"), lambda x, y, fw, fh: y >= fh - int((math.sin(x * 1.9) * 0.5 + 0.5) * 1.6)),
+              cut(("front", "top"), lambda x, y, fw, fh: True), shade(F, 2.4, 0, faces=("bottom",))]),
           mirror=True)
     # --- boots: burnished gold with crimson flames, feathers at the ankles
     m.add("armorRightBoot",
-          Cube((-4, 0, -2), (4, 6, 4), 0.75, [shade(G, 2.0, 0.8), band(G, [0], 3.0), flame_tongues(R, max_height=3, seed=2), band(D, [-1], 1.2, highlight=False),
+          Cube((-4, 0, -2), (4, 5, 4), 0.75, [shade(G, 2.0, 0.8), band(G, [0], 3.0), flame_tongues(R, max_height=3, seed=2), band(D, [-1], 1.2, highlight=False),
                                               shade(D, 0.8, 0, faces=("bottom",))]),
           mirror=True)
-    m.add_bone(Bone("bootFeatherRight", "armorRightBoot", (-4.8, 4.5, 1), (-25, -20, 0), [
-        Cube((-5.8, 3.5, 0.5), (1, 3, 3), 0, [gradient([(G, 2.8), (F, 3.2), (R, 2.0)], faces=("right", "left"), along="z"), shade(F, 3.0, 0, faces=("top", "front", "back", "bottom"))])],
+    m.add_bone(Bone("bootFeatherRight", "armorRightBoot", (-4.8, 3.5, 1), (-25, -20, 0), [
+        Cube((-5.8, 2.5, 0.5), (1, 3, 3), 0, [gradient([(G, 2.8), (F, 3.2), (R, 2.0)], faces=("right", "left"), along="z"), shade(F, 3.0, 0, faces=("top", "front", "back", "bottom"))])],
         anim=sway(1, 5, 2.2)), mirror=True)
     return m
 
@@ -652,30 +674,6 @@ def phoenix_icons():
     return armor_icons("phoenix_mage", pal)
 
 
-def template_icon():
-    """A holystone tablet with a gold feather-and-flame sigil, in the shape vanilla smithing templates use."""
-    stone = ramp("#3A3C46", "#6A6E7A", "#9A9EAA", "#C8CCD4", "#E8EAF0")
-    pal = {"o": (stone, 0.3), "S": (stone, 2.6), "s": (stone, 1.8), "L": (stone, 3.4), "G": (V["G"], 2.7), "Y": (V["G"], 3.8),
-           "F": (X["F"], 3.2), "f": (X["F"], 2.2), "B": (V["B"], 3.0)}
-    return icon([
-        "................",
-        "...oooooooooo...",
-        "..oLLLSSSSSSso..",
-        "..oLSSSSYSSSso..",
-        "..oSSSSYGYSSso..",
-        "..oSSBSYGYSFso..",
-        "..oSSBBYGYFFso..",
-        "..oSSSBYGYFSso..",
-        "..oSSSSYGYSSso..",
-        "..oSSSSSGSSSso..",
-        "..oSSSSSGSSSso..",
-        "..oSsSSSSSSSso..",
-        "..osssssssssso..",
-        "...oooooooooo...",
-        "................",
-        "................"], pal)
-
-
 def empty_rune_slot():
     """Ghost icon for the smithing table's addition slot: a rune stone outline."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
@@ -783,6 +781,6 @@ def generate(save):
     import custom_item_art
     for name, img in {**custom_item_art.valkyrie_mage_icons(), **custom_item_art.phoenix_mage_icons()}.items():
         save(img, "item", name + ".png")
-    save(template_icon(), "item", "aether_arcane_upgrade_smithing_template.png")
+    save(custom_item_art.smithing_template(), "item", "aether_arcane_upgrade_smithing_template.png")
     save(empty_rune_slot(), "item", "empty_slot_rune.png")
     preview(built)

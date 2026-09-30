@@ -44,15 +44,17 @@ public class ASConfig {
                 .defineInRange("pendantMaxSpellPower", 0.20, 0.0, 10.0);
         builder.pop();
 
-        builder.comment("Natural spawning in Aether biomes, in the Aether's surface monster category.",
-                "For reference, the Aether gives Whirlwinds 3, Blue Swets 6 and Aechor Plants 7. 0 disables the spawn. Applied when a world loads.")
+        builder.comment("The spellcasters live in their shrines (the Valkyrie Sanctum and the Solar Altar) and appear when a shrine",
+                "generates, like Iron's Spells' casters. These weights can additionally let them spawn naturally in Aether biomes,",
+                "in the Aether's surface monster category (for reference, the Aether gives Whirlwinds 3, Blue Swets 6 and Aechor",
+                "Plants 7). 0 = shrines only. Applied when a world loads.")
                 .push("mobs");
         VALKYRIE_SORCERESS_SPAWN_WEIGHT = builder
-                .comment("Spawn weight of the Valkyrie Sorceress.")
-                .defineInRange("valkyrieSorceressSpawnWeight", 3, 0, 100);
+                .comment("Natural spawn weight of the Valkyrie Sorceress on the Aether's surface. Since v1.6 they live in Valkyrie Sanctums, so this is 0 by default (it was 3).")
+                .defineInRange("valkyrieSorceressNaturalSpawnWeight", 0, 0, 100);
         SOLAR_ACOLYTE_SPAWN_WEIGHT = builder
-                .comment("Spawn weight of the Solar Acolyte.")
-                .defineInRange("solarAcolyteSpawnWeight", 2, 0, 100);
+                .comment("Natural spawn weight of the Solar Acolyte on the Aether's surface. Since v1.6 they live in Solar Altars, so this is 0 by default (it was 2).")
+                .defineInRange("solarAcolyteNaturalSpawnWeight", 0, 0, 100);
         builder.pop();
 
         SPEC = builder.build();

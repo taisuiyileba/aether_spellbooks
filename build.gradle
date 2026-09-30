@@ -133,3 +133,6 @@ tasks.named('jar', Jar).configure {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
+
+// Include the license in distributed artifacts.
+tasks.named('jar', Jar).configure { from('LICENSE') }

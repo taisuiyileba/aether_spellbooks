@@ -41,7 +41,8 @@
                   "aether_spellbooks:frostbound_crystal",
                   "aether_spellbooks:summon_fire_minion",
                   "aether_spellbooks:solar_flare",
-                  "aether_spellbooks:gravitite_surge"
+                  "aether_spellbooks:gravitite_surge",
+                  "aether_spellbooks:icestone_meteor"
                 ],
                 "force": true
               }

@@ -37,8 +37,9 @@ public class SolarFlareSpell extends AetherSpell {
         super("solar_flare");
         this.baseManaCost = 100;
         this.manaCostPerLevel = 30;
-        this.baseSpellPower = 6;
-        this.spellPowerPerLevel = 2;
+        // v1.5: was 6 + 2/level with faster bolts and a longer life (~400 damage at level 3); now ~75
+        this.baseSpellPower = 3;
+        this.spellPowerPerLevel = 1;
         this.castTime = 30;
     }
 
@@ -82,11 +83,11 @@ public class SolarFlareSpell extends AetherSpell {
     }
 
     public static int getDurationTicks(int spellLevel) {
-        return (10 + 3 * spellLevel) * 20;
+        return (5 + 2 * spellLevel) * 20;
     }
 
     public static int getFireInterval(int spellLevel) {
-        return 20 - 3 * spellLevel;
+        return 24 - 2 * spellLevel;
     }
 
     @Override

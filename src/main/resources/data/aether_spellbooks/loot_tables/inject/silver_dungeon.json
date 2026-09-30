@@ -30,7 +30,10 @@
                   "aether_spellbooks:summon_moa",
                   "aether_spellbooks:valkyrie_lunge",
                   "aether_spellbooks:cloud_sentinels",
-                  "aether_spellbooks:aether_whirlwind"
+                  "aether_spellbooks:aether_whirlwind",
+                  "aether_spellbooks:radiant_javelin",
+                  "aether_spellbooks:thunderhead",
+                  "aether_spellbooks:aerwhale_song"
                 ],
                 "force": true
               }

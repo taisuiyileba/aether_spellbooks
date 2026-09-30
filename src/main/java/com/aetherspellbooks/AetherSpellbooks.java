@@ -8,6 +8,7 @@ import com.aetherspellbooks.registry.ASEntities;
 import com.aetherspellbooks.registry.ASItems;
 import com.aetherspellbooks.registry.ASParticles;
 import com.aetherspellbooks.registry.ASSpells;
+import com.aetherspellbooks.registry.ASStructures;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -31,6 +32,7 @@ public class AetherSpellbooks {
         ASParticles.register(modBus);
         ASCreativeTabs.register(modBus);
         ASBiomeModifiers.register(modBus);
+        ASStructures.register(modBus);
         modBus.addListener(ASEntities::onAttributeCreation);
         modBus.addListener(ASEntities::onSpawnPlacements);
         modBus.addListener(ASCreativeTabs::addToVanillaTabs);

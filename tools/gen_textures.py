@@ -836,8 +836,6 @@ GOLD = ramp("#5A3808", "#9A6616", "#D6A030", "#F4CE5C", "#FFF2B8")
 SILVER = ramp("#34343F", "#6E6E80", "#A8A8BA", "#DADAE6", "#FFFFFF")
 AMBRO = ramp("#8A6410", "#D2AE32", "#F6E27A", "#FFF7B8", "#FFFFFF")
 ZANITE = ramp("#2A0F4A", "#4B2476", "#8E4BC8", "#C58AF0", "#F4E4FF")
-GRAV = ramp("#45184A", "#6F2F73", "#C667C6", "#F0B0F0", "#FFE8FF")
-LEATHER = ramp("#1A1020", "#332238", "#4E3656", "#6C5078", "#8C6E98")
 CLOTH = ramp("#48486A", "#9C9EBE", "#CDD0E4", "#EEF0F8", "#FFFFFF")
 VGOLD = ramp("#5E3E08", "#8A6414", "#E3B53A", "#F8D878", "#FFF3C4")
 
@@ -916,35 +914,6 @@ def zanite_pendant():
         img.putpixel((x, y), ZANITE[2])
     for (x, y) in ((5, 8), (4, 9)):
         img.putpixel((x, y), ZANITE[4])
-    return img
-
-
-def gravitite_gloves():
-    img = blank()
-    pal = {
-        "o": LEATHER[0], "d": LEATHER[1], "m": LEATHER[2], "l": LEATHER[3], "h": LEATHER[4],
-        "O": GRAV[0], "D": GRAV[1], "M": GRAV[2], "L": GRAV[3], "W": GRAV[4],
-        "s": hexa("#FFFFFF"), "t": hexa("#F0B0F0", 255),
-    }
-    rows = [
-        ".............t..",
-        "......oo....tst.",
-        "...oo.lmo.oo.t..",
-        "..olmolmdolmo...",
-        "..olmdlmdlmdoo..",
-        "..olmdlmdlmdlmo.",
-        "..olmdlmdlmdlmo.",
-        "..oLMdLMdLMdLDo.",
-        "oo.oDdoDdoDdODo.",
-        "olm.lmmOOmmmmdo.",
-        "olmllmOLMOmmmdo.",
-        ".olmmmOMDOmmddo.",
-        "..olmmmOOmmmdo..",
-        "..oOOOOOOOOOOo..",
-        "..oMLMMMMMMMDo..",
-        "..ooooooooooooo.",
-    ]
-    draw_map(img, rows, pal)
     return img
 
 
@@ -1253,6 +1222,101 @@ def icon_cloud_sentinels():
     return finish_icon(cv, seed=12)
 
 
+def icon_radiant_javelin():
+    # a golden spear planted in the ground, a column of holy light bursting up around it
+    cv = icon_bg("#E8A83A", "#2E1402", seed=13)
+    pillar = S.poly([(48, 118), (54, 0), (74, 0), (80, 118)], 5)
+    cv.glow(pillar, "#FFE890", 14, 0.5)
+    cv.over(vgrad(0, 118, [(0, "#FFFFFF"), (0.7, "#FFF0B0"), (1, "#FFD060")]), pillar, 0.32)
+    ring = S.ellipse(64, 108, 44, 11, 2)
+    cv.glow(ring, "#FFE27A", 6, 0.6)
+    cv.over("#FFF2B0", ring, 0.5)
+    for ang in range(-60, 61, 30):
+        a = math.radians(ang - 90)
+        ray = S.line([(64 + math.cos(a) * 20, 104 + math.sin(a) * 20), (64 + math.cos(a) * 54, 104 + math.sin(a) * 54)], 3, 1)
+        cv.add("#FFF0B0", ray, 0.45)
+    shaft = S.poly([(59, 112), (59, 34), (69, 34), (69, 112)])
+    cv.over("#3A1E02", S.poly([(56, 114), (56, 32), (72, 32), (72, 114)]), 0.6)
+    cv.over(vgrad(34, 112, [(0, "#FFF0B0"), (0.45, "#E0A628"), (1, "#7A4806")]), shaft)
+    cv.over("#FFFBE8", S.poly([(60, 112), (60, 34), (63, 34), (63, 112)]), 0.8)
+    head = S.poly([(64, 2), (80, 30), (64, 42), (48, 30)])
+    cv.over("#2A1402", S.poly([(64, -2), (84, 30), (64, 46), (44, 30)]), 0.5)
+    cv.glow(head, "#FFFFFF", 6, 0.6)
+    cv.over("#F0F4FF", head)
+    cv.over("#9AA8C8", S.poly([(64, 2), (80, 30), (64, 42)]), 0.9)
+    guard = S.poly([(46, 42), (82, 42), (78, 50), (50, 50)])
+    cv.over("#C8901C", guard)
+    cv.over("#FFE27A", S.poly([(46, 42), (82, 42), (80, 45), (48, 45)]))
+    for x, y, r in ((30, 36, 8), (98, 58, 7), (36, 80, 5)):
+        cv.add("#FFFFFF", sparkle_mask(x, y, r), 0.9)
+    return finish_icon(cv, seed=13)
+
+
+def icon_thunderhead():
+    # a heavy slate thundercloud with a forked bolt and rain underneath
+    cv = icon_bg("#4A5CB0", "#060818", seed=14)
+    for x0 in (24, 44, 84, 102):
+        cv.over("#8CA8E0", S.line([(x0, 66), (x0 - 8, 96)], 2.5, 1), 0.45)
+    cloud = cloud_mask(64, 38, 1.55, 1.5)
+    cv.glow(cloud, "#A8B8E8", 10, 0.45)
+    cv.over(vgrad(4, 72, [(0, "#D4DCF0"), (0.4, "#7C88AC"), (1, "#343C5C")]), cloud)
+    cv.over("#EEF2FF", S.circles([(48, 22, 13), (74, 18, 11)], 3), 0.45)
+    bolt = S.poly([(64, 48), (44, 86), (60, 86), (42, 126), (88, 74), (70, 74), (84, 48)], 1)
+    cv.glow(bolt, "#FFF08A", 12, 1.2)
+    cv.over("#FFE040", bolt)
+    cv.over("#FFFFF4", S.poly([(70, 52), (54, 82), (62, 82), (50, 114), (80, 76), (66, 76), (78, 52)], 0.5))
+    fork = S.line([(54, 98), (32, 106), (24, 122)], 4, 1)
+    cv.glow(fork, "#FFF08A", 5, 0.8)
+    cv.over("#FFF6B0", fork)
+    cv.add("#FFFFFF", sparkle_mask(96, 32, 9), 0.6)
+    return finish_icon(cv, seed=14, sat=1.15)
+
+
+def icon_aerwhale_song():
+    # a spectral aerwhale swimming across, its song rolling down in rings
+    cv = icon_bg("#6CD0A8", "#082A28", seed=15)
+    for i, r in enumerate((22, 36, 50)):
+        wave = S.line(arc_pts(64, 66, r, 30, 150, 20), 5.5 - i, 1)
+        cv.glow(wave, "#E8FFF4", 5, 0.6)
+        cv.over("#F0FFF8", wave, 1.0 - i * 0.22)
+    body = S.poly([(18, 44), (30, 30), (62, 22), (96, 26), (112, 40), (100, 54), (64, 60), (34, 56)], 3)
+    tail = S.poly([(22, 44), (4, 28), (10, 44), (4, 60)], 2)
+    fin = S.poly([(62, 50), (72, 66), (80, 50)], 2)
+    whale = np.maximum(np.maximum(body, tail), fin)
+    cv.glow(whale, "#DFFFF6", 9, 0.6)
+    cv.over(vgrad(20, 62, [(0, "#C4DCF4"), (0.5, "#6E90BC"), (1, "#3A5684")]), whale)
+    cv.over("#F8FFFF", S.poly([(40, 52), (64, 58), (98, 52), (100, 56), (64, 62), (38, 56)], 2), 0.8)
+    cv.over("#FFFFFF", S.line([(36, 32), (70, 25), (96, 29)], 3, 1), 0.55)
+    cv.over("#203048", S.ellipse(98, 38, 3.2))
+    for x, y in ((24, 88), (104, 92)):
+        note = S.ellipse(x, y, 5, 4)
+        cv.over("#FFFFFF", np.maximum(note, S.line([(x + 4, y), (x + 4, y - 16), (x + 10, y - 12)], 2.2, 0.5)), 0.9)
+    return finish_icon(cv, seed=15)
+
+
+def icon_icestone_meteor():
+    # a faceted boulder of icestone plunging down with a frost trail
+    cv = icon_bg("#7ADCFF", "#061C3A", seed=16)
+    for off, w, k in ((0, 30, 0.6), (-14, 14, 0.35), (14, 14, 0.35)):
+        trail = S.poly(taper_stroke([(124 + off * 0.3, -2 + off), (96 + off * 0.2, 30 + off * 0.3), (72, 54)], 2, w))
+        cv.add("#DFF8FF", trail, k)
+    rock = S.poly([(38, 56), (58, 38), (86, 40), (98, 62), (90, 90), (62, 100), (40, 86)], 1)
+    cv.glow(rock, "#BFF2FF", 12, 0.9)
+    cv.over("#5AA8D0", rock)
+    cv.over("#A8E4F8", S.poly([(38, 56), (58, 38), (86, 40), (68, 62)]))
+    cv.over("#E6FAFF", S.poly([(58, 38), (86, 40), (70, 52)]))
+    cv.over("#2E6AA0", S.poly([(68, 62), (98, 62), (90, 90), (62, 100)]), 0.95)
+    cv.over("#6CBCE0", S.poly([(38, 56), (68, 62), (62, 100), (40, 86)]), 0.85)
+    cv.over("#FFFFFF", S.line([(50, 50), (64, 44)], 3, 0.5), 0.9)
+    for ang in (200, 235, 270, 305, 340):
+        a = math.radians(ang)
+        shard = S.poly([(64 + math.cos(a) * 36, 110 + math.sin(a) * 8), (64 + math.cos(a) * 52, 116 + math.sin(a) * 10),
+                        (64 + math.cos(a + 0.12) * 40, 118 + math.sin(a) * 6)], 1)
+        cv.over("#D8F6FF", shard, 0.85)
+    cv.add("#FFFFFF", sparkle_mask(30, 30, 8), 0.7)
+    return finish_icon(cv, seed=16)
+
+
 SPELL_ICONS = {
     "aercloud_step": icon_aercloud_step,
     "stonebreaker_shard": icon_stonebreaker_shard,
@@ -1266,6 +1330,10 @@ SPELL_ICONS = {
     "aether_whirlwind": icon_aether_whirlwind,
     "solar_flare": icon_solar_flare,
     "cloud_sentinels": icon_cloud_sentinels,
+    "radiant_javelin": icon_radiant_javelin,
+    "thunderhead": icon_thunderhead,
+    "aerwhale_song": icon_aerwhale_song,
+    "icestone_meteor": icon_icestone_meteor,
 }
 
 
@@ -1445,7 +1513,7 @@ def main():
         save(book_model_texture(name, spec), "item", "spell_book_models", name + ".png")
     save(ambrosium_ring(), "item", "ambrosium_ring.png")
     save(custom_item_art.zanite_focus_pendant(), "item", "zanite_focus_pendant.png")
-    save(gravitite_gloves(), "item", "gravitite_casting_gloves.png")
+    save(custom_item_art.gravitite_casting_gloves(), "item", "gravitite_casting_gloves.png")
     save(valkyrie_mantle(), "item", "valkyrie_mantle.png")
     for name, fn in SPELL_ICONS.items():
         save(fn(), "gui", "spell_icons", name + ".png")

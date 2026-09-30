@@ -1,239 +1,355 @@
 """
-Pixel-crafted authentic Minecraft/Aether/Iron's Spells item textures for Aether Spellbooks.
+Hand-built 16x16 item icons for Aether Spellbooks: the 3 boss spellbooks, the Zanite Focus Pendant
+and the two mage armour sets.
 
-Includes:
-- 3 Boss Spellbooks (Slider Codex, Valkyrie Grimoire, Solar Codex) following Iron's Spells isometric template
-- Zanite Focus Pendant following Aether accessory pendant style
-- 2 Mage Armor Sets (Valkyrie Mage & Phoenix Mage, 4 pieces each) following vanilla/Aether armor icon style
+Every pixel here is original. Only generic silhouettes/composition are shared with the games' icons
+so ours sit naturally next to them in an inventory:
+  * spellbooks - a closed book lying flat in the same isometric view as Iron's Spells' book icons
+                 (long edge 2:1, short edge 1:1, 3px thick, pages showing on both front faces,
+                 metal corner caps, cover emblem).
+  * pendant    - the Aether accessory layout: a chain loop hanging towards a pendant bottom-right.
+  * gloves     - the Aether gloves layout: a pair of rounded mitts overlapping on the diagonal, cuffs bottom-left.
+  * template   - a vanilla smithing template: an upright stone tablet with an engraved motif.
+  * armour     - vanilla armour icon silhouettes (helmet front-on, chestplate, leggings, boots
+                 side-on with the toes pointing outwards like vanilla), two-tone selective outline
+                 (lighter top/left, darker bottom/right), light from the top-left.
+
+Used by gen_textures.py (books, pendant, gloves) and gen_armor_models.py (armour icons, smithing template).
 """
 from PIL import Image
+
 
 def hex_to_rgba(h, a=255):
     h = h.lstrip('#')
     return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), a)
 
+
 def render_icon(rows, pal):
+    assert len(rows) == 16 and all(len(r) == 16 for r in rows), rows
     im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
             if ch in pal:
-                im.putpixel((x, y), pal[ch])
+                im.putpixel((x, y), hex_to_rgba(pal[ch]))
     return im
 
+
 # ==============================================================================
-# 1. SPELLBOOKS (Exact Iron's Spells isometric perspective & template)
+# 1. SPELLBOOKS
 # ==============================================================================
+def book_template():
+    """Region map {(x, y): kind} of the closed book.
+    c cover face, e front-cover edge, P pages, q recessed page end, k back cover,
+    o outline catching the light (back edges), O outline in shadow."""
+    R = {}
 
-SLIDER_PAL = {
-    "k": hex_to_rgba("#181a22"), # dark outline
-    "K": hex_to_rgba("#262a34"), # mid outline
-    "A": hex_to_rgba("#ffd684"), # bronze glint
-    "B": hex_to_rgba("#ea9838"), # light bronze
-    "C": hex_to_rgba("#b46420"), # mid bronze
-    "D": hex_to_rgba("#7e3e10"), # dark bronze
-    "1": hex_to_rgba("#9eaac0"), # holystone highlight
-    "2": hex_to_rgba("#748096"), # mid holystone
-    "3": hex_to_rgba("#525c70"), # shaded holystone
-    "4": hex_to_rgba("#384050"), # deep stone shadow
-    "W": hex_to_rgba("#ffffff"), # eye white pupil
-    "E": hex_to_rgba("#6cf2ff"), # bright cyan flare
-    "e": hex_to_rgba("#00c4e6"), # vibrant slider cyan
-    "q": hex_to_rgba("#007898"), # deep cyan glow
-    "Q": hex_to_rgba("#004054"), # eye socket outline
-    "P": hex_to_rgba("#dce8f0"), # page highlight
-    "p": hex_to_rgba("#a4b8c6"), # page midtone
-    "r": hex_to_rgba("#728696"), # page shadow
-    "R": hex_to_rgba("#4a5a68"), # page crevice
-    "S": hex_to_rgba("#0e1014"), # shadow
-}
+    def bottom(x):  # bottom outline row of the right-hand (long) side face for column x
+        return 14 - (x - 6) // 2
 
-SLIDER_ROWS = [
+    for x in range(6, 16):
+        for j, kind in enumerate("ePPkO"):
+            R[(x, bottom(x) - 4 + j)] = kind
+    for y in range(6, 15):
+        for i, kind in enumerate("OkPPe"):
+            x = y - 9 + i
+            if 0 <= x <= 5 and ((x, y) not in R or kind == "O"):
+                R[(x, y)] = kind
+    spans = {1: (8, 10), 2: (6, 11), 3: (4, 12), 4: (2, 13), 5: (0, 14), 6: (0, 15), 7: (0, 15), 8: (0, 15), 9: (0, 15)}
+    for y, (a, b) in spans.items():
+        for x in range(a, b + 1):
+            R.setdefault((x, y), "c")
+    for y in range(1, 6):
+        R[(10 - 2 * y, y)] = R[(11 - 2 * y, y)] = "o"
+        R[(9 + y, y)] = "O"
+    R[(8, 1)] = R[(9, 1)] = "o"
+    R[(10, 1)] = R[(15, 6)] = "O"
+    for y in (5, 6, 7, 8):
+        R[(0, y)] = "o" if y < 7 else "O"
+    # the page block sits slightly inside the covers at the right-hand corner
+    del R[(15, 7)], R[(15, 8)]
+    R[(14, 7)] = R[(14, 8)] = "q"
+    return R
+
+
+BAYER4 = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
+
+
+def render_book(spec):
+    R = book_template()
+    cov = [hex_to_rgba(c) for c in spec["cover"]]   # 5 shades, dark -> light
+    pag = [hex_to_rgba(c) for c in spec["pages"]]   # 4 shades, dark -> light
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+
+    def near(x, y, kinds):
+        return any(R.get((x + dx, y + dy)) in kinds for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+
+    def lit_face(x, y):  # the short side face looks towards the light, the long one away from it
+        return x <= 5 or (x == 6 and y >= 13)
+
+    for (x, y), kind in R.items():
+        if kind == "O":
+            c = hex_to_rgba(spec["outline"])
+        elif kind == "o":
+            c = hex_to_rgba(spec["outline_light"])
+        elif kind == "c":
+            if near(x, y, "o"):                                  # light rim along the back edges
+                c = cov[4]
+            elif near(x, y, "e") or R.get((x, y + 1)) == "e":    # shade along the front edges
+                c = cov[1]
+            else:                                                # soft falloff + leather/stone grain
+                v = 3.0 - (x * 0.35 + y * 0.9) / 11.0 * 1.6
+                v += (BAYER4[y % 4][x % 4] / 16.0 - 0.5) * spec.get("grain", 0.6)
+                c = cov[max(1, min(3, int(round(v))))]
+        elif kind == "e":
+            c = cov[2] if lit_face(x, y) else cov[1]
+        elif kind == "k":
+            c = cov[1] if lit_face(x, y) else cov[0]
+        elif kind == "q":
+            c = pag[0]
+        else:  # pages: the sheet under the cover edge is brighter, every third column shows a gap
+            if lit_face(x, y):
+                c = pag[3] if R.get((x + 1, y)) == "e" else pag[2]
+            else:
+                upper = R.get((x, y - 1)) == "e"
+                c = pag[2] if upper else (pag[0] if x % 3 == 0 else pag[1])
+        im.putpixel((x, y), c)
+    for rows, pal in spec["overlays"]:
+        for y, row in enumerate(rows):
+            for x, ch in enumerate(row):
+                if ch in pal and (x, y) in R:
+                    im.putpixel((x, y), hex_to_rgba(pal[ch]))
+    return im
+
+
+GOLD_TRIM = {"1": "#7a4a10", "2": "#c88a22", "3": "#f0c048", "4": "#fff2a8"}
+BRONZE_TRIM = {"1": "#5a2c10", "2": "#a4581c", "3": "#dc8a34", "4": "#ffd08a"}
+
+# metal caps on the four corners of the front cover and the front corners of the back cover
+BOOK_CORNERS = [
     "................",
-    "........kkk.....",
-    "......kkABCK....",
-    "....kkABCD233K..",
-    "..kkABCD222334K.",
-    "kkABCD22QeeeQ3CK",
-    "kABC222QeWWWeQBC",
-    "kP12222QeWEEeQCP",
-    "kPp12222QeeeQPpP",
-    "kCPpCCCC22kPpPPk",
-    ".kRppBCCCCkPpPkS",
-    "..kRppppppkPkSS.",
-    "...kRpppkSkS....",
-    "....kBCkS.......",
-    ".....kk.........",
+    "........221.....",
+    "........432.....",
     "................",
-]
-
-VALKYRIE_PAL = {
-    "k": hex_to_rgba("#161826"),
-    "K": hex_to_rgba("#262a3e"),
-    "A": hex_to_rgba("#fff6be"), # gold glint
-    "B": hex_to_rgba("#f6d052"), # bright gold
-    "C": hex_to_rgba("#ce9e22"), # gold midtone
-    "D": hex_to_rgba("#926810"), # gold shadow
-    "1": hex_to_rgba("#7698dc"), # sky-cloth highlight
-    "2": hex_to_rgba("#4e70b4"), # royal blue midtone
-    "3": hex_to_rgba("#344c84"), # shaded blue cloth
-    "4": hex_to_rgba("#203058"), # dark cloth
-    "W": hex_to_rgba("#ffffff"), # wing highlight
-    "w": hex_to_rgba("#dce6f4"), # soft wing white
-    "v": hex_to_rgba("#9cb2cc"), # wing shadow
-    "G": hex_to_rgba("#68c0ff"), # bright azure gem
-    "g": hex_to_rgba("#1c72c8"), # deep sapphire
-    "H": hex_to_rgba("#0a386e"), # gem socket
-    "P": hex_to_rgba("#fff8d0"), # gilded page highlight
-    "p": hex_to_rgba("#ebd06c"), # gilded page midtone
-    "r": hex_to_rgba("#b89630"), # page shadow
-    "R": hex_to_rgba("#785e1c"), # deep crevice
-    "S": hex_to_rgba("#0c1018"),
-}
-
-VALKYRIE_ROWS = [
     "................",
-    "........kkk.....",
-    "......kkABCK....",
-    "....kkABCD233K..",
-    "..kkABCD222334K.",
-    "kkABCD2Wwvv23BCK",
-    "kABC22WwGWw22BCk",
-    "kP12222wgw222BCP",
-    "kPp12222H222PpPk",
-    "kBPpBBBB22kPpPPk",
-    ".kRppBBBBkkPpPkS",
-    "..kRppppppkPkSS.",
-    "...kRpppkSkS....",
-    "....kBCkS.......",
-    ".....kk.........",
+    "232..........2..",
+    "23...........321",
+    "12..............",
+    "1...............",
+    ".2...343......21",
+    ".....221........",
     "................",
-]
-
-SOLAR_PAL = {
-    "k": hex_to_rgba("#220606"),
-    "K": hex_to_rgba("#380a08"),
-    "A": hex_to_rgba("#ffea80"), # sun gold glint
-    "B": hex_to_rgba("#f8b834"), # bright sun gold
-    "C": hex_to_rgba("#dc8216"), # gold midtone
-    "D": hex_to_rgba("#9c4c0a"), # gold shadow
-    "1": hex_to_rgba("#cc2818"), # crimson highlight
-    "2": hex_to_rgba("#981812"), # rich crimson
-    "3": hex_to_rgba("#68100c"), # shaded leather
-    "4": hex_to_rgba("#400806"), # dark charred leather
-    "W": hex_to_rgba("#ffffff"), # sun core incandescent
-    "Y": hex_to_rgba("#fff060"), # solar flare yellow
-    "O": hex_to_rgba("#ff9816"), # flame orange
-    "o": hex_to_rgba("#e24408"), # deep solar fire
-    "q": hex_to_rgba("#981004"), # solar flare rim
-    "P": hex_to_rgba("#fce890"), # amber page highlight
-    "p": hex_to_rgba("#deb04a"), # amber page midtone
-    "r": hex_to_rgba("#a47020"), # amber page shadow
-    "R": hex_to_rgba("#684210"), # deep crevice
-    "S": hex_to_rgba("#120404"),
-}
-
-SOLAR_ROWS = [
     "................",
-    "........kkk.....",
-    "......kkABCK....",
-    "....kkABCD233K..",
-    "..kkABCD2qOq34K.",
-    "kkABCD22OYWO3BCk",
-    "kABC222qYWWYOBCk",
-    "kP122222OYWO2BCP",
-    "kPp122222qOqPpPk",
-    "kBPpBBBB22kPpPPk",
-    ".kRppBBBBkkPpPkS",
-    "..kRppppppkPkSS.",
-    "...kRpppkSkS....",
-    "....kBCkS.......",
-    ".....kk.........",
+    ".....221........",
+    "................",
     "................",
 ]
+
+BOOK_SPECS = {
+    # carved holystone slab from the Bronze Dungeon, bronze corners, the Slider's glowing eye
+    "slider_codex": dict(
+        cover=["#343c4e", "#525e76", "#74829c", "#96a4bc", "#c4cedf"],
+        pages=["#7e7c70", "#aaa898", "#ccc8b6", "#e6e2d0"],
+        outline="#151a24", outline_light="#2a3242", grain=1.2,
+        overlays=[(BOOK_CORNERS, BRONZE_TRIM), ([
+            "................",
+            "................",
+            "................",
+            "................",
+            ".....dqEEqd.....",
+            "...dqEEWWEEqd...",
+            ".....dqEEqd.....",
+            "......llll......",
+        ], {"d": "#262e40", "l": "#b4c0d4", "q": "#1c86ac", "E": "#58e6ff", "W": "#effeff"})],
+    ),
+    # royal-blue binding, gilded pages, a pair of white wings around a sky gem
+    "valkyrie_grimoire": dict(
+        cover=["#1a2a58", "#264484", "#365eae", "#4f7ed0", "#84acea"],
+        pages=["#9a7630", "#d0ae58", "#ecd694", "#fcf0c8"],
+        outline="#0c1430", outline_light="#1c2c5c",
+        overlays=[(BOOK_CORNERS, GOLD_TRIM), ([
+            "................",
+            "................",
+            "................",
+            ".....W.....W....",
+            ".....wW...Ww....",
+            ".....vwW4Wwv....",
+            "......vv3vv.....",
+        ], {"W": "#ffffff", "w": "#d4e2f4", "v": "#8ea4cc", "4": "#c4f2ff", "3": "#3aa0ff"})],
+    ),
+    # crimson leather, gold corners, a blazing sun
+    "solar_codex": dict(
+        cover=["#3c0808", "#681010", "#961c14", "#c03420", "#e66a3a"],
+        pages=["#96602a", "#cc9a52", "#eac886", "#faeabc"],
+        outline="#1c0404", outline_light="#3c0a06",
+        overlays=[(BOOK_CORNERS, GOLD_TRIM), ([
+            "................",
+            "................",
+            "................",
+            ".......y.y......",
+            "......oYYYo.....",
+            ".....yYWWWYy....",
+            "......oYYYo.....",
+            ".......y.y......",
+        ], {"W": "#fffbe0", "Y": "#ffd23c", "y": "#f7a020", "o": "#e06410"})],
+    ),
+}
+
+
+def slider_codex():
+    return render_book(BOOK_SPECS["slider_codex"])
+
+
+def valkyrie_grimoire():
+    return render_book(BOOK_SPECS["valkyrie_grimoire"])
+
+
+def solar_codex():
+    return render_book(BOOK_SPECS["solar_codex"])
+
 
 # ==============================================================================
 # 2. ZANITE FOCUS PENDANT
 # ==============================================================================
 ZANITE_PENDANT_PAL = {
-    "k": hex_to_rgba("#22083c"),
-    "s": hex_to_rgba("#120424"),
-    "A": hex_to_rgba("#ebe6f2"), # silver gleam
-    "a": hex_to_rgba("#c09ff1"), # bright zanite link
-    "b": hex_to_rgba("#9455f2"), # mid zanite link
-    "G": hex_to_rgba("#f4d273"), # gold prongs highlight
-    "d": hex_to_rgba("#8c5816"), # gold shadow
-    "W": hex_to_rgba("#ffffff"), # specular glint
-    "w": hex_to_rgba("#ebe6f2"), # light facet
-    "1": hex_to_rgba("#c09ff1"), # bright violet facet
-    "2": hex_to_rgba("#9455f2"), # vibrant royal violet
-    "3": hex_to_rgba("#7a36e0"), # rich violet body
-    "4": hex_to_rgba("#531fa0"), # deep violet
-    "5": hex_to_rgba("#37136e"), # shadow facet
-    "6": hex_to_rgba("#190838"), # deep base shadow
-    "C": hex_to_rgba("#68f6ff"), # cyan mana core spark
+    "O": "#5e3c0c", "i": "#301c06",                                       # chain outline outside / inside the loop
+    "o": "#4a2e08", "a": "#8a5a14", "b": "#c08620", "c": "#eeb846", "d": "#fff2a8",  # gold
+    "k": "#1c0634", "1": "#2e0c52", "2": "#4e1e94", "3": "#7436d2", "4": "#a068f4", "5": "#d2b2ff", "W": "#ffffff",  # zanite
+}
+# faceted zanite in a gold cap; hangs where both ends of the chain meet
+ZANITE_GEM = [
+    "..ooo..",
+    ".obdco.",
+    "k45W43k",
+    "k35432k",
+    ".k4322k",
+    "..k32k.",
+    "...kk..",
+]
+
+
+def zanite_focus_pendant():
+    right = [(4, 2), (5, 2), (6, 2), (7, 2), (8, 3), (9, 4), (9, 5), (9, 6), (9, 7), (9, 8)]
+    left = [(3, 3), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8), (3, 9), (4, 10), (5, 10), (6, 11), (7, 11)]
+    M = {}
+    for chain in (right, left):
+        for i, (x, y) in enumerate(chain):  # links alternate; the top-left of the loop catches the light
+            lit = x + y < 11
+            M[(x, y)] = ("d" if lit else "c") if i % 2 == 0 else ("c" if lit else "b")
+    gem = {(8 + i, 8 + j): ch for j, row in enumerate(ZANITE_GEM) for i, ch in enumerate(row) if ch != "."}
+    solid = set(M) | set(gem)
+    outside, stack = set(), [(0, 0)]
+    while stack:
+        p = stack.pop()
+        if p in outside or p in solid or not (-1 <= p[0] <= 16 and -1 <= p[1] <= 16):
+            continue
+        outside.add(p)
+        stack += [(p[0] + 1, p[1]), (p[0] - 1, p[1]), (p[0], p[1] + 1), (p[0], p[1] - 1)]
+    for (x, y) in list(M):
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                q = (x + dx, y + dy)
+                if q not in solid and q not in M:
+                    M[q] = "O" if q in outside else "i"
+    M.update(gem)
+    im = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for (x, y), ch in M.items():
+        if 0 <= x < 16 and 0 <= y < 16:
+            im.putpixel((x, y), hex_to_rgba(ZANITE_PENDANT_PAL[ch]))
+    return im
+
+
+# ==============================================================================
+# 3. GRAVITITE CASTING GLOVES - gravitite mitts, gold-rimmed cuffs, a mana gem on the back of the hand
+# ==============================================================================
+GRAVITITE_GLOVES_PAL = {
+    "0": "#2c0a2c", "1": "#5e1a58", "2": "#942c8c", "3": "#c64cba", "4": "#ea84dc", "5": "#ffc8f6",  # gravitite
+    "b": "#8a5a14", "c": "#c89024", "d": "#f0c048", "e": "#fff0a0",                                  # gold rims
+    "x": "#1e8ec4", "y": "#7ae8ff", "W": "#ffffff",                                                  # mana gem
 }
 
-ZANITE_PENDANT_ROWS = [
+GRAVITITE_GLOVES_ROWS = [
     "................",
-    "................",
-    "....kkkkk.......",
-    "...kAaBbAk......",
-    "..kAbssbsbAk....",
-    "..kask..kbsk....",
-    "..kbsk....kask..",
-    "..kask....kbsk..",
-    "..kbsk...kask...",
-    "...kask.kbGdk...",
-    "....kbkkgWw1Gk..",
-    ".....kgW11234dk.",
-    "......kW1C2345k.",
-    "......kd23456k..",
-    ".......kk66kk...",
+    ".....000........",
+    "....045400......",
+    "...0454320......",
+    "...0443000000...",
+    "..043205554430..",
+    "..032105544320..",
+    ".0d11045443220..",
+    ".01c104433Wy10..",
+    "..01d03332yx10..",
+    "...00d2221110...",
+    "....02e11100....",
+    ".....02de0......",
+    "......0220......",
+    ".......00.......",
     "................",
 ]
 
+
+def gravitite_casting_gloves():
+    return render_icon(GRAVITITE_GLOVES_ROWS, GRAVITITE_GLOVES_PAL)
+
+
 # ==============================================================================
-# 3. VALKYRIE MAGE ARMOR
+# 4. AETHER ARCANE UPGRADE SMITHING TEMPLATE - holystone tablet, engraved mana crystal between golden wings
+# ==============================================================================
+SMITHING_TEMPLATE_PAL = {
+    "D": "#2e3038", "d": "#4a4e5a",                                                   # outline shaded / lit, engraving
+    "1": "#6c707c", "2": "#8c909c", "3": "#a8acb6", "4": "#c4c8d0", "5": "#dfe2e8",   # holystone
+    "f": "#1c8cb0", "g": "#46c4dc", "h": "#86ecf6", "W": "#ffffff",                   # mana crystal
+    "a": "#6e4610", "b": "#b88020", "c": "#eab63e", "y": "#fff0a0",                   # ambrosium gold
+}
+
+SMITHING_TEMPLATE_ROWS = [
+    "................",
+    "....ddddddddd...",
+    "...d544444433D..",
+    "...d4434d4332D..",
+    "...d433dhd323D..",
+    "...dy3dghfd3cD..",
+    "...dcydhWgdcbD..",
+    "...dbcdghfdbaD..",
+    "...d3bdfgfda2D..",
+    "...d433dfd232D..",
+    "...d3323d3222D..",
+    "...d333232221D..",
+    "...d232222121D..",
+    "....D22212111D..",
+    ".....DDDDDDDD...",
+    "................",
+]
+
+
+def smithing_template():
+    return render_icon(SMITHING_TEMPLATE_ROWS, SMITHING_TEMPLATE_PAL)
+
+
+# ==============================================================================
+# 5. VALKYRIE MAGE ARMOUR - silver plate, gold trim, blue robe, winged helm (matches the 3D model)
 # ==============================================================================
 VALK_ARMOR_PAL = {
-    "k": hex_to_rgba("#1e2230"),
-    "S": hex_to_rgba("#f6f8fd"), # specular silver
-    "s": hex_to_rgba("#d8deea"), # bright silver
-    "1": hex_to_rgba("#aeb7ca"), # mid silver
-    "2": hex_to_rgba("#7e88a0"), # dark silver
-    "3": hex_to_rgba("#4e566c"), # deep shadow silver
-    "G": hex_to_rgba("#fff1c2"), # gold glint
-    "g": hex_to_rgba("#f4d273"), # bright gold
-    "4": hex_to_rgba("#d8a63a"), # gold midtone
-    "5": hex_to_rgba("#9c6a1c"), # gold shadow
-    "6": hex_to_rgba("#5e3c0c"), # deep gold rim
-    "B": hex_to_rgba("#a4d0f8"), # sky blue highlight
-    "b": hex_to_rgba("#6caae8"), # sky blue midtone
-    "7": hex_to_rgba("#4480c8"), # royal blue
-    "8": hex_to_rgba("#2a5696"), # dark blue
-    "W": hex_to_rgba("#ffffff"), # pure feather white
-    "w": hex_to_rgba("#e4eaf4"), # soft white
-    "v": hex_to_rgba("#b8c3d8"), # feather shadow
-    "u": hex_to_rgba("#6e7a98"), # feather edge
-    "M": hex_to_rgba("#e4f8ff"), # gem sparkle
-    "m": hex_to_rgba("#58b8ff"), # bright mana blue
-    "x": hex_to_rgba("#141822"), # interior helmet/collar shadow
-    "X": hex_to_rgba("#202636"), # mid interior shadow
+    "K": "#2e364a", "k": "#161a26",                                                   # outline lit / shaded
+    "1": "#5e6882", "2": "#8e98b2", "3": "#bec7d8", "4": "#dfe5f0", "W": "#ffffff",   # silver
+    "o": "#4a300a", "a": "#8a5a12", "b": "#c48a1c", "c": "#ecb83e", "d": "#fff0a0",   # gold
+    "x": "#1a2c62", "y": "#2c52a2", "z": "#4a80dc", "Z": "#8cc0fa",                   # blue robe
+    "g": "#2a8ef0", "G": "#c8f4ff",                                                   # sky gem
+    "i": "#0e1018", "j": "#1c202c",                                                   # helmet interior
 }
 
 VALK_HELMET_ROWS = [
     "................",
-    "..W..........W..",
-    ".WwW..kkkk..WwW.",
-    ".wwv.kSss1k.vww.",
-    "kww1kSg44gSk1wwk",
-    "ku2k1g4Mm4g1k2uk",
-    "..k1ks6446sk1k..",
-    "..k21kXXXXk12k..",
-    "..k21kXXXXk12k..",
-    "..k32kxXXxk23k..",
-    "...k3.xxxx.3k...",
-    "...kk......kk...",
+    ".o............o.",
+    "odo..........odo",
+    "ocdo.KKKKKK.odco",
+    "obcdK3W4433kdcbo",
+    ".oabK34W4332bao.",
+    "..oKbcdGgccako..",
+    "...K32jjjj21k...",
+    "...K3jiiiii1k...",
+    "...K3jiiiii1k...",
+    "...Kbiiiiiiak...",
+    "....Kk....kk....",
     "................",
     "................",
     "................",
@@ -242,102 +358,88 @@ VALK_HELMET_ROWS = [
 
 VALK_CHEST_ROWS = [
     "................",
-    ".kkkk......kkkk.",
-    "kSss1kkXXkkSss1k",
-    "ksww1kG44Gk1wwsk",
-    "ksuv1g4Mm4g1vusk",
-    "k1u1kg7bb7gk1u1k",
-    ".k2kS47bb74Sk2k.",
-    ".k2k14788741k2k.",
-    "..kk14788741kk..",
-    "...k1g4444g1k...",
-    "...k2g5665g2k...",
-    "...ks18bb81sk...",
-    "...k12888821k...",
-    "....ks1111sk....",
+    "................",
+    ".KKKKK....KKKKK.",
+    ".K4WcK....Kc43k.",
+    ".K443cK..Kc332k.",
+    ".K3334caac3321k.",
+    ".Kbcc34W433cbak.",
+    ".kk234cGgc321kk.",
+    "...K4W3cb332k...",
+    "...K443cb321k...",
+    "...K343cb321k...",
+    "...Kbccddcbak...",
+    "...KzZzyyyxxk...",
+    "....Kzyyyxk.....",
     ".....kkkkkk.....",
     "................",
 ]
 
 VALK_LEGS_ROWS = [
     "................",
-    "..kkkkkkkkkkkk..",
-    "..kSg44Mm44gSk..",
-    "..ks47888874sk..",
-    "..k147bbbb741k..",
-    "..k147bbbb741k..",
-    "..k2G47kk74G2k..",
-    "..k2s1kkkks12k..",
-    "..kSw1k..kSw1k..",
-    "..k1v2k..k1v2k..",
-    "..k1s2k..k1s2k..",
-    "..k213k..k213k..",
-    "..k323k..k323k..",
-    "..kG46k..kG46k..",
-    "..kkkkk..kkkkk..",
+    "................",
+    "....KKKKKKKk....",
+    "...KcdcGgcbak...",
+    "...KzZzyyyyxk...",
+    "...KzZyyxyyxk...",
+    "...Kzyykkyyxk...",
+    "...Kzyk..Kyxk...",
+    "...Kcbk..Kcak...",
+    "...K4Wk..K43k...",
+    "...K43k..K32k...",
+    "...K32k..K21k...",
+    "...Kcbk..Kbak...",
+    "...kkkk..kkkk...",
+    "................",
     "................",
 ]
 
+# side-on like vanilla boots: left boot's toe points left, right boot's toe points right
 VALK_BOOTS_ROWS = [
     "................",
     "................",
     "................",
-    "................",
-    "..kkkk....kkkk..",
-    "..ks1k....ks1k..",
-    "..k12k....k12k..",
-    "W.k12k....k12k.W",
-    "Wwks4Gk..kG4skwW",
-    "wwkSss1kk1ssSkww",
-    "uukSsg4kk4gsSuuk",
-    ".kk1234kk4321kk.",
-    "..kkkkk..kkkkk..",
+    "....KKK..KKK....",
+    "...Kdck..Kdck...",
+    "...KW3k..KW3k...",
+    "...K43k..K43k...",
+    "...Kgzk..KGgk...",
+    "...K42k..K32k...",
+    "..K432k..K243k..",
+    ".Kc432k..K234ck.",
+    ".Kb21kk..kk12bk.",
+    ".Kkkk......kkkk.",
     "................",
     "................",
     "................",
 ]
 
 # ==============================================================================
-# 4. PHOENIX MAGE ARMOR
+# 6. PHOENIX MAGE ARMOUR - crimson robe, gold trim, flame crest and hems
 # ==============================================================================
 PHOENIX_ARMOR_PAL = {
-    "k": hex_to_rgba("#1e0806"),
-    "C": hex_to_rgba("#dc5424"), # bright crimson highlight
-    "c": hex_to_rgba("#b8341a"), # crimson body
-    "1": hex_to_rgba("#8a2014"), # mid crimson
-    "2": hex_to_rgba("#5a120c"), # dark crimson
-    "3": hex_to_rgba("#2e0806"), # deep shadow crimson
-    "F": hex_to_rgba("#fff2b0"), # flame white-yellow tip
-    "f": hex_to_rgba("#ffd064"), # bright yellow flame
-    "A": hex_to_rgba("#ff9e34"), # amber flame
-    "a": hex_to_rgba("#ea6a16"), # fiery orange
-    "0": hex_to_rgba("#b83a0c"), # deep flame base
-    "G": hex_to_rgba("#ffe6a6"), # gold glint
-    "g": hex_to_rgba("#f2be52"), # bright gold
-    "4": hex_to_rgba("#d08a24"), # gold midtone
-    "5": hex_to_rgba("#8e5410"), # gold shadow
-    "6": hex_to_rgba("#4e2a06"), # deep gold rim
-    "R": hex_to_rgba("#ffa070"), # ruby glint
-    "r": hex_to_rgba("#f04a24"), # vivid ruby
-    "e": hex_to_rgba("#a81810"), # deep ruby
-    "x": hex_to_rgba("#160806"), # interior hood shadow
-    "X": hex_to_rgba("#260e0a"), # mid hood shadow
+    "K": "#4e140a", "k": "#240604",
+    "1": "#5e1008", "2": "#8c1c0e", "3": "#b83018", "4": "#dc5224", "W": "#ff9658",   # crimson
+    "o": "#4a2606", "a": "#8a5210", "b": "#c8861a", "c": "#f0b63a", "d": "#fff0a0",   # gold
+    "f": "#b83208", "g": "#ee7216", "h": "#ffb62e", "H": "#fff4b0",                   # flame
+    "r": "#ff5a1e", "R": "#ffd8a8",                                                   # ember gem
+    "i": "#140604", "j": "#2c0c08",
 }
 
 PHOENIX_HELMET_ROWS = [
-    ".......ff.......",
-    "......fAFf......",
-    ".....kAaa0k.....",
-    "....kC1111Ck....",
-    "...kCcg44gcCk...",
-    "..kC1g4Rr4g1Ck..",
-    "..kc2k6446k2ck..",
-    "..kc2kXXXXk2ck..",
-    "..k13kXXXXk31k..",
-    "..k13kxXXxk31k..",
-    ".kAa2kxxxxk2aAk.",
-    ".kfa1kk..kk1afk.",
-    "..kkkk....kkkk..",
+    ".......Hh.......",
+    ".....h.hh.h.....",
+    ".....hghhgh.....",
+    ".....fggggf.....",
+    "....K4W4332k....",
+    "...K34W44321k...",
+    "...KbcdRrcbak...",
+    "...K32jjjj21k...",
+    "...K3jhiihi1k...",
+    "...K3jiiiii1k...",
+    "...Kgiiiiiifk...",
+    "....Kk....kk....",
+    "................",
     "................",
     "................",
     "................",
@@ -345,72 +447,61 @@ PHOENIX_HELMET_ROWS = [
 
 PHOENIX_CHEST_ROWS = [
     "................",
-    ".kkkk......kkkk.",
-    "kCc12kkXXkkCc12k",
-    "kfaA1kG44Gk1Aafk",
-    "kfA01g4Rr4g10Afk",
-    "kc12kg4rre4gk21k",
-    ".k2kC4aAAa4Ck2k.",
-    ".k2kc4aAAa4ck2k.",
-    "..kk14aff041kk..",
-    "...k1g4444g1k...",
-    "...k2g5665g2k...",
-    "...kc1aAAa1ck...",
-    "...k12afFa21k...",
-    "....kc1aa1ck....",
+    "................",
+    ".KKKKK....KKKKK.",
+    ".K4WcK....Kc43k.",
+    ".K443cK..Kc332k.",
+    ".K3334caac3321k.",
+    ".Khgg34W433ggfk.",
+    ".kk234cRrc321kk.",
+    "...K4W3cb332k...",
+    "...Kbccddcbak...",
+    "...K3g333g21k...",
+    "...Kghg3ghg1k...",
+    "...KhHhghHhgk...",
+    "....KghHhgfk....",
     ".....kkkkkk.....",
     "................",
 ]
 
 PHOENIX_LEGS_ROWS = [
     "................",
-    "..kkkkkkkkkkkk..",
-    "..kCg44Rr44gCk..",
-    "..kc4aAAaAA4ck..",
-    "..k14affffff41k.",
-    "..k14aAffAA41k..",
-    "..k2G40kk04G2k..",
-    "..k2c1kkkkc12k..",
-    "..kCA1k..k1ACk..",
-    "..kc02k..k20ck..",
-    "..kc12k..k21ck..",
-    "..k123k..k321k..",
-    "..k233k..k332k..",
-    "..kG46k..kG46k..",
-    "..kkkkk..kkkkk..",
+    "................",
+    "....KKKKKKKk....",
+    "...KcdcRrcbak...",
+    "...K4W433321k...",
+    "...K4433c321k...",
+    "...K432kk321k...",
+    "...K43k..K21k...",
+    "...K43k..K21k...",
+    "...Kg3k..Kg1k...",
+    "...Khgk..Khfk...",
+    "...KHhk..Khgk...",
+    "...Kcbk..Kbak...",
+    "...kkkk..kkkk...",
+    "................",
     "................",
 ]
 
 PHOENIX_BOOTS_ROWS = [
     "................",
     "................",
-    "................",
-    "................",
-    "..kkkk....kkkk..",
-    "..kc1k....kc1k..",
-    "..k12k....k12k..",
-    "f.k12k....k12k.f",
-    "fAkc4Gk..kG4ckAf",
-    "aAkCc12kk21cCkAa",
-    "00kCca4kk4acK00k",
-    ".kk1234kk4321kk.",
-    "..kkkkk..kkkkk..",
+    ".....h....h.....",
+    "....hHh..hHh....",
+    "...Kdck..Kdck...",
+    "...K43k..K43k...",
+    "...K43k..K32k...",
+    "...K32k..K32k...",
+    "...Kh2k..Kh2k...",
+    "..K4g2k..K2g3k..",
+    ".Kc432k..K234ck.",
+    ".Kb21kk..kk12bk.",
+    ".Kkkk......kkkk.",
     "................",
     "................",
     "................",
 ]
 
-def slider_codex():
-    return render_icon(SLIDER_ROWS, SLIDER_PAL)
-
-def valkyrie_grimoire():
-    return render_icon(VALKYRIE_ROWS, VALKYRIE_PAL)
-
-def solar_codex():
-    return render_icon(SOLAR_ROWS, SOLAR_PAL)
-
-def zanite_focus_pendant():
-    return render_icon(ZANITE_PENDANT_ROWS, ZANITE_PENDANT_PAL)
 
 def valkyrie_mage_icons():
     return {
@@ -419,6 +510,7 @@ def valkyrie_mage_icons():
         "valkyrie_mage_leggings": render_icon(VALK_LEGS_ROWS, VALK_ARMOR_PAL),
         "valkyrie_mage_boots": render_icon(VALK_BOOTS_ROWS, VALK_ARMOR_PAL),
     }
+
 
 def phoenix_mage_icons():
     return {

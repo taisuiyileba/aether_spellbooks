@@ -2,6 +2,11 @@ package com.aetherspellbooks.registry;
 
 import com.aetherspellbooks.AetherSpellbooks;
 import com.aetherspellbooks.entity.AetherWhirlwind;
+import com.aetherspellbooks.entity.IcestoneMeteor;
+import com.aetherspellbooks.entity.RadiantJavelin;
+import com.aetherspellbooks.entity.SpectralAerwhale;
+import com.aetherspellbooks.entity.StormBolt;
+import com.aetherspellbooks.entity.StormCloud;
 import com.aetherspellbooks.entity.SolarBoltProjectile;
 import com.aetherspellbooks.entity.SolarOrb;
 import com.aetherspellbooks.entity.StonebreakerShard;
@@ -14,6 +19,7 @@ import com.aetherspellbooks.entity.mob.SolarAcolyte;
 import com.aetherspellbooks.entity.mob.ValkyrieSorceress;
 import com.aetherteam.aether.data.resources.AetherMobCategory;
 import com.aetherteam.aether.entity.monster.dungeon.FireMinion;
+import com.aetherteam.aether.entity.passive.Aerwhale;
 import com.aetherteam.aether.entity.passive.Moa;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -82,6 +88,41 @@ public class ASEntities {
                     .updateInterval(1)
                     .build(AetherSpellbooks.id("solar_orb").toString()));
 
+    // --- v1.5 spell entities ---
+    public static final RegistryObject<EntityType<RadiantJavelin>> RADIANT_JAVELIN = ENTITIES.register("radiant_javelin",
+            () -> EntityType.Builder.<RadiantJavelin>of(RadiantJavelin::new, MobCategory.MISC)
+                    .sized(0.5f, 0.5f)
+                    .clientTrackingRange(64)
+                    .build(AetherSpellbooks.id("radiant_javelin").toString()));
+
+    public static final RegistryObject<EntityType<StormCloud>> STORM_CLOUD = ENTITIES.register("storm_cloud",
+            () -> EntityType.Builder.<StormCloud>of(StormCloud::new, MobCategory.MISC)
+                    .sized(3f, 1f)
+                    .clientTrackingRange(64)
+                    .updateInterval(1)
+                    .build(AetherSpellbooks.id("storm_cloud").toString()));
+
+    public static final RegistryObject<EntityType<StormBolt>> STORM_BOLT = ENTITIES.register("storm_bolt",
+            () -> EntityType.Builder.<StormBolt>of(StormBolt::new, MobCategory.MISC)
+                    .sized(0.5f, 0.5f)
+                    .clientTrackingRange(64)
+                    .build(AetherSpellbooks.id("storm_bolt").toString()));
+
+    public static final RegistryObject<EntityType<SpectralAerwhale>> SPECTRAL_AERWHALE = ENTITIES.register("spectral_aerwhale",
+            () -> EntityType.Builder.<SpectralAerwhale>of(SpectralAerwhale::new, MobCategory.MISC)
+                    .sized(3f, 2f)
+                    .noSave()
+                    .clientTrackingRange(80)
+                    .updateInterval(1)
+                    .build(AetherSpellbooks.id("spectral_aerwhale").toString()));
+
+    public static final RegistryObject<EntityType<IcestoneMeteor>> ICESTONE_METEOR = ENTITIES.register("icestone_meteor",
+            () -> EntityType.Builder.<IcestoneMeteor>of(IcestoneMeteor::new, MobCategory.MISC)
+                    .sized(1.2f, 1.2f)
+                    .clientTrackingRange(80)
+                    .updateInterval(1)
+                    .build(AetherSpellbooks.id("icestone_meteor").toString()));
+
     // --- Spellcasting mobs: counted against the Aether's surface monster cap, like Swets and Whirlwinds ---
     public static final RegistryObject<EntityType<ValkyrieSorceress>> VALKYRIE_SORCERESS = ENTITIES.register("valkyrie_sorceress",
             () -> EntityType.Builder.<ValkyrieSorceress>of(ValkyrieSorceress::new, AetherMobCategory.AETHER_SURFACE_MONSTER)
@@ -99,6 +140,7 @@ public class ASEntities {
     public static void onAttributeCreation(EntityAttributeCreationEvent event) {
         event.put(SUMMONED_FIRE_MINION.get(), FireMinion.createMobAttributes().build());
         event.put(SUMMONED_MOA.get(), Moa.createMobAttributes().build());
+        event.put(SPECTRAL_AERWHALE.get(), Aerwhale.createMobAttributes().build());
         event.put(VALKYRIE_SORCERESS.get(), ValkyrieSorceress.prepareAttributes().build());
         event.put(SOLAR_ACOLYTE.get(), SolarAcolyte.prepareAttributes().build());
     }

@@ -17,6 +17,8 @@ public class ASParticles {
     public static final RegistryObject<SimpleParticleType> SKY_SPARKLE = PARTICLES.register("sky_sparkle", () -> new SimpleParticleType(false));
     /** A soft, expanding aercloud puff. */
     public static final RegistryObject<SimpleParticleType> CLOUD_PUFF = PARTICLES.register("cloud_puff", () -> new SimpleParticleType(false));
+    /** A heavy slate-grey thundercloud puff (Thunderhead). */
+    public static final RegistryObject<SimpleParticleType> STORM_PUFF = PARTICLES.register("storm_puff", () -> new SimpleParticleType(false));
     /** A rising pink-violet gravitite mote. */
     public static final RegistryObject<SimpleParticleType> GRAVITY_MOTE = PARTICLES.register("gravity_mote", () -> new SimpleParticleType(false));
 

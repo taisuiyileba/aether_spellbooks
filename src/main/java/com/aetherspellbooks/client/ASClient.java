@@ -40,6 +40,12 @@ public class ASClient {
         // Summons reuse the Aether's own renderers (loaded from the Aether at runtime, not redistributed)
         event.registerEntityRenderer(ASEntities.SUMMONED_FIRE_MINION.get(), FireMinionRenderer::new);
         event.registerEntityRenderer(ASEntities.SUMMONED_MOA.get(), MoaRenderer::new);
+        event.registerEntityRenderer(ASEntities.RADIANT_JAVELIN.get(), RadiantJavelinRenderer::new);
+        // the thundercloud is all particles; its bolts are drawn by their own renderer
+        event.registerEntityRenderer(ASEntities.STORM_CLOUD.get(), NoopRenderer::new);
+        event.registerEntityRenderer(ASEntities.STORM_BOLT.get(), StormBoltRenderer::new);
+        event.registerEntityRenderer(ASEntities.SPECTRAL_AERWHALE.get(), SpectralAerwhaleRenderer::new);
+        event.registerEntityRenderer(ASEntities.ICESTONE_METEOR.get(), IcestoneMeteorRenderer::new);
         // Spellcasters use Iron's Spells' humanoid casting model with their own skins and layers
         event.registerEntityRenderer(ASEntities.VALKYRIE_SORCERESS.get(), context -> {
             AetherCasterRenderer renderer = new AetherCasterRenderer(context, AetherSpellbooks.id("textures/entity/valkyrie_sorceress.png"));
@@ -70,6 +76,7 @@ public class ASClient {
         event.registerSpriteSet(ASParticles.SKY_SPARKLE.get(), ASParticleTypes.SparkleProvider::new);
         event.registerSpriteSet(ASParticles.CLOUD_PUFF.get(), ASParticleTypes.CloudPuffProvider::new);
         event.registerSpriteSet(ASParticles.GRAVITY_MOTE.get(), ASParticleTypes.GravityMoteProvider::new);
+        event.registerSpriteSet(ASParticles.STORM_PUFF.get(), ASParticleTypes.StormPuffProvider::new);
     }
 
     @SubscribeEvent

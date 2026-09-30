@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "aether_spellbooks:valkyrie_sanctum",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 918273645,
+    "spacing": 14,
+    "separation": 6,
+    "exclusion_zone": {
+      "other_set": "aether:silver_and_gold_dungeons",
+      "chunk_count": 3
+    }
+  }
+}

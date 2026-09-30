@@ -1,0 +1,12 @@
+{
+  "type": "aether_spellbooks:island_shrine",
+  "biomes": "#aether_spellbooks:has_structure/solar_altar",
+  "step": "top_layer_modification",
+  "terrain_adaptation": "beard_thin",
+  "spawn_overrides": {},
+  "start_pool": "aether_spellbooks:solar_altar",
+  "footprint_radius": 7,
+  "max_slope": 6,
+  "min_ground_depth": 2,
+  "sink": 0
+}

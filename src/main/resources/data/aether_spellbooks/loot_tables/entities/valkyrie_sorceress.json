@@ -9,7 +9,7 @@
         },
         {
           "condition": "minecraft:random_chance_with_looting",
-          "chance": 0.35,
+          "chance": 0.75,
           "looting_multiplier": 0.1
         }
       ],
@@ -31,8 +31,35 @@
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            },
+            {
+              "function": "minecraft:looting_enchant",
+              "count": {
+                "type": "minecraft:uniform",
                 "min": 0,
-                "max": 2
+                "max": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:arcane_essence",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
               }
             },
             {
@@ -55,8 +82,8 @@
         },
         {
           "condition": "minecraft:random_chance_with_looting",
-          "chance": 0.03,
-          "looting_multiplier": 0.01
+          "chance": 0.12,
+          "looting_multiplier": 0.03
         }
       ],
       "entries": [
@@ -74,8 +101,8 @@
         },
         {
           "condition": "minecraft:random_chance_with_looting",
-          "chance": 0.08,
-          "looting_multiplier": 0.03
+          "chance": 0.3,
+          "looting_multiplier": 0.05
         }
       ],
       "entries": [
@@ -87,15 +114,17 @@
               "function": "irons_spellbooks:randomize_spell",
               "quality": {
                 "type": "minecraft:uniform",
-                "min": 0.1,
-                "max": 0.6
+                "min": 0.2,
+                "max": 0.7
               },
               "spell_filter": {
                 "spells": [
                   "aether_spellbooks:thunder_crystal",
                   "aether_spellbooks:valkyrie_lunge",
                   "aether_spellbooks:zephyr_blast",
-                  "aether_spellbooks:gravitite_surge"
+                  "aether_spellbooks:gravitite_surge",
+                  "aether_spellbooks:radiant_javelin",
+                  "aether_spellbooks:thunderhead"
                 ],
                 "force": true
               }
@@ -109,14 +138,20 @@
       "conditions": [
         {
           "condition": "minecraft:random_chance_with_looting",
-          "chance": 0.12,
-          "looting_multiplier": 0.04
+          "chance": 0.3,
+          "looting_multiplier": 0.05
         }
       ],
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "irons_spellbooks:uncommon_ink"
+          "name": "irons_spellbooks:uncommon_ink",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:rare_ink",
+          "weight": 1
         }
       ]
     },
@@ -125,8 +160,8 @@
       "conditions": [
         {
           "condition": "minecraft:random_chance_with_looting",
-          "chance": 0.06,
-          "looting_multiplier": 0.03
+          "chance": 0.2,
+          "looting_multiplier": 0.05
         }
       ],
       "entries": [

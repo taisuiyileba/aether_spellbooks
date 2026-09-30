@@ -24,8 +24,9 @@ def sp(*names):
 
 # Spell tiers follow the Aether's dungeon progression
 BRONZE = sp("aercloud_step", "stonebreaker_shard", "zephyr_blast")
-SILVER = sp("thunder_crystal", "summon_moa", "valkyrie_lunge", "cloud_sentinels", "aether_whirlwind")
-GOLD = sp("frostbound_crystal", "summon_fire_minion", "solar_flare", "gravitite_surge")
+SILVER = sp("thunder_crystal", "summon_moa", "valkyrie_lunge", "cloud_sentinels", "aether_whirlwind",
+            "radiant_javelin", "thunderhead", "aerwhale_song")
+GOLD = sp("frostbound_crystal", "summon_fire_minion", "solar_flare", "gravitite_surge", "icestone_meteor")
 
 
 def scroll_pool(chance, spells, qmin, qmax, extra_conditions=()):
@@ -81,9 +82,9 @@ INJECT = {
         item_pool(0.5, f"{NS}:{TEMPLATE}"),
         item_pool(0.2, f"{NS}:solar_scepter")]),
     "valkyrie": ("aether:entities/valkyrie", [
-        scroll_pool(0.04, sp("thunder_crystal", "valkyrie_lunge"), 0.0, 0.4, KILLED_BY_PLAYER)]),
+        scroll_pool(0.04, sp("thunder_crystal", "valkyrie_lunge", "radiant_javelin"), 0.0, 0.4, KILLED_BY_PLAYER)]),
     "zephyr": ("aether:entities/zephyr", [
-        scroll_pool(0.05, sp("aercloud_step", "zephyr_blast", "aether_whirlwind"), 0.0, 0.4, KILLED_BY_PLAYER)]),
+        scroll_pool(0.05, sp("aercloud_step", "zephyr_blast", "aether_whirlwind", "aerwhale_song"), 0.0, 0.4, KILLED_BY_PLAYER)]),
 }
 
 
@@ -104,34 +105,118 @@ def mob_scroll_pool(chance, per_level, spells, qmin, qmax):
     return pool
 
 
-# The spellcasting mobs: Victory Medals (so casters can also reach the Valkyrie Queen), Aether materials,
-# a chance at a scroll of their own spells, and Iron's Spells inks and runes
+# The spellcasting mobs. Since v1.6 they live in their shrines (two per shrine, like Iron's Spells' casters) instead
+# of spawning everywhere, so each one is worth more: Victory Medals (so casters can also reach the Valkyrie Queen),
+# Aether materials, arcane essence, a good chance at a scroll of their spells, Iron's Spells inks and runes and the
+# upgrade template.
 MOB_LOOT = {
     "valkyrie_sorceress": [
-        {"rolls": 1, "conditions": KILLED_BY_PLAYER + [chance_with_looting(0.35, 0.1)],
+        {"rolls": 1, "conditions": KILLED_BY_PLAYER + [chance_with_looting(0.75, 0.1)],
          "entries": [{"type": "minecraft:item", "name": "aether:victory_medal"}]},
-        {"rolls": 1, "entries": [counted("aether:ambrosium_shard", 0, 2, 1)]},
-        {"rolls": 1, "conditions": KILLED_BY_PLAYER + [chance_with_looting(0.03, 0.01)],
+        {"rolls": 1, "entries": [counted("aether:ambrosium_shard", 1, 3, 1)]},
+        {"rolls": 1, "entries": [counted("irons_spellbooks:arcane_essence", 1, 3, 1)]},
+        {"rolls": 1, "conditions": KILLED_BY_PLAYER + [chance_with_looting(0.12, 0.03)],
          "entries": [{"type": "minecraft:item", "name": f"{NS}:{TEMPLATE}"}]},
-        mob_scroll_pool(0.08, 0.03, sp("thunder_crystal", "valkyrie_lunge", "zephyr_blast", "gravitite_surge"), 0.1, 0.6),
-        {"rolls": 1, "conditions": [chance_with_looting(0.12, 0.04)],
-         "entries": [{"type": "minecraft:item", "name": "irons_spellbooks:uncommon_ink"}]},
-        {"rolls": 1, "conditions": [chance_with_looting(0.06, 0.03)],
+        mob_scroll_pool(0.30, 0.05, sp("thunder_crystal", "valkyrie_lunge", "zephyr_blast", "gravitite_surge", "radiant_javelin", "thunderhead"), 0.2, 0.7),
+        {"rolls": 1, "conditions": [chance_with_looting(0.30, 0.05)],
+         "entries": [{"type": "minecraft:item", "name": "irons_spellbooks:uncommon_ink", "weight": 3},
+                     {"type": "minecraft:item", "name": "irons_spellbooks:rare_ink", "weight": 1}]},
+        {"rolls": 1, "conditions": [chance_with_looting(0.20, 0.05)],
          "entries": [{"type": "minecraft:item", "name": "irons_spellbooks:lightning_rune", "weight": 3},
                      {"type": "minecraft:item", "name": "irons_spellbooks:holy_rune", "weight": 2}]},
     ],
     "solar_acolyte": [
-        {"rolls": 1, "conditions": KILLED_BY_PLAYER + [chance_with_looting(0.03, 0.01)],
+        {"rolls": 1, "conditions": KILLED_BY_PLAYER + [chance_with_looting(0.12, 0.03)],
          "entries": [{"type": "minecraft:item", "name": f"{NS}:{TEMPLATE}"}]},
-        {"rolls": 1, "entries": [counted("aether:golden_amber", 1, 2, 1)]},
-        {"rolls": 1, "entries": [counted("aether:ambrosium_shard", 0, 2, 1)]},
-        mob_scroll_pool(0.07, 0.03, sp("solar_flare", "summon_fire_minion"), 0.1, 0.6),
-        {"rolls": 1, "conditions": [chance_with_looting(0.08, 0.03)],
+        {"rolls": 1, "entries": [counted("aether:golden_amber", 2, 4, 1)]},
+        {"rolls": 1, "entries": [counted("aether:ambrosium_shard", 1, 3, 1)]},
+        {"rolls": 1, "entries": [counted("irons_spellbooks:arcane_essence", 1, 3, 1)]},
+        mob_scroll_pool(0.30, 0.05, sp("solar_flare", "summon_fire_minion", "icestone_meteor"), 0.2, 0.7),
+        {"rolls": 1, "conditions": [chance_with_looting(0.20, 0.05)],
          "entries": [{"type": "minecraft:item", "name": "irons_spellbooks:fire_rune"}]},
-        {"rolls": 1, "conditions": [chance_with_looting(0.05, 0.02)],
+        {"rolls": 1, "conditions": [chance_with_looting(0.15, 0.04)],
          "entries": [{"type": "minecraft:item", "name": "irons_spellbooks:rare_ink"}]},
     ],
 }
+
+
+def weighted(item, weight, lo=1, hi=1):
+    entry = {"type": "minecraft:item", "name": item, "weight": weight}
+    if hi > 1:
+        entry["functions"] = [{"function": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": lo, "max": hi}}]
+    return entry
+
+
+# The two shrines the spellcasters live in. Placement: see IslandShrineStructure (only on flat, solid island ground).
+SHRINES = {
+    "valkyrie_sanctum": dict(
+        biomes=["aether:skyroot_meadow", "aether:skyroot_grove", "aether:skyroot_woodland", "aether:skyroot_forest"],
+        spacing=14, separation=6, salt=918273645, footprint=7, slope=6,
+        weathering=[("aether:angelic_stone", "aether:light_angelic_stone", 0.08), ("aether:holystone_bricks", "aether:mossy_holystone", 0.15)],
+        loot=[
+            {"rolls": {"type": "minecraft:uniform", "min": 4, "max": 7}, "entries": [
+                weighted("aether:ambrosium_shard", 20, 2, 6), weighted("aether:zanite_gemstone", 12, 1, 3),
+                weighted("irons_spellbooks:arcane_essence", 16, 2, 5), weighted("aether:white_apple", 8, 1, 2),
+                weighted("aether:golden_feather", 3), weighted("irons_spellbooks:uncommon_ink", 10, 1, 2),
+                weighted("irons_spellbooks:rare_ink", 4), weighted("irons_spellbooks:holy_rune", 6), weighted("irons_spellbooks:lightning_rune", 6),
+                weighted("irons_spellbooks:divine_pearl", 2), weighted("aether:healing_stone", 4)]},
+            scroll_pool(0.85, SILVER, 0.3, 0.9),
+            scroll_pool(0.35, SILVER, 0.4, 1.0),
+            {"rolls": 1, "conditions": [{"condition": "minecraft:random_chance", "chance": 0.45}], "entries": [
+                weighted(f"{NS}:{TEMPLATE}", 5), weighted(f"{NS}:valkyrie_scepter", 3), weighted(f"{NS}:ambrosium_ring", 3),
+                weighted(f"{NS}:valkyrie_mantle", 2), weighted(f"{NS}:valkyrie_grimoire", 1)]},
+            item_pool(0.5, "aether:victory_medal", (1, 2)),
+        ]),
+    "solar_altar": dict(
+        biomes=["aether:skyroot_meadow", "aether:skyroot_grove", "aether:skyroot_woodland", "aether:skyroot_forest"],
+        spacing=17, separation=7, salt=564738291, footprint=7, slope=6,
+        weathering=[("aether:hellfire_stone", "aether:light_hellfire_stone", 0.07)],
+        loot=[
+            {"rolls": {"type": "minecraft:uniform", "min": 4, "max": 7}, "entries": [
+                weighted("aether:golden_amber", 20, 2, 6), weighted("aether:ambrosium_shard", 14, 2, 6),
+                weighted("irons_spellbooks:arcane_essence", 16, 2, 5), weighted("minecraft:blaze_powder", 8, 1, 4),
+                weighted("aether:enchanted_gravitite", 3), weighted("irons_spellbooks:rare_ink", 8), weighted("irons_spellbooks:epic_ink", 2),
+                weighted("irons_spellbooks:fire_rune", 8), weighted("irons_spellbooks:ice_rune", 4), weighted("aether:healing_stone", 4)]},
+            scroll_pool(0.85, GOLD, 0.4, 1.0),
+            scroll_pool(0.35, GOLD + SILVER, 0.4, 1.0),
+            {"rolls": 1, "conditions": [{"condition": "minecraft:random_chance", "chance": 0.45}], "entries": [
+                weighted(f"{NS}:{TEMPLATE}", 5), weighted(f"{NS}:solar_scepter", 3), weighted(f"{NS}:zanite_focus_pendant", 3),
+                weighted(f"{NS}:gravitite_casting_gloves", 2), weighted(f"{NS}:solar_codex", 1)]},
+        ]),
+}
+
+
+def structures():
+    for name, cfg in SHRINES.items():
+        w(f"data/{NS}/tags/worldgen/biome/has_structure/{name}.json", {"replace": False, "values": cfg["biomes"]})
+        w(f"data/{NS}/worldgen/structure/{name}.json", {
+            "type": f"{NS}:island_shrine",
+            "biomes": f"#{NS}:has_structure/{name}",
+            # after trees and flowers, so the template's air clears any vegetation on the site
+            "step": "top_layer_modification",
+            "terrain_adaptation": "beard_thin",
+            "spawn_overrides": {},
+            "start_pool": f"{NS}:{name}",
+            "footprint_radius": cfg["footprint"],
+            "max_slope": cfg["slope"],
+            "min_ground_depth": 2,
+            # 0: the template's bottom layer replaces the top block of the ground
+            "sink": 0})
+        w(f"data/{NS}/worldgen/structure_set/{name}.json", {
+            "structures": [{"structure": f"{NS}:{name}", "weight": 1}],
+            "placement": {"type": "minecraft:random_spread", "salt": cfg["salt"], "spacing": cfg["spacing"], "separation": cfg["separation"],
+                          # keep clear of the Aether's own silver and gold dungeons
+                          "exclusion_zone": {"other_set": "aether:silver_and_gold_dungeons", "chunk_count": 3}}})
+        w(f"data/{NS}/worldgen/template_pool/{name}.json", {
+            "name": f"{NS}:{name}",
+            "fallback": "minecraft:empty",
+            "elements": [{"weight": 1, "element": {"element_type": "minecraft:single_pool_element", "location": f"{NS}:{name}",
+                                                   "projection": "rigid", "processors": f"{NS}:{name}"}}]})
+        w(f"data/{NS}/worldgen/processor_list/{name}.json", {"processors": [{"processor_type": "minecraft:rule", "rules": [
+            {"input_predicate": {"predicate_type": "minecraft:random_block_match", "block": src, "probability": chance},
+             "location_predicate": {"predicate_type": "minecraft:always_true"},
+             "output_state": {"Name": dst}} for src, dst, chance in cfg["weathering"]]}]})
+        w(f"data/{NS}/loot_tables/chests/{name}.json", {"type": "minecraft:chest", "pools": cfg["loot"]})
 
 
 def mobs():
@@ -260,11 +345,14 @@ def assets():
         w(f"{a}/blockstates/temporary_{cloud}_aercloud.json", {"variants": {"": {"model": f"aether:block/{cloud}_aercloud"}}})
     for particle in ["feather", "sky_sparkle", "cloud_puff", "gravity_mote"]:
         w(f"{a}/particles/{particle}.json", {"textures": [f"{NS}:{particle}_{i}" for i in range(4)]})
+    # the thundercloud puff is the aercloud puff tinted slate-grey in code
+    w(f"{a}/particles/storm_puff.json", {"textures": [f"{NS}:cloud_puff_{i}" for i in range(4)]})
 
 
 if __name__ == "__main__":
     loot()
     mobs()
+    structures()
     tags()
     recipes()
     optional_pack()

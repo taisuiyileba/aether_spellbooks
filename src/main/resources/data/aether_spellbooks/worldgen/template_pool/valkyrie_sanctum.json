@@ -1,0 +1,15 @@
+{
+  "name": "aether_spellbooks:valkyrie_sanctum",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "element_type": "minecraft:single_pool_element",
+        "location": "aether_spellbooks:valkyrie_sanctum",
+        "projection": "rigid",
+        "processors": "aether_spellbooks:valkyrie_sanctum"
+      }
+    }
+  ]
+}

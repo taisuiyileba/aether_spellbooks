@@ -1,6 +1,7 @@
 package com.aetherspellbooks.gametest;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.config.ASConfig;
 import com.aetherspellbooks.entity.mob.AetherSpellcaster;
 import com.aetherspellbooks.entity.mob.SolarAcolyte;
 import com.aetherspellbooks.entity.mob.ValkyrieSorceress;
@@ -112,13 +113,17 @@ public class ASMobGameTests {
         });
     }
 
+    /** By default the casters only come from their shrines; natural spawning is opt-in through the config. */
     @GameTest(template = EMPTY, batch = BATCH)
-    public static void spellcastersSpawnInAetherBiomes(GameTestHelper helper) {
+    public static void spellcastersSpawnOnlyInShrinesByDefault(GameTestHelper helper) {
         Biome meadow = helper.getLevel().registryAccess().registryOrThrow(Registries.BIOME).getOrThrow(AetherBiomes.SKYROOT_MEADOW);
         for (EntityType<?> type : List.of(ASEntities.VALKYRIE_SORCERESS.get(), ASEntities.SOLAR_ACOLYTE.get())) {
             boolean spawns = meadow.getMobSettings().getMobs(type.getCategory()).unwrap().stream().anyMatch(data -> data.type == type);
-            helper.assertTrue(spawns, EntityType.getKey(type) + " should be added to the Skyroot Meadow spawns");
+            boolean enabled = (type == ASEntities.VALKYRIE_SORCERESS.get() ? ASConfig.valkyrieSorceressWeight() : ASConfig.solarAcolyteWeight()) > 0;
+            helper.assertTrue(spawns == enabled, EntityType.getKey(type) + " natural spawn should follow the config (enabled=" + enabled + ")");
         }
+        helper.assertTrue(ASConfig.VALKYRIE_SORCERESS_SPAWN_WEIGHT.getDefault() == 0 && ASConfig.SOLAR_ACOLYTE_SPAWN_WEIGHT.getDefault() == 0,
+                "natural spawning should be off by default");
         helper.succeed();
     }
 

@@ -28,7 +28,8 @@
                 "spells": [
                   "aether_spellbooks:aercloud_step",
                   "aether_spellbooks:zephyr_blast",
-                  "aether_spellbooks:aether_whirlwind"
+                  "aether_spellbooks:aether_whirlwind",
+                  "aether_spellbooks:aerwhale_song"
                 ],
                 "force": true
               }

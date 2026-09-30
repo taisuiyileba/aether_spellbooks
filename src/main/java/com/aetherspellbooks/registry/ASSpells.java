@@ -2,6 +2,10 @@ package com.aetherspellbooks.registry;
 
 import com.aetherspellbooks.AetherSpellbooks;
 import com.aetherspellbooks.spells.AercloudStepSpell;
+import com.aetherspellbooks.spells.AerwhaleSongSpell;
+import com.aetherspellbooks.spells.IcestoneMeteorSpell;
+import com.aetherspellbooks.spells.RadiantJavelinSpell;
+import com.aetherspellbooks.spells.ThunderheadSpell;
 import com.aetherspellbooks.spells.AetherWhirlwindSpell;
 import com.aetherspellbooks.spells.CloudSentinelsSpell;
 import com.aetherspellbooks.spells.GravititeSurgeSpell;
@@ -35,6 +39,12 @@ public class ASSpells {
     public static final RegistryObject<AbstractSpell> AETHER_WHIRLWIND = SPELLS.register("aether_whirlwind", AetherWhirlwindSpell::new);
     public static final RegistryObject<AbstractSpell> SOLAR_FLARE = SPELLS.register("solar_flare", SolarFlareSpell::new);
     public static final RegistryObject<AbstractSpell> CLOUD_SENTINELS = SPELLS.register("cloud_sentinels", CloudSentinelsSpell::new);
+
+    // v1.5
+    public static final RegistryObject<AbstractSpell> RADIANT_JAVELIN = SPELLS.register("radiant_javelin", RadiantJavelinSpell::new);
+    public static final RegistryObject<AbstractSpell> THUNDERHEAD = SPELLS.register("thunderhead", ThunderheadSpell::new);
+    public static final RegistryObject<AbstractSpell> AERWHALE_SONG = SPELLS.register("aerwhale_song", AerwhaleSongSpell::new);
+    public static final RegistryObject<AbstractSpell> ICESTONE_METEOR = SPELLS.register("icestone_meteor", IcestoneMeteorSpell::new);
 
     public static void register(IEventBus bus) {
         SPELLS.register(bus);

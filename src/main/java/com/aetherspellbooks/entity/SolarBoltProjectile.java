@@ -25,7 +25,7 @@ import java.util.function.Supplier;
  * Homing sunfire bolt fired by the Solar Flare orb. Ignites what it hits (no fire blocks).
  */
 public class SolarBoltProjectile extends AbstractMagicProjectile {
-    public static final int IGNITE_SECONDS = 3;
+    public static final int IGNITE_SECONDS = 2;
 
     public SolarBoltProjectile(EntityType<? extends SolarBoltProjectile> type, Level level) {
         super(type, level);

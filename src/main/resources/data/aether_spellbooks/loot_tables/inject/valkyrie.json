@@ -27,7 +27,8 @@
               "spell_filter": {
                 "spells": [
                   "aether_spellbooks:thunder_crystal",
-                  "aether_spellbooks:valkyrie_lunge"
+                  "aether_spellbooks:valkyrie_lunge",
+                  "aether_spellbooks:radiant_javelin"
                 ],
                 "force": true
               }

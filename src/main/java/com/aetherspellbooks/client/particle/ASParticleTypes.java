@@ -131,6 +131,36 @@ public final class ASParticleTypes {
         }
     }
 
+    // ------------------------------------------------------------------ storm puff
+    /** A heavy, slow, slate-grey thundercloud puff (same sprites as the aercloud puff). */
+    public static class StormPuff extends FadingParticle {
+        private final float growth;
+
+        StormPuff(ClientLevel level, double x, double y, double z, double dx, double dy, double dz, SpriteSet sprites) {
+            super(level, x, y, z, dx, dy, dz, sprites, 0.9f);
+            this.lifetime = 24 + random.nextInt(16);
+            this.gravity = 0f;
+            this.friction = 0.86f;
+            this.quadSize = 0.55f + random.nextFloat() * 0.45f;
+            this.growth = 1.01f + random.nextFloat() * 0.015f;
+            this.hasPhysics = false;
+            this.roll = random.nextFloat() * Mth.TWO_PI;
+            this.oRoll = roll;
+            float shade = 0.26f + random.nextFloat() * 0.16f;
+            setColor(shade, shade * 1.04f, shade * 1.18f);
+            setSpriteFromAge(sprites);
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            quadSize *= growth;
+            if (!removed) {
+                setSpriteFromAge(sprites);
+            }
+        }
+    }
+
     // ------------------------------------------------------------------ gravity mote
     public static class GravityMote extends FadingParticle {
         GravityMote(ClientLevel level, double x, double y, double z, double dx, double dy, double dz, SpriteSet sprites) {
@@ -177,6 +207,13 @@ public final class ASParticleTypes {
         @Override
         public Particle createParticle(@NotNull SimpleParticleType type, @NotNull ClientLevel level, double x, double y, double z, double dx, double dy, double dz) {
             return new CloudPuff(level, x, y, z, dx, dy, dz, sprites);
+        }
+    }
+
+    public record StormPuffProvider(SpriteSet sprites) implements ParticleProvider<SimpleParticleType> {
+        @Override
+        public Particle createParticle(@NotNull SimpleParticleType type, @NotNull ClientLevel level, double x, double y, double z, double dx, double dy, double dz) {
+            return new StormPuff(level, x, y, z, dx, dy, dz, sprites);
         }
     }
 

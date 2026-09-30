@@ -1,10 +1,14 @@
 package com.aetherspellbooks.registry;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import io.redspace.ironsspellbooks.api.spells.AbstractSpell;
+import io.redspace.ironsspellbooks.api.spells.ISpellContainer;
+import io.redspace.ironsspellbooks.registries.ItemRegistry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
@@ -16,7 +20,17 @@ public class ASCreativeTabs {
     public static final RegistryObject<CreativeModeTab> MAIN = TABS.register("main", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.aether_spellbooks"))
             .icon(() -> ASItems.VALKYRIE_GRIMOIRE.get().getDefaultInstance())
-            .displayItems((parameters, output) -> ASItems.ITEMS.getEntries().forEach(item -> output.accept(item.get())))
+            .displayItems((parameters, output) -> {
+                ASItems.ITEMS.getEntries().forEach(item -> output.accept(item.get()));
+                for (var entry : ASSpells.SPELLS.getEntries()) {
+                    AbstractSpell spell = entry.get();
+                    for (int level = spell.getMinLevel(); level <= spell.getMaxLevel(); level++) {
+                        ItemStack scroll = new ItemStack(ItemRegistry.SCROLL.get());
+                        ISpellContainer.createScrollContainer(spell, level, scroll);
+                        output.accept(scroll);
+                    }
+                }
+            })
             .build());
 
     /** Spawn eggs also go in the vanilla spawn egg tab. */

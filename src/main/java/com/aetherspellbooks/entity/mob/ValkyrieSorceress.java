@@ -54,7 +54,7 @@ public class ValkyrieSorceress extends AetherSpellcaster {
     protected void registerSpellGoals() {
         this.goalSelector.addGoal(2, new WizardAttackGoal(this, 1.25f, 30, 60)
                 .setSpells(
-                        List.of(ASSpells.THUNDER_CRYSTAL.get(), ASSpells.THUNDER_CRYSTAL.get(), ASSpells.ZEPHYR_BLAST.get(), SpellRegistry.GUIDING_BOLT_SPELL.get()),
+                        List.of(ASSpells.THUNDER_CRYSTAL.get(), ASSpells.THUNDER_CRYSTAL.get(), ASSpells.RADIANT_JAVELIN.get(), ASSpells.ZEPHYR_BLAST.get(), SpellRegistry.GUIDING_BOLT_SPELL.get()),
                         List.of(ASSpells.GRAVITITE_SURGE.get()),
                         List.of(ASSpells.VALKYRIE_LUNGE.get()),
                         List.of(SpellRegistry.HEAL_SPELL.get()))

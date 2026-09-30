@@ -1,0 +1,218 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 4,
+        "max": 7
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether:golden_amber",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether:ambrosium_shard",
+          "weight": 14,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:arcane_essence",
+          "weight": 16,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 5
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:blaze_powder",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether:enchanted_gravitite",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:rare_ink",
+          "weight": 8
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:epic_ink",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:fire_rune",
+          "weight": 8
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:ice_rune",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether:healing_stone",
+          "weight": 4
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.85
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:scroll",
+          "functions": [
+            {
+              "function": "irons_spellbooks:randomize_spell",
+              "quality": {
+                "type": "minecraft:uniform",
+                "min": 0.4,
+                "max": 1.0
+              },
+              "spell_filter": {
+                "spells": [
+                  "aether_spellbooks:frostbound_crystal",
+                  "aether_spellbooks:summon_fire_minion",
+                  "aether_spellbooks:solar_flare",
+                  "aether_spellbooks:gravitite_surge",
+                  "aether_spellbooks:icestone_meteor"
+                ],
+                "force": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.35
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:scroll",
+          "functions": [
+            {
+              "function": "irons_spellbooks:randomize_spell",
+              "quality": {
+                "type": "minecraft:uniform",
+                "min": 0.4,
+                "max": 1.0
+              },
+              "spell_filter": {
+                "spells": [
+                  "aether_spellbooks:frostbound_crystal",
+                  "aether_spellbooks:summon_fire_minion",
+                  "aether_spellbooks:solar_flare",
+                  "aether_spellbooks:gravitite_surge",
+                  "aether_spellbooks:icestone_meteor",
+                  "aether_spellbooks:thunder_crystal",
+                  "aether_spellbooks:summon_moa",
+                  "aether_spellbooks:valkyrie_lunge",
+                  "aether_spellbooks:cloud_sentinels",
+                  "aether_spellbooks:aether_whirlwind",
+                  "aether_spellbooks:radiant_javelin",
+                  "aether_spellbooks:thunderhead",
+                  "aether_spellbooks:aerwhale_song"
+                ],
+                "force": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.45
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:aether_arcane_upgrade_smithing_template",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:solar_scepter",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:zanite_focus_pendant",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:gravitite_casting_gloves",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:solar_codex",
+          "weight": 1
+        }
+      ]
+    }
+  ]
+}

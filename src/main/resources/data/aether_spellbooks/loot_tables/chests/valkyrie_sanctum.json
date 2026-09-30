@@ -1,0 +1,256 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 4,
+        "max": 7
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether:ambrosium_shard",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether:zanite_gemstone",
+          "weight": 12,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:arcane_essence",
+          "weight": 16,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 5
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether:white_apple",
+          "weight": 8,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether:golden_feather",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:uncommon_ink",
+          "weight": 10,
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:rare_ink",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:holy_rune",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:lightning_rune",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:divine_pearl",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether:healing_stone",
+          "weight": 4
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.85
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:scroll",
+          "functions": [
+            {
+              "function": "irons_spellbooks:randomize_spell",
+              "quality": {
+                "type": "minecraft:uniform",
+                "min": 0.3,
+                "max": 0.9
+              },
+              "spell_filter": {
+                "spells": [
+                  "aether_spellbooks:thunder_crystal",
+                  "aether_spellbooks:summon_moa",
+                  "aether_spellbooks:valkyrie_lunge",
+                  "aether_spellbooks:cloud_sentinels",
+                  "aether_spellbooks:aether_whirlwind",
+                  "aether_spellbooks:radiant_javelin",
+                  "aether_spellbooks:thunderhead",
+                  "aether_spellbooks:aerwhale_song"
+                ],
+                "force": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.35
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:scroll",
+          "functions": [
+            {
+              "function": "irons_spellbooks:randomize_spell",
+              "quality": {
+                "type": "minecraft:uniform",
+                "min": 0.4,
+                "max": 1.0
+              },
+              "spell_filter": {
+                "spells": [
+                  "aether_spellbooks:thunder_crystal",
+                  "aether_spellbooks:summon_moa",
+                  "aether_spellbooks:valkyrie_lunge",
+                  "aether_spellbooks:cloud_sentinels",
+                  "aether_spellbooks:aether_whirlwind",
+                  "aether_spellbooks:radiant_javelin",
+                  "aether_spellbooks:thunderhead",
+                  "aether_spellbooks:aerwhale_song"
+                ],
+                "force": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.45
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:aether_arcane_upgrade_smithing_template",
+          "weight": 5
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:valkyrie_scepter",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:ambrosium_ring",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:valkyrie_mantle",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:valkyrie_grimoire",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance",
+          "chance": 0.5
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether:victory_medal",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
