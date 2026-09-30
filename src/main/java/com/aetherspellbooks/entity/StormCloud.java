@@ -53,8 +53,8 @@ public class StormCloud extends OwnedSpellEntity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(DATA_RADIUS, 4.5f);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        builder.define(DATA_RADIUS, 4.5f);
     }
 
     public void setRadius(float radius) {

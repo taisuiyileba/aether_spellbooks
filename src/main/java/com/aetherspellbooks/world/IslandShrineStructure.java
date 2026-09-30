@@ -1,6 +1,7 @@
 package com.aetherspellbooks.world;
 
 import com.aetherspellbooks.registry.ASStructures;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
@@ -26,7 +27,7 @@ import java.util.Optional;
  * pools, processors, terrain beards and the entities saved in the template all work as usual).
  */
 public class IslandShrineStructure extends Structure {
-    public static final Codec<IslandShrineStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final MapCodec<IslandShrineStructure> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             settingsCodec(instance),
             StructureTemplatePool.CODEC.fieldOf("start_pool").forGetter(s -> s.startPool),
             Codec.intRange(1, 32).fieldOf("footprint_radius").forGetter(s -> s.footprintRadius),
@@ -52,7 +53,7 @@ public class IslandShrineStructure extends Structure {
     }
 
     /** Name of the jigsaw block at the centre of the bottom layer of every shrine template. */
-    public static final ResourceLocation CENTER = new ResourceLocation("aether_spellbooks", "center");
+    public static final ResourceLocation CENTER = ResourceLocation.fromNamespaceAndPath("aether_spellbooks", "center");
 
     /** Spots tried inside the start chunk (offsets from its middle); the flattest one that fits wins. */
     private static final int[][] CANDIDATES = {{0, 0}, {-4, -4}, {4, -4}, {-4, 4}, {4, 4}};
@@ -77,7 +78,7 @@ public class IslandShrineStructure extends Structure {
             return Optional.empty();
         }
         // the template's centre jigsaw lands on the spot we checked, whichever way the template is rotated
-        return JigsawPlacement.addPieces(context, startPool, Optional.of(CENTER), 1, best, false, Optional.empty(), 64);
+        return JigsawPlacement.addPieces(context, startPool, Optional.of(CENTER), 1, best, false, Optional.empty(), 64, net.minecraft.world.level.levelgen.structure.pools.alias.PoolAliasLookup.EMPTY, net.minecraft.world.level.levelgen.structure.pools.DimensionPadding.ZERO, net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings.APPLY_WATERLOGGING);
     }
 
     /** Lowest and highest ground under the footprint (centre, corners and edge middles), or null if any is void or a thin crust. */

@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * The golden spear of Radiant Javelin (rendered as the Aether's Valkyrie Lance). It flies fast and nearly straight and
@@ -70,9 +69,9 @@ public class RadiantJavelin extends AbstractMagicProjectile {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(DATA_PLANTED, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_PLANTED, false);
     }
 
     public boolean isPlanted() {
@@ -148,8 +147,8 @@ public class RadiantJavelin extends AbstractMagicProjectile {
     }
 
     @Override
-    public Optional<Supplier<SoundEvent>> getImpactSound() {
-        return Optional.of(() -> SoundEvents.TRIDENT_HIT);
+    public Optional<net.minecraft.core.Holder<SoundEvent>> getImpactSound() {
+        return Optional.of(net.minecraft.core.Holder.direct(SoundEvents.TRIDENT_HIT));
     }
 
     @Override

@@ -19,7 +19,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * Homing sunfire bolt fired by the Solar Flare orb. Ignites what it hits (no fire blocks).
@@ -59,7 +58,7 @@ public class SolarBoltProjectile extends AbstractMagicProjectile {
     }
 
     @Override
-    public Optional<Supplier<SoundEvent>> getImpactSound() {
+    public Optional<net.minecraft.core.Holder<SoundEvent>> getImpactSound() {
         return Optional.of(AetherSoundEvents.ENTITY_FIRE_CRYSTAL_EXPLODE);
     }
 
@@ -73,7 +72,7 @@ public class SolarBoltProjectile extends AbstractMagicProjectile {
     protected void onHitEntity(@NotNull EntityHitResult result) {
         super.onHitEntity(result);
         if (DamageSources.applyDamage(result.getEntity(), damage, ASSpells.SOLAR_FLARE.get().getDamageSource(this, getOwner()))) {
-            result.getEntity().setSecondsOnFire(IGNITE_SECONDS);
+            result.getEntity().igniteForSeconds(IGNITE_SECONDS);
         }
         discard();
     }

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "#S#",
+    "#C#",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "irons_spellbooks:arcane_essence"
+    },
+    "S": {
+      "item": "aether_spellbooks:aether_arcane_upgrade_smithing_template"
+    },
+    "C": {
+      "item": "aether:enchanted_gravitite"
+    }
+  },
+  "result": {
+    "count": 2,
+    "id": "aether_spellbooks:aether_arcane_upgrade_smithing_template"
+  }
+}

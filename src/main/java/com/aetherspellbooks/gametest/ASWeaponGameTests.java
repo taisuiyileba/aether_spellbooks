@@ -5,7 +5,7 @@ import com.aetherspellbooks.item.weapon.AetherSpellbladeItem;
 import com.aetherspellbooks.item.weapon.AetherStaffItem;
 import com.aetherspellbooks.registry.ASItems;
 import com.aetherspellbooks.registry.ASSpells;
-import com.aetherteam.aether.capability.player.AetherPlayer;
+import com.aetherteam.aether.attachment.AetherPlayerAttachment;
 import com.aetherteam.aether.item.AetherItems;
 import com.mojang.authlib.GameProfile;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
@@ -16,7 +16,6 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -30,10 +29,10 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.Map;
 import java.util.UUID;
@@ -62,7 +61,7 @@ public class ASWeaponGameTests {
         return mob;
     }
 
-    private static Husk wielder(GameTestHelper helper, RegistryObject<Item> weapon, int x, int z) {
+    private static Husk wielder(GameTestHelper helper, DeferredHolder<Item, Item> weapon, int x, int z) {
         Husk husk = mob(helper, EntityType.HUSK, x, z);
         husk.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(weapon.get()));
         return husk;
@@ -112,7 +111,7 @@ public class ASWeaponGameTests {
 
     @GameTest(template = EMPTY)
     public static void spellbladesCarryTheirSpells(GameTestHelper helper) {
-        Map<RegistryObject<Item>, RegistryObject<io.redspace.ironsspellbooks.api.spells.AbstractSpell>> expected = Map.of(
+        Map<DeferredHolder<Item, Item>, DeferredHolder<io.redspace.ironsspellbooks.api.spells.AbstractSpell, io.redspace.ironsspellbooks.api.spells.AbstractSpell>> expected = Map.of(
                 ASItems.SUNFIRE_SPELLBLADE, ASSpells.SOLAR_FLARE, ASItems.STORMCALLER_SPELLBLADE, ASSpells.THUNDER_CRYSTAL,
                 ASItems.HALLOWED_SPELLBLADE, ASSpells.VALKYRIE_LUNGE);
         expected.forEach((item, spell) -> {
@@ -122,12 +121,12 @@ public class ASWeaponGameTests {
             helper.assertTrue(ISpellContainer.get(stack).getSpellAtIndex(0).getSpell() == spell.get(), item.getId() + " should hold " + spell.getId());
         });
         ItemStack blade = new ItemStack(ASItems.STORMCALLER_SPELLBLADE.get());
-        double lightning = blade.getAttributeModifiers(EquipmentSlot.MAINHAND).get(AttributeRegistry.LIGHTNING_SPELL_POWER.get()).stream().mapToDouble(m -> m.getAmount()).sum();
+        double lightning = blade.getAttributeModifiers().modifiers().stream().filter(e -> e.slot().test(EquipmentSlot.MAINHAND) && e.attribute().equals(AttributeRegistry.LIGHTNING_SPELL_POWER)).mapToDouble(e -> e.modifier().amount()).sum();
         helper.assertTrue(Math.abs(lightning - 0.10) < 1e-6, "stormcaller should add 10% lightning power, got " + lightning);
         ItemStack scepter = new ItemStack(ASItems.SOLAR_SCEPTER.get());
-        double fire = scepter.getAttributeModifiers(EquipmentSlot.MAINHAND).get(AttributeRegistry.FIRE_SPELL_POWER.get()).stream().mapToDouble(m -> m.getAmount()).sum();
+        double fire = scepter.getAttributeModifiers().modifiers().stream().filter(e -> e.slot().test(EquipmentSlot.MAINHAND) && e.attribute().equals(AttributeRegistry.FIRE_SPELL_POWER)).mapToDouble(e -> e.modifier().amount()).sum();
         helper.assertTrue(Math.abs(fire - 0.15) < 1e-6, "solar scepter should add 15% fire power, got " + fire);
-        helper.assertTrue(scepter.getAttributeModifiers(EquipmentSlot.OFFHAND).isEmpty(), "staff stats only apply in the main hand");
+        helper.assertTrue(scepter.getAttributeModifiers().modifiers().stream().noneMatch(e -> e.slot().test(EquipmentSlot.OFFHAND)), "staff stats only apply in the main hand");
         helper.succeed();
     }
 
@@ -152,7 +151,7 @@ public class ASWeaponGameTests {
         player.moveTo(pos.x, pos.y, pos.z, 0, 0);
         level.addNewPlayer(player);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ASItems.AERCLOUD_STAFF.get()));
-        AetherPlayer aetherPlayer = AetherPlayer.get(player).orElseThrow(IllegalStateException::new);
+        AetherPlayerAttachment aetherPlayer = java.util.Optional.of(player.getData(com.aetherteam.aether.attachment.AetherDataAttachments.AETHER_PLAYER)).orElseThrow(IllegalStateException::new);
         AetherStaffItem.summonOrDismissMinions(player, InteractionHand.MAIN_HAND);
         helper.assertTrue(aetherPlayer.getCloudMinions().size() == 2, "sneak-using the aercloud staff should summon two cloud minions");
         AetherStaffItem.summonOrDismissMinions(player, InteractionHand.MAIN_HAND);
@@ -171,10 +170,10 @@ public class ASWeaponGameTests {
                 AetherItems.VAMPIRE_BLADE.get(), new Item[]{ItemRegistry.BLOOD_RUNE.get(), ASItems.SANGUINE_SPELLBLADE.get()},
                 AetherItems.CLOUD_STAFF.get(), new Item[]{ItemRegistry.EVOCATION_RUNE.get(), ASItems.AERCLOUD_STAFF.get()});
         upgrades.forEach((base, runeAndResult) -> {
-            SimpleContainer table = new SimpleContainer(new ItemStack(ASItems.ARCANE_UPGRADE_TEMPLATE.get()), new ItemStack(base), new ItemStack(runeAndResult[0]));
+            net.minecraft.world.item.crafting.SmithingRecipeInput table = new net.minecraft.world.item.crafting.SmithingRecipeInput(new ItemStack(ASItems.ARCANE_UPGRADE_TEMPLATE.get()), new ItemStack(base), new ItemStack(runeAndResult[0]));
             var recipe = level.getRecipeManager().getRecipeFor(RecipeType.SMITHING, table, level);
             helper.assertTrue(recipe.isPresent(), "no smithing upgrade for " + base);
-            helper.assertTrue(recipe.get().assemble(table, level.registryAccess()).is(runeAndResult[1]), "wrong upgrade result for " + base);
+            helper.assertTrue(recipe.get().value().assemble(table, level.registryAccess()).is(runeAndResult[1]), "wrong upgrade result for " + base);
         });
         for (String id : new String[]{"zanite_staff", "gravitite_staff"}) {
             helper.assertTrue(level.getRecipeManager().byKey(AetherSpellbooks.id(id)).isPresent(), "missing recipe " + id);

@@ -152,7 +152,7 @@ public class FrostboundCrystalSpell extends AetherSpell {
     public static void onCrystalHit(LivingEntity target, DamageSource source) {
         if (source.getDirectEntity() instanceof IceCrystal crystal && crystal.getPersistentData().contains(TAG_LEVEL)) {
             int spellLevel = crystal.getPersistentData().getInt(TAG_LEVEL);
-            target.addEffect(new MobEffectInstance(MobEffectRegistry.CHILLED.get(), getChillTicks(spellLevel), 0));
+            target.addEffect(new MobEffectInstance(MobEffectRegistry.CHILLED, getChillTicks(spellLevel), 0));
             if (target.level() instanceof ServerLevel server) {
                 server.sendParticles(ParticleHelper.SNOWFLAKE, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(), 20, 0.3, 0.4, 0.3, 0.1);
             }

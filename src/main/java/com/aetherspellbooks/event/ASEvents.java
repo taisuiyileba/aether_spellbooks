@@ -8,15 +8,15 @@ import com.aetherspellbooks.util.CloudSentinels;
 import io.redspace.ironsspellbooks.api.events.SpellOnCastEvent;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import top.theillusivec4.curios.api.CuriosApi;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
-@Mod.EventBusSubscriber(modid = AetherSpellbooks.MODID)
+@EventBusSubscriber(modid = AetherSpellbooks.MODID)
 public class ASEvents {
     public static final float MANTLE_FALL_DAMAGE_MULTIPLIER = 0.5f;
 
@@ -30,29 +30,26 @@ public class ASEvents {
         if (player.level().isClientSide) {
             return;
         }
-        CuriosApi.getCuriosInventory(player).ifPresent(inventory ->
-                inventory.findCurios(stack -> stack.getItem() instanceof ZaniteFocusPendantItem)
-                        .forEach(slot -> ZaniteFocusPendantItem.wear(slot.stack())));
+        com.aetherspellbooks.compat.AccessoriesCompat.forEachEquipped(player,
+                stack -> stack.getItem() instanceof ZaniteFocusPendantItem, ZaniteFocusPendantItem::wear);
         CloudSentinels.volley(player);
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && !event.player.level().isClientSide) {
-            CloudSentinels.tick(event.player);
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!event.getEntity().level().isClientSide) {
+            CloudSentinels.tick(event.getEntity());
         }
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            FrostboundCrystalSpell.tickTrails();
-        }
+    public static void onServerTick(ServerTickEvent.Post event) {
+        FrostboundCrystalSpell.tickTrails();
     }
 
     /** Frostbound crystals chill what they hit. */
     @SubscribeEvent
-    public static void onLivingHurt(LivingHurtEvent event) {
+    public static void onLivingHurt(LivingIncomingDamageEvent event) {
         FrostboundCrystalSpell.onCrystalHit(event.getEntity(), event.getSource());
     }
 
@@ -60,8 +57,7 @@ public class ASEvents {
     @SubscribeEvent
     public static void onFall(LivingFallEvent event) {
         LivingEntity entity = event.getEntity();
-        if (event.getDistance() > 3 && CuriosApi.getCuriosInventory(entity)
-                .map(inventory -> inventory.isEquipped(ASItems.VALKYRIE_MANTLE.get())).orElse(false)) {
+        if (event.getDistance() > 3 && com.aetherspellbooks.compat.AccessoriesCompat.isEquipped(entity, ASItems.VALKYRIE_MANTLE.get())) {
             event.setDamageMultiplier(event.getDamageMultiplier() * MANTLE_FALL_DAMAGE_MULTIPLIER);
         }
     }

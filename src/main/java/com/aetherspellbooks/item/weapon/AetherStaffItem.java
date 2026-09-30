@@ -3,7 +3,6 @@ package com.aetherspellbooks.item.weapon;
 import com.aetherspellbooks.client.ClientViewHelper;
 import com.aetherspellbooks.registry.ASParticles;
 import com.aetherteam.aether.AetherTags;
-import com.aetherteam.aether.capability.player.AetherPlayer;
 import com.aetherteam.aether.entity.miscellaneous.CloudMinion;
 import com.aetherteam.aether.item.EquipmentUtil;
 import io.redspace.ironsspellbooks.item.weapons.StaffItem;
@@ -26,7 +25,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -51,8 +49,19 @@ public class AetherStaffItem extends StaffItem {
     private final Trait trait;
 
     public AetherStaffItem(StaffTier tier, Trait trait, Properties properties) {
-        super(properties, tier);
+        super(properties.attributes(staffAttributes(tier)));
         this.trait = trait;
+    }
+
+    private static net.minecraft.world.item.component.ItemAttributeModifiers staffAttributes(StaffTier tier) {
+        var builder = net.minecraft.world.item.component.ItemAttributeModifiers.builder();
+        var slot = net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND;
+        builder.add(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
+                new net.minecraft.world.entity.ai.attributes.AttributeModifier(BASE_ATTACK_DAMAGE_ID, tier.getAttackDamageBonus(), net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE), slot);
+        builder.add(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED,
+                new net.minecraft.world.entity.ai.attributes.AttributeModifier(BASE_ATTACK_SPEED_ID, tier.getSpeed(), net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE), slot);
+        for (var attribute : tier.getAdditionalAttributes()) builder.add(attribute.attribute(), attribute.createModifier("mainhand"), slot);
+        return builder.build();
     }
 
     public Trait getTrait() {
@@ -71,7 +80,7 @@ public class AetherStaffItem extends StaffItem {
 
     /** Two cloud minions at the wielder's sides, or dismisses them if they are already out. */
     public static void summonOrDismissMinions(Player player, InteractionHand hand) {
-        AetherPlayer.get(player).ifPresent(aetherPlayer -> {
+        java.util.Optional.of(player.getData(com.aetherteam.aether.attachment.AetherDataAttachments.AETHER_PLAYER)).ifPresent(aetherPlayer -> {
             Level level = player.level();
             player.swing(hand);
             if (aetherPlayer.getCloudMinions().isEmpty()) {
@@ -80,7 +89,7 @@ public class AetherStaffItem extends StaffItem {
                     CloudMinion left = new CloudMinion(level, player, HumanoidArm.LEFT);
                     level.addFreshEntity(right);
                     level.addFreshEntity(left);
-                    aetherPlayer.setCloudMinions(right, left);
+                    aetherPlayer.setCloudMinions(player, right, left);
                     if (level instanceof ServerLevel server) {
                         server.sendParticles(ASParticles.CLOUD_PUFF.get(), player.getX(), player.getY() + 1, player.getZ(), 16, 0.8, 0.4, 0.8, 0.02);
                     }
@@ -94,7 +103,7 @@ public class AetherStaffItem extends StaffItem {
     @Override
     public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
         if (trait == Trait.CLOUD_MINIONS && entity instanceof Player player && !player.getCooldowns().isOnCooldown(this)) {
-            AetherPlayer.get(player).ifPresent(aetherPlayer -> {
+            java.util.Optional.of(player.getData(com.aetherteam.aether.attachment.AetherDataAttachments.AETHER_PLAYER)).ifPresent(aetherPlayer -> {
                 if (aetherPlayer.isHitting() && !aetherPlayer.getCloudMinions().isEmpty()) {
                     aetherPlayer.getCloudMinions().forEach(minion -> minion.setShouldShoot(true));
                     if (!player.getAbilities().instabuild) {
@@ -150,7 +159,7 @@ public class AetherStaffItem extends StaffItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         if (trait == Trait.CLOUD_MINIONS || trait == Trait.LAUNCH) {
             tooltip.add(Component.translatable("tooltip.aether_spellbooks.staff." + trait.name().toLowerCase()).withStyle(ChatFormatting.GOLD));

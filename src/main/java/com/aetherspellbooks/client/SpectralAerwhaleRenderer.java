@@ -43,54 +43,42 @@ public class SpectralAerwhaleRenderer extends AerwhaleRenderer {
     /** Scales every vertex colour, used to tint and fade a model drawn through an ordinary renderer. */
     public record TintedVertexConsumer(VertexConsumer delegate, float r, float g, float b, float a) implements VertexConsumer {
         @Override
-        public @NotNull VertexConsumer vertex(double x, double y, double z) {
-            delegate.vertex(x, y, z);
+        public @NotNull VertexConsumer addVertex(float x, float y, float z) {
+            delegate.addVertex(x, y, z);
             return this;
         }
 
         @Override
-        public @NotNull VertexConsumer color(int red, int green, int blue, int alpha) {
-            delegate.color((int) (red * r), (int) (green * g), (int) (blue * b), (int) (alpha * a));
+        public @NotNull VertexConsumer setColor(int red, int green, int blue, int alpha) {
+            delegate.setColor((int) (red * r), (int) (green * g), (int) (blue * b), (int) (alpha * a));
             return this;
         }
 
         @Override
-        public @NotNull VertexConsumer uv(float u, float v) {
-            delegate.uv(u, v);
+        public @NotNull VertexConsumer setUv(float u, float v) {
+            delegate.setUv(u, v);
             return this;
         }
 
         @Override
-        public @NotNull VertexConsumer overlayCoords(int u, int v) {
-            delegate.overlayCoords(u, v);
+        public @NotNull VertexConsumer setUv1(int u, int v) {
+            delegate.setUv1(u, v);
             return this;
         }
 
         @Override
-        public @NotNull VertexConsumer uv2(int u, int v) {
-            delegate.uv2(u, v);
+        public @NotNull VertexConsumer setUv2(int u, int v) {
+            delegate.setUv2(u, v);
             return this;
         }
 
         @Override
-        public @NotNull VertexConsumer normal(float x, float y, float z) {
-            delegate.normal(x, y, z);
+        public @NotNull VertexConsumer setNormal(float x, float y, float z) {
+            delegate.setNormal(x, y, z);
             return this;
         }
 
-        @Override
-        public void endVertex() {
-            delegate.endVertex();
-        }
 
-        @Override
-        public void defaultColor(int red, int green, int blue, int alpha) {
-            delegate.defaultColor(red, green, blue, alpha);
-        }
 
-        @Override
-        public void unsetDefaultColor() {
-            delegate.unsetDefaultColor();
-        }
     }
 }

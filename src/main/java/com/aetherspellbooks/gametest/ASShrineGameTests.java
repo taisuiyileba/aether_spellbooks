@@ -28,8 +28,8 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -74,7 +74,7 @@ public class ASShrineGameTests {
             String expected = AetherSpellbooks.MODID + ":chests/" + shrine.getKey();
             boolean chest = BlockPos.betweenClosedStream(box).anyMatch(pos -> {
                 BlockEntity be = level.getBlockEntity(pos);
-                return be instanceof ChestBlockEntity && expected.equals(be.saveWithoutMetadata().getString("LootTable"));
+                return be instanceof ChestBlockEntity && expected.equals(be.saveWithoutMetadata(level.registryAccess()).getString("LootTable"));
             });
             helper.assertTrue(chest, shrine.getKey() + " should have a chest with " + expected);
             casters.forEach(AetherSpellcaster::discard);
@@ -86,7 +86,7 @@ public class ASShrineGameTests {
     public static void shrineChestsRollLoot(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         for (String shrine : SHRINES.keySet()) {
-            LootTable table = level.getServer().getLootData().getLootTable(id("chests/" + shrine));
+            LootTable table = level.getServer().reloadableRegistries().getLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, id("chests/" + shrine)));
             helper.assertTrue(table != LootTable.EMPTY, "missing chest loot table for " + shrine);
             LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, Vec3.ZERO).create(LootContextParamSets.CHEST);
             List<ItemStack> items = table.getRandomItems(params);
@@ -102,10 +102,30 @@ public class ASShrineGameTests {
         var registry = aether.registryAccess().registryOrThrow(Registries.STRUCTURE);
         for (String shrine : SHRINES.keySet()) {
             Holder<Structure> holder = registry.getHolderOrThrow(ResourceKey.create(Registries.STRUCTURE, id(shrine)));
-            Pair<BlockPos, Holder<Structure>> found = aether.getChunkSource().getGenerator()
-                    .findNearestMapStructure(aether, HolderSet.direct(holder), BlockPos.ZERO, 100, false);
-            helper.assertTrue(found != null, shrine + " should generate somewhere near the Aether's origin");
-            AetherSpellbooks.LOGGER.info("shrine test: nearest {} at {}", shrine, found.getFirst());
+            var generator = aether.getChunkSource().getGenerator();
+            var state = aether.getChunkSource().getGeneratorState();
+            var structureSet = aether.registryAccess().registryOrThrow(Registries.STRUCTURE_SET).get(id(shrine));
+            var placement = (net.minecraft.world.level.levelgen.structure.placement.RandomSpreadStructurePlacement) structureSet.placement();
+            net.minecraft.world.level.levelgen.structure.StructureStart found = null;
+            // GameTest's world options disable automatic structures. Generate starts explicitly at the
+            // registered placement candidates, using the real Aether noise, biome checks and exclusions.
+            search:
+            for (int radius = 0; radius <= 12; radius++) {
+                for (int x = -radius; x <= radius; x++) {
+                    for (int z = -radius; z <= radius; z++) {
+                        if (Math.max(Math.abs(x), Math.abs(z)) != radius) continue;
+                        var chunk = placement.getPotentialStructureChunk(aether.getSeed(), x * placement.spacing(), z * placement.spacing());
+                        if (!placement.isStructureChunk(state, chunk.x, chunk.z)) continue;
+                        var start = holder.value().generate(aether.registryAccess(), generator, generator.getBiomeSource(),
+                                aether.getChunkSource().randomState(), aether.getStructureManager(), aether.getSeed(),
+                                chunk, 0, aether, holder.value().biomes()::contains);
+                        if (start.isValid()) { found = start; break search; }
+                    }
+                }
+            }
+            helper.assertTrue(found != null, shrine + " should generate on a valid Aether placement candidate");
+            helper.assertTrue(!found.getPieces().isEmpty(), shrine + " should generate actual template pieces");
+            AetherSpellbooks.LOGGER.info("shrine test: generated {} at {}", shrine, found.getBoundingBox());
         }
         helper.succeed();
     }

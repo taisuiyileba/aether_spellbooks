@@ -34,7 +34,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * A tumbling boulder of the Aether's icestone called down from the sky by Icestone Meteor. It shatters on impact:
@@ -92,8 +91,8 @@ public class IcestoneMeteor extends AbstractMagicProjectile {
     }
 
     @Override
-    public Optional<Supplier<SoundEvent>> getImpactSound() {
-        return Optional.of(SoundRegistry.ICE_BLOCK_IMPACT::get);
+    public Optional<net.minecraft.core.Holder<SoundEvent>> getImpactSound() {
+        return Optional.of(SoundRegistry.ICE_BLOCK_IMPACT);
     }
 
     @Override
@@ -124,7 +123,7 @@ public class IcestoneMeteor extends AbstractMagicProjectile {
             float falloff = 1 - (1 - EDGE_DAMAGE) * (float) Mth.clamp(distance / radius, 0, 1);
             if (DamageSources.applyDamage(target, damage * falloff, ASSpells.ICESTONE_METEOR.get().getDamageSource(this, owner))) {
                 target.setTicksFrozen(Math.max(target.getTicksFrozen(), target.getTicksRequiredToFreeze() + chillTicks / 2));
-                target.addEffect(new MobEffectInstance(MobEffectRegistry.CHILLED.get(), chillTicks, 0));
+                target.addEffect(new MobEffectInstance(MobEffectRegistry.CHILLED, chillTicks, 0));
                 Vec3 away = target.position().subtract(at).multiply(1, 0, 1);
                 away = away.lengthSqr() < 1.0E-4 ? Vec3.ZERO : away.normalize();
                 target.setDeltaMovement(target.getDeltaMovement().add(away.scale(0.55 * falloff)).add(0, 0.35 * falloff, 0));

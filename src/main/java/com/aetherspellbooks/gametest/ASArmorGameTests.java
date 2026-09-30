@@ -5,7 +5,7 @@ import com.aetherspellbooks.armor.PhoenixMageSet;
 import com.aetherspellbooks.armor.ValkyrieMageSet;
 import com.aetherspellbooks.registry.ASArmorMaterials;
 import com.aetherspellbooks.registry.ASItems;
-import com.aetherteam.aether.capability.player.AetherPlayer;
+import com.aetherteam.aether.attachment.AetherPlayerAttachment;
 import com.aetherteam.aether.item.AetherItems;
 import com.mojang.authlib.GameProfile;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
@@ -14,7 +14,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,10 +27,10 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,8 +42,8 @@ import java.util.UUID;
 @PrefixGameTestTemplate(false)
 public class ASArmorGameTests {
     private static final String EMPTY = "empty";
-    private static final List<RegistryObject<Item>> PHOENIX = List.of(ASItems.PHOENIX_MAGE_HELMET, ASItems.PHOENIX_MAGE_CHESTPLATE, ASItems.PHOENIX_MAGE_LEGGINGS, ASItems.PHOENIX_MAGE_BOOTS);
-    private static final List<RegistryObject<Item>> VALKYRIE = List.of(ASItems.VALKYRIE_MAGE_HELMET, ASItems.VALKYRIE_MAGE_CHESTPLATE, ASItems.VALKYRIE_MAGE_LEGGINGS, ASItems.VALKYRIE_MAGE_BOOTS);
+    private static final List<DeferredHolder<Item, Item>> PHOENIX = List.of(ASItems.PHOENIX_MAGE_HELMET, ASItems.PHOENIX_MAGE_CHESTPLATE, ASItems.PHOENIX_MAGE_LEGGINGS, ASItems.PHOENIX_MAGE_BOOTS);
+    private static final List<DeferredHolder<Item, Item>> VALKYRIE = List.of(ASItems.VALKYRIE_MAGE_HELMET, ASItems.VALKYRIE_MAGE_CHESTPLATE, ASItems.VALKYRIE_MAGE_LEGGINGS, ASItems.VALKYRIE_MAGE_BOOTS);
 
     private static void floor(GameTestHelper helper) {
         for (int x = 0; x < 9; x++) {
@@ -54,7 +53,7 @@ public class ASArmorGameTests {
         }
     }
 
-    private static void equip(LivingEntity entity, List<RegistryObject<Item>> set) {
+    private static void equip(LivingEntity entity, List<DeferredHolder<Item, Item>> set) {
         for (int i = 0; i < 4; i++) {
             entity.setItemSlot(ASArmorMaterials.ARMOR_SLOTS[i], new ItemStack(set.get(i).get()));
         }
@@ -117,13 +116,13 @@ public class ASArmorGameTests {
         equip(player, VALKYRIE);
         player.setOnGround(false);
         player.setDeltaMovement(0, -0.3, 0);
-        AetherPlayer aetherPlayer = AetherPlayer.get(player).orElseThrow(IllegalStateException::new);
+        AetherPlayerAttachment aetherPlayer = java.util.Optional.of(player.getData(com.aetherteam.aether.attachment.AetherDataAttachments.AETHER_PLAYER)).orElseThrow(IllegalStateException::new);
         aetherPlayer.setJumping(true);
         for (int i = 0; i < 6; i++) {
             ValkyrieMageSet.tick(player, ValkyrieMageSet.isWornBy(player));
         }
         helper.assertTrue(player.getDeltaMovement().y > 0, "holding jump in the air should lift the wearer, v=" + player.getDeltaMovement());
-        var castTime = player.getAttribute(AttributeRegistry.CAST_TIME_REDUCTION.get());
+        var castTime = player.getAttribute(AttributeRegistry.CAST_TIME_REDUCTION);
         helper.assertTrue(castTime != null && castTime.getModifier(ValkyrieMageSet.GRACE_ID) != null, "Valkyrie's Grace should apply while airborne");
         player.setOnGround(true);
         ValkyrieMageSet.tick(player, true);
@@ -133,19 +132,20 @@ public class ASArmorGameTests {
         helper.succeed();
     }
 
-    private static double modifier(ItemStack stack, EquipmentSlot slot, Attribute attribute) {
-        return stack.getAttributeModifiers(slot).get(attribute).stream().mapToDouble(m -> m.getAmount()).sum();
+    private static double modifier(ItemStack stack, EquipmentSlot slot, net.minecraft.core.Holder<Attribute> attribute) {
+        return stack.getAttributeModifiers().modifiers().stream().filter(e -> e.slot().test(slot) && e.attribute().equals(attribute)).mapToDouble(e -> e.modifier().amount()).sum();
     }
 
     @GameTest(template = EMPTY)
     public static void mageArmorCarriesSpellcastingStats(GameTestHelper helper) {
         ItemStack robe = new ItemStack(ASItems.PHOENIX_MAGE_CHESTPLATE.get());
+        helper.assertTrue(robe.is(net.minecraft.tags.ItemTags.CHEST_ARMOR), "mage robes must be tagged as chest armor for enchanting");
         helper.assertTrue(modifier(robe, EquipmentSlot.CHEST, Attributes.ARMOR) == 8, "robe should keep the Aether's 8 armour");
-        helper.assertTrue(modifier(robe, EquipmentSlot.CHEST, AttributeRegistry.MAX_MANA.get()) == 125, "robe should add 125 mana");
-        helper.assertTrue(Math.abs(modifier(robe, EquipmentSlot.CHEST, AttributeRegistry.FIRE_SPELL_POWER.get()) - 0.10) < 1e-6, "robe should add 10% fire power");
+        helper.assertTrue(modifier(robe, EquipmentSlot.CHEST, AttributeRegistry.MAX_MANA) == 125, "robe should add 125 mana");
+        helper.assertTrue(Math.abs(modifier(robe, EquipmentSlot.CHEST, AttributeRegistry.FIRE_SPELL_POWER) - 0.10) < 1e-6, "robe should add 10% fire power");
         ItemStack helm = new ItemStack(ASItems.VALKYRIE_MAGE_HELMET.get());
-        helper.assertTrue(Math.abs(modifier(helm, EquipmentSlot.HEAD, AttributeRegistry.HOLY_SPELL_POWER.get()) - 0.10) < 1e-6, "helm should add 10% holy power");
-        helper.assertTrue(modifier(helm, EquipmentSlot.CHEST, AttributeRegistry.MAX_MANA.get()) == 0, "attributes only apply in the piece's own slot");
+        helper.assertTrue(Math.abs(modifier(helm, EquipmentSlot.HEAD, AttributeRegistry.HOLY_SPELL_POWER) - 0.10) < 1e-6, "helm should add 10% holy power");
+        helper.assertTrue(modifier(helm, EquipmentSlot.CHEST, AttributeRegistry.MAX_MANA) == 0, "attributes only apply in the piece's own slot");
         helper.succeed();
     }
 
@@ -153,14 +153,14 @@ public class ASArmorGameTests {
     public static void arcaneUpgradeKeepsEnchantments(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
         ItemStack base = new ItemStack(AetherItems.VALKYRIE_HELMET.get());
-        base.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 3);
-        SimpleContainer table = new SimpleContainer(new ItemStack(ASItems.ARCANE_UPGRADE_TEMPLATE.get()), base, new ItemStack(ItemRegistry.HOLY_RUNE.get()));
+        base.enchant(level.registryAccess().holderOrThrow(Enchantments.PROTECTION), 3);
+        net.minecraft.world.item.crafting.SmithingRecipeInput table = new net.minecraft.world.item.crafting.SmithingRecipeInput(new ItemStack(ASItems.ARCANE_UPGRADE_TEMPLATE.get()), base, new ItemStack(ItemRegistry.HOLY_RUNE.get()));
         var recipe = level.getRecipeManager().getRecipeFor(RecipeType.SMITHING, table, level);
         helper.assertTrue(recipe.isPresent(), "template + valkyrie helmet + holy rune should have a smithing recipe");
-        ItemStack result = recipe.get().assemble(table, level.registryAccess());
+        ItemStack result = recipe.get().value().assemble(table, level.registryAccess());
         helper.assertTrue(result.is(ASItems.VALKYRIE_MAGE_HELMET.get()), "result should be the valkyrie mage helm, got " + result);
-        helper.assertTrue(EnchantmentHelper.getItemEnchantmentLevel(Enchantments.ALL_DAMAGE_PROTECTION, result) == 3, "enchantments should carry over");
-        SimpleContainer wrongRune = new SimpleContainer(new ItemStack(ASItems.ARCANE_UPGRADE_TEMPLATE.get()), new ItemStack(AetherItems.VALKYRIE_HELMET.get()),
+        helper.assertTrue(EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().holderOrThrow(Enchantments.PROTECTION), result) == 3, "enchantments should carry over");
+        net.minecraft.world.item.crafting.SmithingRecipeInput wrongRune = new net.minecraft.world.item.crafting.SmithingRecipeInput(new ItemStack(ASItems.ARCANE_UPGRADE_TEMPLATE.get()), new ItemStack(AetherItems.VALKYRIE_HELMET.get()),
                 new ItemStack(ItemRegistry.FIRE_RUNE.get()));
         helper.assertTrue(level.getRecipeManager().getRecipeFor(RecipeType.SMITHING, wrongRune, level).isEmpty(), "valkyrie armour needs a holy rune");
         helper.assertTrue(level.getRecipeManager().byKey(AetherSpellbooks.id("aether_arcane_upgrade_smithing_template")).isPresent(), "the template should be duplicable");

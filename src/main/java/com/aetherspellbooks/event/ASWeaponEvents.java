@@ -4,15 +4,15 @@ import com.aetherspellbooks.AetherSpellbooks;
 import com.aetherspellbooks.item.weapon.AetherSpellbladeItem;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /** Spellblade abilities that act on the damage dealt (the same hook the Aether's Flaming and Holy swords use). */
-@Mod.EventBusSubscriber(modid = AetherSpellbooks.MODID)
+@EventBusSubscriber(modid = AetherSpellbooks.MODID)
 public class ASWeaponEvents {
     @SubscribeEvent
-    public static void onLivingDamage(LivingDamageEvent event) {
+    public static void onLivingDamage(LivingDamageEvent.Pre event) {
         // melee only: the attacker itself must be the direct source
         if (!(event.getSource().getDirectEntity() instanceof LivingEntity attacker)) {
             return;
@@ -23,8 +23,8 @@ public class ASWeaponEvents {
         }
         LivingEntity target = event.getEntity();
         switch (blade.getAbility()) {
-            case FLAMING -> target.setSecondsOnFire(AetherSpellbladeItem.burnSeconds(attacker));
-            case HOLY -> event.setAmount(event.getAmount() + AetherSpellbladeItem.holyBonus(held, target));
+            case FLAMING -> target.igniteForSeconds(AetherSpellbladeItem.burnSeconds(attacker));
+            case HOLY -> event.setNewDamage(event.getNewDamage() + AetherSpellbladeItem.holyBonus(held, target));
             default -> {
             }
         }

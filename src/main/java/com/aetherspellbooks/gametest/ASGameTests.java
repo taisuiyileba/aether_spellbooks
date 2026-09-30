@@ -7,7 +7,7 @@ import com.aetherspellbooks.entity.SummonedMoa;
 import com.aetherspellbooks.registry.ASBlocks;
 import com.aetherspellbooks.registry.ASItems;
 import com.aetherspellbooks.registry.ASSpells;
-import com.aetherteam.aether.api.AetherMoaTypes;
+import com.aetherteam.aether.data.resources.registries.AetherMoaTypes;
 import com.aetherteam.aether.entity.AetherEntityTypes;
 import com.aetherteam.aether.entity.monster.dungeon.boss.Slider;
 import com.aetherteam.aether.entity.monster.dungeon.boss.SunSpirit;
@@ -34,9 +34,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import com.mojang.authlib.GameProfile;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 import java.util.Set;
@@ -50,14 +50,13 @@ import java.util.UUID;
 public class ASGameTests {
     private static final String EMPTY = "empty";
 
-    /**
-     * Vanilla's mock player goes through the full login, which trips modded networking on a channel-less
-     * connection. A Forge FakePlayer added straight to the level avoids that and is still resolvable by
-     * UUID, which Iron's Spells needs to look up summon owners.
-     */
+    /** Test player with real riding behavior and a no-op connection, avoiding the full login handshake. */
     private static ServerPlayer casterAt(GameTestHelper helper, double x, double y, double z, float yaw) {
         ServerLevel level = helper.getLevel();
-        FakePlayer player = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "aether-spellbooks-test"));
+        ServerPlayer player = new ServerPlayer(level.getServer(), level,
+                new GameProfile(UUID.randomUUID(), "asb-test"), net.minecraft.server.level.ClientInformation.createDefault());
+        // NeoForge FakePlayer intentionally refuses riding; retain its no-op connection on a real test player.
+        player.connection = new FakePlayer(level, player.getGameProfile()).connection;
         Vec3 pos = helper.absoluteVec(new Vec3(x, y, z));
         player.moveTo(pos.x, pos.y, pos.z, yaw, 0);
         player.setYHeadRot(yaw);
@@ -131,7 +130,7 @@ public class ASGameTests {
         helper.assertTrue(player.getVehicle() instanceof SummonedMoa, "caster should ride the summoned moa");
         SummonedMoa moa = (SummonedMoa) player.getVehicle();
         helper.assertTrue(moa.isSaddled(), "moa should be saddled");
-        helper.assertTrue(moa.getMoaType() == AetherMoaTypes.WHITE.get(), "level 2 should summon a white moa");
+        helper.assertTrue(moa.getMoaTypeKey().equals(AetherMoaTypes.WHITE), "level 2 should summon a white moa");
         helper.assertTrue(moa.getMaxJumps() == 4, "white moa should have 4 jumps, got " + moa.getMaxJumps());
         helper.assertTrue(moa.getSummoner() == player, "moa should belong to the caster");
         helper.succeed();
@@ -160,7 +159,7 @@ public class ASGameTests {
     @GameTest(template = EMPTY)
     public static void goldDungeonRewardContainsSolarCodexAndScrolls(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        LootTable table = level.getServer().getLootData().getLootTable(ResourceLocation.fromNamespaceAndPath("aether", "chests/dungeon/gold/gold_dungeon_reward"));
+        LootTable table = level.getServer().reloadableRegistries().getLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath("aether", "chests/dungeon/gold/gold_dungeon_reward")));
         LootParams params = new LootParams.Builder(level)
                 .withParameter(LootContextParams.ORIGIN, helper.absoluteVec(Vec3.ZERO))
                 .create(LootContextParamSets.CHEST);
@@ -192,9 +191,9 @@ public class ASGameTests {
         for (String recipe : List.of("ambrosium_ring", "zanite_focus_pendant")) {
             helper.assertTrue(server.getRecipeManager().byKey(AetherSpellbooks.id(recipe)).isPresent(), "recipe " + recipe + " should load");
         }
-        String pack = AetherSpellbooks.MODID + ":" + com.aetherspellbooks.event.ASModEvents.ICE_MAGIC_IS_COLD_PACK;
+        String pack = "mod/" + AetherSpellbooks.MODID + ":datapacks/" + com.aetherspellbooks.event.ASModEvents.ICE_MAGIC_IS_COLD_PACK;
         helper.assertTrue(server.getPackRepository().getAvailableIds().contains(pack), "optional pack should be available");
-        helper.assertFalse(server.getPackRepository().getSelectedIds().contains(pack), "optional pack should be disabled by default");
+        helper.assertFalse(server.getPackRepository().getPack(pack).getPackSource().shouldAddAutomatically(), "optional pack should be disabled by default");
         helper.succeed();
     }
 }

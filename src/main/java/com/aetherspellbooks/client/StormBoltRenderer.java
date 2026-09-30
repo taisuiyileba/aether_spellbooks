@@ -87,14 +87,14 @@ public class StormBoltRenderer extends EntityRenderer<StormBolt> {
 
     private static void quad(VertexConsumer c, Matrix4f m, float x0, float y0, float z0, float x1, float y1, float z1,
                              float x2, float y2, float z2, float x3, float y3, float z3, float r, float g, float b, float a) {
-        c.vertex(m, x0, y0, z0).color(r, g, b, a).endVertex();
-        c.vertex(m, x1, y1, z1).color(r, g, b, a).endVertex();
-        c.vertex(m, x2, y2, z2).color(r, g, b, a).endVertex();
-        c.vertex(m, x3, y3, z3).color(r, g, b, a).endVertex();
-        c.vertex(m, x3, y3, z3).color(r, g, b, a).endVertex();
-        c.vertex(m, x2, y2, z2).color(r, g, b, a).endVertex();
-        c.vertex(m, x1, y1, z1).color(r, g, b, a).endVertex();
-        c.vertex(m, x0, y0, z0).color(r, g, b, a).endVertex();
+        c.addVertex(m, x0, y0, z0).setColor(r, g, b, a);
+        c.addVertex(m, x1, y1, z1).setColor(r, g, b, a);
+        c.addVertex(m, x2, y2, z2).setColor(r, g, b, a);
+        c.addVertex(m, x3, y3, z3).setColor(r, g, b, a);
+        c.addVertex(m, x3, y3, z3).setColor(r, g, b, a);
+        c.addVertex(m, x2, y2, z2).setColor(r, g, b, a);
+        c.addVertex(m, x1, y1, z1).setColor(r, g, b, a);
+        c.addVertex(m, x0, y0, z0).setColor(r, g, b, a);
     }
 
     @SuppressWarnings("deprecation")

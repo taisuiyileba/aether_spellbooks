@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "aether:zanite_pendant"
+    },
+    {
+      "item": "aether:zanite_gemstone"
+    },
+    {
+      "item": "aether:zanite_gemstone"
+    },
+    {
+      "item": "irons_spellbooks:arcane_essence"
+    },
+    {
+      "item": "irons_spellbooks:arcane_essence"
+    }
+  ],
+  "result": {
+    "id": "aether_spellbooks:zanite_focus_pendant"
+  }
+}

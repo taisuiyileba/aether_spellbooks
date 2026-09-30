@@ -11,19 +11,19 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 public class ASBlocks {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, AetherSpellbooks.MODID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, AetherSpellbooks.MODID);
 
-    public static final RegistryObject<Block> TEMPORARY_COLD_AERCLOUD = BLOCKS.register("temporary_cold_aercloud",
+    public static final DeferredHolder<Block, Block> TEMPORARY_COLD_AERCLOUD = BLOCKS.register("temporary_cold_aercloud",
             () -> new TemporaryAercloudBlock(cloudProperties(MapColor.SNOW)));
-    public static final RegistryObject<Block> TEMPORARY_BLUE_AERCLOUD = BLOCKS.register("temporary_blue_aercloud",
+    public static final DeferredHolder<Block, Block> TEMPORARY_BLUE_AERCLOUD = BLOCKS.register("temporary_blue_aercloud",
             () -> new TemporaryBlueAercloudBlock(cloudProperties(MapColor.COLOR_LIGHT_BLUE)));
-    public static final RegistryObject<Block> TEMPORARY_GOLDEN_AERCLOUD = BLOCKS.register("temporary_golden_aercloud",
+    public static final DeferredHolder<Block, Block> TEMPORARY_GOLDEN_AERCLOUD = BLOCKS.register("temporary_golden_aercloud",
             () -> new TemporaryAercloudBlock(cloudProperties(MapColor.COLOR_YELLOW)));
 
     // Mirrors the Aether's aercloud properties, but without drops and removable by pistons.

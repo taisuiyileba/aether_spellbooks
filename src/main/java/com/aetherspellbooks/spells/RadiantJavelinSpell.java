@@ -74,7 +74,7 @@ public class RadiantJavelinSpell extends AetherSpell {
 
     @Override
     public Optional<SoundEvent> getCastFinishSound() {
-        return Optional.of(SoundEvents.TRIDENT_THROW);
+        return Optional.of(SoundEvents.TRIDENT_THROW.value());
     }
 
     @Override

@@ -7,7 +7,6 @@ import com.aetherteam.aether.entity.passive.Moa;
 import io.redspace.ironsspellbooks.capabilities.magic.MagicManager;
 import io.redspace.ironsspellbooks.entity.mobs.IMagicSummon;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -104,9 +103,9 @@ public class SummonedMoa extends Moa implements IMagicSummon {
     }
 
     @Override
-    public void onRemovedFromWorld() {
+    public void onRemovedFromLevel() {
         this.onRemovedHelper(this);
-        super.onRemovedFromWorld();
+        super.onRemovedFromLevel();
     }
 
     // --- no eggs, breeding, feeding or drops ---
@@ -137,7 +136,7 @@ public class SummonedMoa extends Moa implements IMagicSummon {
     }
 
     @Override
-    protected @NotNull ResourceLocation getDefaultLootTable() {
+    protected @NotNull net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> getDefaultLootTable() {
         return BuiltInLootTables.EMPTY;
     }
 
@@ -147,7 +146,7 @@ public class SummonedMoa extends Moa implements IMagicSummon {
     }
 
     @Override
-    public boolean canBeLeashed(@NotNull Player player) {
+    public boolean canBeLeashed() {
         return false;
     }
 }

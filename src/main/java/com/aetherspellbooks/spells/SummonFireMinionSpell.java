@@ -96,7 +96,7 @@ public class SummonFireMinionSpell extends AetherSummonSpell {
             SummonedFireMinion minion = new SummonedFireMinion(level);
             Vec3 spawn = caster.position().add(Utils.getRandomScaled(2), 0.2, Utils.getRandomScaled(2));
             minion.moveTo(Utils.moveToRelativeGroundLevel(level, spawn, 4));
-            minion.finalizeSpawn(level, level.getCurrentDifficultyAt(minion.blockPosition()), MobSpawnType.MOB_SUMMONED, null, null);
+            minion.finalizeSpawn(level, level.getCurrentDifficultyAt(minion.blockPosition()), MobSpawnType.MOB_SUMMONED, null);
             minion.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(damage);
             minion.getAttribute(Attributes.MAX_HEALTH).setBaseValue(20 + 4 * spellLevel);
             minion.setHealth(minion.getMaxHealth());

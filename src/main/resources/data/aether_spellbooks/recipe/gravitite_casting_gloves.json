@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    {
+      "item": "aether:gravitite_gloves"
+    },
+    {
+      "item": "aether:enchanted_gravitite"
+    },
+    {
+      "item": "irons_spellbooks:arcane_essence"
+    },
+    {
+      "item": "irons_spellbooks:arcane_essence"
+    }
+  ],
+  "result": {
+    "id": "aether_spellbooks:gravitite_casting_gloves"
+  }
+}

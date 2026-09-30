@@ -5,18 +5,16 @@ import com.google.common.collect.Multimap;
 import io.redspace.ironsspellbooks.item.curios.CurioBaseItem;
 import io.redspace.ironsspellbooks.item.weapons.AttributeContainer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.SlotContext;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * A curio that grants its attributes in any of several slots, so it works both in the Aether's own
@@ -38,19 +36,19 @@ public class MultiSlotCurioItem extends CurioBaseItem {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(SlotContext slotContext, UUID uuid, ItemStack stack) {
+    public Multimap<net.minecraft.core.Holder<Attribute>, AttributeModifier> getAttributeModifiers(SlotContext slotContext, ResourceLocation id, ItemStack stack) {
         if (!appliesTo(slotContext)) {
             return ImmutableMultimap.of();
         }
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+        ImmutableMultimap.Builder<net.minecraft.core.Holder<Attribute>, AttributeModifier> builder = ImmutableMultimap.builder();
         for (AttributeContainer container : attributes) {
-            builder.put(container.attribute().get(), new AttributeModifier(uuid, "aether_spellbooks_curio", container.value(), container.operation()));
+            builder.put(container.attribute(), new AttributeModifier(id, container.value(), container.operation()));
         }
         return builder.build();
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         tooltip.add(Component.translatable(getDescriptionId() + ".desc").withStyle(ChatFormatting.GRAY));
     }

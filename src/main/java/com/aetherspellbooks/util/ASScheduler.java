@@ -1,10 +1,10 @@
 package com.aetherspellbooks.util;
 
 import com.aetherspellbooks.AetherSpellbooks;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,7 +14,7 @@ import java.util.List;
  * Runs short server-side delayed actions (e.g. the slam of Gravitite Surge).
  * Not persisted: pending actions are dropped when the server stops.
  */
-@Mod.EventBusSubscriber(modid = AetherSpellbooks.MODID)
+@EventBusSubscriber(modid = AetherSpellbooks.MODID)
 public final class ASScheduler {
     private static final List<Task> TASKS = new ArrayList<>();
     private static final List<Task> PENDING = new ArrayList<>();
@@ -35,10 +35,7 @@ public final class ASScheduler {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
+    public static void onServerTick(ServerTickEvent.Post event) {
         synchronized (PENDING) {
             TASKS.addAll(PENDING);
             PENDING.clear();

@@ -1,21 +1,21 @@
 package com.aetherspellbooks.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class ASConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue AETHER_EXCLUSIVE_SPELLS;
-    public static final ForgeConfigSpec.DoubleValue AERCLOUD_DURATION_MULTIPLIER;
-    public static final ForgeConfigSpec.DoubleValue FIRE_MINION_DAMAGE;
-    public static final ForgeConfigSpec.IntValue MOA_DISMOUNT_UNSUMMON_SECONDS;
-    public static final ForgeConfigSpec.DoubleValue PENDANT_MIN_SPELL_POWER;
-    public static final ForgeConfigSpec.DoubleValue PENDANT_MAX_SPELL_POWER;
-    public static final ForgeConfigSpec.IntValue VALKYRIE_SORCERESS_SPAWN_WEIGHT;
-    public static final ForgeConfigSpec.IntValue SOLAR_ACOLYTE_SPAWN_WEIGHT;
+    public static final ModConfigSpec.BooleanValue AETHER_EXCLUSIVE_SPELLS;
+    public static final ModConfigSpec.DoubleValue AERCLOUD_DURATION_MULTIPLIER;
+    public static final ModConfigSpec.DoubleValue FIRE_MINION_DAMAGE;
+    public static final ModConfigSpec.IntValue MOA_DISMOUNT_UNSUMMON_SECONDS;
+    public static final ModConfigSpec.DoubleValue PENDANT_MIN_SPELL_POWER;
+    public static final ModConfigSpec.DoubleValue PENDANT_MAX_SPELL_POWER;
+    public static final ModConfigSpec.IntValue VALKYRIE_SORCERESS_SPAWN_WEIGHT;
+    public static final ModConfigSpec.IntValue SOLAR_ACOLYTE_SPAWN_WEIGHT;
 
     static {
-        ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
         builder.push("loot");
         AETHER_EXCLUSIVE_SPELLS = builder

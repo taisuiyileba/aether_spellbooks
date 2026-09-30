@@ -8,7 +8,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkHooks;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,7 +77,7 @@ public abstract class OwnedSpellEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
     }
 
     // Spell effects are transient and are not saved with the chunk.
@@ -100,7 +100,7 @@ public abstract class OwnedSpellEntity extends Entity {
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket(net.minecraft.server.level.ServerEntity entity) {
+        return new net.minecraft.network.protocol.game.ClientboundAddEntityPacket(this, entity);
     }
 }

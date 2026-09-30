@@ -21,7 +21,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * A compressed ball of Zephyr wind. Bursts on impact, blasting everything nearby away,
@@ -67,7 +66,7 @@ public class ZephyrOrbProjectile extends AbstractMagicProjectile {
     }
 
     @Override
-    public Optional<Supplier<SoundEvent>> getImpactSound() {
+    public Optional<net.minecraft.core.Holder<SoundEvent>> getImpactSound() {
         return Optional.of(AetherSoundEvents.ENTITY_CLOUD_CRYSTAL_EXPLODE);
     }
 

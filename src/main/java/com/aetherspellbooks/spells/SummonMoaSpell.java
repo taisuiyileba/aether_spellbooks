@@ -1,7 +1,7 @@
 package com.aetherspellbooks.spells;
 
 import com.aetherspellbooks.entity.SummonedMoa;
-import com.aetherteam.aether.api.AetherMoaTypes;
+import com.aetherteam.aether.data.resources.registries.AetherMoaTypes;
 import com.aetherteam.aether.api.registers.MoaType;
 import io.redspace.ironsspellbooks.api.config.DefaultConfig;
 import io.redspace.ironsspellbooks.api.registry.SchoolRegistry;
@@ -68,16 +68,16 @@ public class SummonMoaSpell extends AetherSummonSpell {
     @Override
     public List<MutableComponent> getUniqueInfo(int spellLevel, LivingEntity caster) {
         return List.of(
-                Component.translatable("ui.aether_spellbooks.moa_jumps", getMoaType(spellLevel).getMaxJumps()),
+                Component.translatable("ui.aether_spellbooks.moa_jumps", spellLevel == 1 ? 3 : spellLevel == 2 ? 4 : 8),
                 Component.translatable("ui.irons_spellbooks.duration", Utils.timeFromTicks(getSummonDurationTicks(spellLevel, caster), 1))
         );
     }
 
-    public static MoaType getMoaType(int spellLevel) {
+    public static net.minecraft.resources.ResourceKey<MoaType> getMoaType(int spellLevel) {
         return switch (spellLevel) {
-            case 1 -> AetherMoaTypes.BLUE.get();
-            case 2 -> AetherMoaTypes.WHITE.get();
-            default -> AetherMoaTypes.BLACK.get();
+            case 1 -> AetherMoaTypes.BLUE;
+            case 2 -> AetherMoaTypes.WHITE;
+            default -> AetherMoaTypes.BLACK;
         };
     }
 
@@ -90,7 +90,7 @@ public class SummonMoaSpell extends AetherSummonSpell {
     protected void summon(ServerLevel level, int spellLevel, LivingEntity caster, int durationTicks, SummonedEntitiesCastData castData) {
         SummonedMoa moa = new SummonedMoa(level);
         moa.moveTo(caster.getX(), caster.getY(), caster.getZ(), caster.getYRot(), 0);
-        moa.setMoaType(getMoaType(spellLevel));
+        moa.setMoaTypeByKey(getMoaType(spellLevel));
         moa.setPlayerGrown(true);
         moa.setSaddled(true);
         level.addFreshEntity(moa);

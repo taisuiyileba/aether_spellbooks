@@ -25,9 +25,9 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
@@ -133,7 +133,7 @@ public class ASMobGameTests {
         SolarAcolyte acolyte = caster(helper, ASEntities.SOLAR_ACOLYTE.get(), 4, 1, 4);
         ValkyrieSorceress sorceress = caster(helper, ASEntities.VALKYRIE_SORCERESS.get(), 2, 1, 2);
         helper.assertTrue(acolyte.isAlliedTo(sorceress) && sorceress.isAlliedTo(acolyte), "Aether spellcasters should be allies");
-        var lootData = helper.getLevel().getServer().getLootData();
+        var lootData = helper.getLevel().getServer().reloadableRegistries();
         helper.assertTrue(lootData.getLootTable(sorceress.getType().getDefaultLootTable()) != LootTable.EMPTY, "the sorceress needs a loot table");
         LootTable table = lootData.getLootTable(acolyte.getType().getDefaultLootTable());
         LootParams params = new LootParams.Builder(helper.getLevel())

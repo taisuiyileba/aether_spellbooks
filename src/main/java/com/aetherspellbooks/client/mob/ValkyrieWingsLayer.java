@@ -74,13 +74,12 @@ public class ValkyrieWingsLayer extends BoneAnchoredLayer {
     private static void vertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float u, float v, int light, int overlay) {
         Matrix4f matrix = pose.pose();
         Matrix3f normal = pose.normal();
-        consumer.vertex(matrix, x, y, 0)
-                .color(255, 255, 255, 255)
-                .uv(u, v)
-                .overlayCoords(overlay)
-                .uv2(light)
+        consumer.addVertex(matrix, x, y, 0)
+                .setColor(255, 255, 255, 255)
+                .setUv(u, v)
+                .setOverlay(overlay)
+                .setLight(light)
                 // an upward normal lights both faces of the two-sided panels evenly
-                .normal(normal, 0, 1, 0)
-                .endVertex();
+                .setNormal(pose, 0, 1, 0);
     }
 }

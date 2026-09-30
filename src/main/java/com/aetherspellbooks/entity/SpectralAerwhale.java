@@ -87,9 +87,9 @@ public class SpectralAerwhale extends Aerwhale {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(DATA_LIFETIME, 80);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_LIFETIME, 80);
     }
 
     public int getLifetime() {
@@ -159,7 +159,7 @@ public class SpectralAerwhale extends Aerwhale {
             } else if (DamageSources.applyDamage(target, damage, ASSpells.AERWHALE_SONG.get().getDamageSource(this, owner))) {
                 target.setDeltaMovement(target.getDeltaMovement().x * 0.6, Math.max(target.getDeltaMovement().y, 0.55), target.getDeltaMovement().z * 0.6);
                 target.hurtMarked = true;
-                target.addEffect(new MobEffectInstance(MobEffectRegistry.SLOWED.get(), 30, 0));
+                target.addEffect(new MobEffectInstance(MobEffectRegistry.SLOWED, 30, 0));
                 server.sendParticles(ASParticles.CLOUD_PUFF.get(), target.getX(), target.getY() + 0.3, target.getZ(), 6, 0.3, 0.1, 0.3, 0.05);
             }
         }

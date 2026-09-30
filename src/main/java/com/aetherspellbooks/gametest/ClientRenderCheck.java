@@ -28,10 +28,10 @@ import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,11 +42,11 @@ import java.util.UUID;
  * "mobs" (or "1"), "armor", "weapons", "items", "spells" or "shrines", the client creates a flat world, sets up that scene, saves screenshots
  * (run/screenshots/asb_*.png) and quits.
  */
-@Mod.EventBusSubscriber(modid = AetherSpellbooks.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = AetherSpellbooks.MODID, value = Dist.CLIENT)
 public class ClientRenderCheck {
     private static final String SCENE = System.getenv("ASB_RENDER_CHECK");
     private static final boolean ENABLED = SCENE != null && !SCENE.isEmpty();
-    private static final String WORLD = "shrines".equals(System.getenv("ASB_RENDER_CHECK")) ? "asb_render_check_shrines" : "asb_render_check";
+    private static final String WORLD = "asb_render_check_" + SCENE;
     private static final String[] PIECES = {"helmet", "chestplate", "leggings", "boots"};
     private static final String[] SLOTS = {"armor.head", "armor.chest", "armor.legs", "armor.feet"};
     private static int stage;
@@ -271,8 +271,8 @@ public class ClientRenderCheck {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) {
+    public static void onClientTick(ClientTickEvent.Post event) {
+        if (!ENABLED) {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
@@ -288,7 +288,7 @@ public class ClientRenderCheck {
                 LevelSettings settings = new LevelSettings(WORLD, GameType.CREATIVE, false, Difficulty.NORMAL, true, new GameRules(), WorldDataConfiguration.DEFAULT);
                 // the shrines scene needs real structure generation in the Aether
                 mc.createWorldOpenFlows().createFreshLevel(WORLD, settings, new WorldOptions(1L, "shrines".equals(SCENE), false),
-                        access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions());
+                        access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions(), null);
             }
             return;
         }

@@ -20,7 +20,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -72,7 +71,7 @@ public class SummonedFireMinion extends FireMinion implements IMagicSummon {
         boolean hit = Utils.doMeleeAttack(this, target, ASSpells.SUMMON_FIRE_MINION.get().getDamageSource(this, getSummoner()));
         if (hit) {
             // Sets the target on fire without placing fire blocks (fire blocks are banned in the Aether).
-            target.setSecondsOnFire(IGNITE_SECONDS);
+            target.igniteForSeconds(IGNITE_SECONDS);
         }
         return hit;
     }
@@ -124,7 +123,7 @@ public class SummonedFireMinion extends FireMinion implements IMagicSummon {
                 continue;
             }
             if (DamageSources.applyDamage(target, damage, source)) {
-                target.setSecondsOnFire(IGNITE_SECONDS);
+                target.igniteForSeconds(IGNITE_SECONDS);
             }
         }
     }
@@ -138,13 +137,13 @@ public class SummonedFireMinion extends FireMinion implements IMagicSummon {
     }
 
     @Override
-    public void onRemovedFromWorld() {
+    public void onRemovedFromLevel() {
         this.onRemovedHelper(this);
-        super.onRemovedFromWorld();
+        super.onRemovedFromLevel();
     }
 
     @Override
-    protected @NotNull ResourceLocation getDefaultLootTable() {
+    protected @NotNull net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> getDefaultLootTable() {
         return BuiltInLootTables.EMPTY;
     }
 
@@ -169,7 +168,7 @@ public class SummonedFireMinion extends FireMinion implements IMagicSummon {
     }
 
     @Override
-    public boolean canBeLeashed(@NotNull Player player) {
+    public boolean canBeLeashed() {
         return false;
     }
 

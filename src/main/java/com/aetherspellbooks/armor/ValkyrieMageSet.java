@@ -2,7 +2,6 @@ package com.aetherspellbooks.armor;
 
 import com.aetherspellbooks.registry.ASArmorMaterials;
 import com.aetherspellbooks.registry.ASParticles;
-import com.aetherteam.aether.capability.player.AetherPlayer;
 import com.aetherteam.aether.mixin.mixins.common.accessor.ServerGamePacketListenerImplAccessor;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.server.level.ServerLevel;
@@ -13,7 +12,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.UUID;
 
 /**
  * Full Valkyrie Mage set.
@@ -24,7 +22,7 @@ import java.util.UUID;
  * </ul>
  */
 public final class ValkyrieMageSet {
-    public static final UUID GRACE_ID = UUID.fromString("5b8f1c0e-6a3d-4d7e-9a61-3c9b2f0e7a41");
+    public static final net.minecraft.resources.ResourceLocation GRACE_ID = com.aetherspellbooks.AetherSpellbooks.id("valkyries_grace");
     public static final double GRACE_CAST_TIME_REDUCTION = 0.15;
 
     private ValkyrieMageSet() {
@@ -41,7 +39,7 @@ public final class ValkyrieMageSet {
         if (!fullSet || player.getAbilities().flying) {
             return;
         }
-        AetherPlayer.get(player).ifPresent(aetherPlayer -> {
+        java.util.Optional.of(player.getData(com.aetherteam.aether.attachment.AetherDataAttachments.AETHER_PLAYER)).ifPresent(aetherPlayer -> {
             // Mirrors the Aether's ValkyrieArmor#handleFlight
             if (aetherPlayer.isJumping() && !grounded) {
                 if (aetherPlayer.getFlightModifier() >= aetherPlayer.getFlightModifierMax()) {
@@ -84,13 +82,13 @@ public final class ValkyrieMageSet {
         if (player.level().isClientSide) {
             return;
         }
-        AttributeInstance castTime = player.getAttribute(AttributeRegistry.CAST_TIME_REDUCTION.get());
+        AttributeInstance castTime = player.getAttribute(AttributeRegistry.CAST_TIME_REDUCTION);
         if (castTime == null) {
             return;
         }
         boolean present = castTime.getModifier(GRACE_ID) != null;
         if (active && !present) {
-            castTime.addTransientModifier(new AttributeModifier(GRACE_ID, "Valkyrie's Grace", GRACE_CAST_TIME_REDUCTION, AttributeModifier.Operation.MULTIPLY_BASE));
+            castTime.addTransientModifier(new AttributeModifier(GRACE_ID, GRACE_CAST_TIME_REDUCTION, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
         } else if (!active && present) {
             castTime.removeModifier(GRACE_ID);
         }

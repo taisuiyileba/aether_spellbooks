@@ -4,7 +4,12 @@ import com.aetherspellbooks.AetherSpellbooks;
 import com.aetherspellbooks.item.AetherMageArmorItem;
 import com.aetherteam.aether.client.AetherSoundEvents;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
-import io.redspace.ironsspellbooks.item.armor.IronsExtendedArmorMaterial;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.core.Holder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.minecraft.core.registries.Registries;
+import io.redspace.ironsspellbooks.item.weapons.AttributeContainer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.ItemTags;
@@ -24,15 +29,22 @@ import java.util.function.Supplier;
  * The Aether's Valkyrie and Phoenix armour, reforged for spellcasters: the same protection as the originals
  * (3/8/6/3, toughness 2, repaired with the same materials) plus Iron's Spells mana and school power on every piece.
  */
-public enum ASArmorMaterials implements IronsExtendedArmorMaterial {
-    VALKYRIE_MAGE("valkyrie_mage", "valkyrie_repairing", Rarity.RARE, AetherSoundEvents.ITEM_ARMOR_EQUIP_VALKYRIE::get, () -> Map.of(
-            AttributeRegistry.MAX_MANA.get(), new AttributeModifier("Max Mana", 125, Operation.ADDITION),
-            AttributeRegistry.HOLY_SPELL_POWER.get(), new AttributeModifier("Holy Power", 0.10, Operation.MULTIPLY_BASE),
-            AttributeRegistry.LIGHTNING_SPELL_POWER.get(), new AttributeModifier("Lightning Power", 0.05, Operation.MULTIPLY_BASE))),
-    PHOENIX_MAGE("phoenix_mage", "phoenix_repairing", Rarity.EPIC, AetherSoundEvents.ITEM_ARMOR_EQUIP_PHOENIX::get, () -> Map.of(
-            AttributeRegistry.MAX_MANA.get(), new AttributeModifier("Max Mana", 125, Operation.ADDITION),
-            AttributeRegistry.FIRE_SPELL_POWER.get(), new AttributeModifier("Fire Power", 0.10, Operation.MULTIPLY_BASE),
-            AttributeRegistry.FIRE_MAGIC_RESIST.get(), new AttributeModifier("Fire Resist", 0.05, Operation.MULTIPLY_BASE)));
+public enum ASArmorMaterials {
+    VALKYRIE_MAGE("valkyrie_mage", "valkyrie_repairing", Rarity.RARE, AetherSoundEvents.ITEM_ARMOR_EQUIP_VALKYRIE, () -> Map.of(
+            AttributeRegistry.MAX_MANA, new AttributeModifier(AetherSpellbooks.id("max_mana"), 125, Operation.ADD_VALUE),
+            AttributeRegistry.HOLY_SPELL_POWER, new AttributeModifier(AetherSpellbooks.id("holy_power"), 0.10, Operation.ADD_MULTIPLIED_BASE),
+            AttributeRegistry.LIGHTNING_SPELL_POWER, new AttributeModifier(AetherSpellbooks.id("lightning_power"), 0.05, Operation.ADD_MULTIPLIED_BASE))),
+    PHOENIX_MAGE("phoenix_mage", "phoenix_repairing", Rarity.EPIC, AetherSoundEvents.ITEM_ARMOR_EQUIP_PHOENIX, () -> Map.of(
+            AttributeRegistry.MAX_MANA, new AttributeModifier(AetherSpellbooks.id("max_mana"), 125, Operation.ADD_VALUE),
+            AttributeRegistry.FIRE_SPELL_POWER, new AttributeModifier(AetherSpellbooks.id("fire_power"), 0.10, Operation.ADD_MULTIPLIED_BASE),
+            AttributeRegistry.FIRE_MAGIC_RESIST, new AttributeModifier(AetherSpellbooks.id("fire_resist"), 0.05, Operation.ADD_MULTIPLIED_BASE)));
+
+    public static final DeferredRegister<ArmorMaterial> MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, AetherSpellbooks.MODID);
+    private DeferredHolder<ArmorMaterial, ArmorMaterial> holder;
+    public Holder<ArmorMaterial> holder() { return holder; }
+    public AttributeContainer[] attributeContainers() {
+        return getAdditionalAttributes().entrySet().stream().map(e -> new AttributeContainer(e.getKey(), e.getValue().amount(), e.getValue().operation())).toArray(AttributeContainer[]::new);
+    }
 
     private static final int DURABILITY_MULTIPLIER = 33;
     private static final Map<ArmorItem.Type, Integer> BASE_DURABILITY = Map.of(
@@ -41,14 +53,22 @@ public enum ASArmorMaterials implements IronsExtendedArmorMaterial {
             ArmorItem.Type.HELMET, 3, ArmorItem.Type.CHESTPLATE, 8, ArmorItem.Type.LEGGINGS, 6, ArmorItem.Type.BOOTS, 3);
     public static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
+    static {
+        for (ASArmorMaterials set : values()) {
+            set.holder = MATERIALS.register(set.id, () -> new ArmorMaterial(
+                    ASArmorMaterials.DEFENSE, 15, set.equipSound, set::getRepairIngredient,
+                    java.util.List.of(new ArmorMaterial.Layer(AetherSpellbooks.id(set.id))), 2f, 0f));
+        }
+    }
+
     private final String id;
     private final String repairTag;
     private final Rarity rarity;
-    private final Supplier<SoundEvent> equipSound;
-    private final Supplier<Map<Attribute, AttributeModifier>> attributes;
-    private Map<Attribute, AttributeModifier> resolvedAttributes;
+    private final Holder<SoundEvent> equipSound;
+    private final Supplier<Map<Holder<Attribute>, AttributeModifier>> attributes;
+    private Map<Holder<Attribute>, AttributeModifier> resolvedAttributes;
 
-    ASArmorMaterials(String id, String repairTag, Rarity rarity, Supplier<SoundEvent> equipSound, Supplier<Map<Attribute, AttributeModifier>> attributes) {
+    ASArmorMaterials(String id, String repairTag, Rarity rarity, Holder<SoundEvent> equipSound, Supplier<Map<Holder<Attribute>, AttributeModifier>> attributes) {
         this.id = id;
         this.repairTag = repairTag;
         this.rarity = rarity;
@@ -80,50 +100,41 @@ public enum ASArmorMaterials implements IronsExtendedArmorMaterial {
         return count;
     }
 
-    @Override
-    public Map<Attribute, AttributeModifier> getAdditionalAttributes() {
+    public Map<Holder<Attribute>, AttributeModifier> getAdditionalAttributes() {
         if (resolvedAttributes == null) {
             resolvedAttributes = attributes.get();
         }
         return resolvedAttributes;
     }
 
-    @Override
     public int getDurabilityForType(ArmorItem.Type type) {
         return BASE_DURABILITY.get(type) * DURABILITY_MULTIPLIER;
     }
 
-    @Override
     public int getDefenseForType(ArmorItem.Type type) {
         return DEFENSE.get(type);
     }
 
-    @Override
     public int getEnchantmentValue() {
         return 15;
     }
 
-    @Override
     public SoundEvent getEquipSound() {
-        return equipSound.get();
+        return equipSound.value();
     }
 
-    @Override
     public Ingredient getRepairIngredient() {
         return Ingredient.of(ItemTags.create(ResourceLocation.fromNamespaceAndPath("aether", repairTag)));
     }
 
-    @Override
     public String getName() {
         return AetherSpellbooks.MODID + ":" + id;
     }
 
-    @Override
     public float getToughness() {
         return 2.0f;
     }
 
-    @Override
     public float getKnockbackResistance() {
         return 0;
     }

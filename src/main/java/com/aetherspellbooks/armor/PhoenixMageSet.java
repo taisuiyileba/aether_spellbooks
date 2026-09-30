@@ -2,7 +2,7 @@ package com.aetherspellbooks.armor;
 
 import com.aetherspellbooks.registry.ASArmorMaterials;
 import com.aetherspellbooks.util.ASFx;
-import com.aetherteam.aether.capability.player.AetherPlayer;
+import com.aetherteam.aether.attachment.AetherPlayerAttachment;
 import com.aetherteam.aether.client.AetherSoundEvents;
 import io.redspace.ironsspellbooks.damage.SpellDamageSource;
 import io.redspace.ironsspellbooks.util.ParticleHelper;
@@ -54,9 +54,9 @@ public final class PhoenixMageSet {
         entity.clearFire();
         if (entity.isInLava()) {
             entity.resetFallDistance();
-            float boost = 1.75f + Math.min(EnchantmentHelper.getDepthStrider(entity), 3);
+            float boost = 1.75f + Math.min(EnchantmentHelper.getEnchantmentLevel(entity.registryAccess().holderOrThrow(net.minecraft.world.item.enchantment.Enchantments.DEPTH_STRIDER), entity), 3);
             entity.moveRelative(0.04f * boost, new Vec3(entity.xxa, entity.yya, entity.zza));
-            if (entity instanceof Player player && AetherPlayer.get(player).map(AetherPlayer::isJumping).orElse(false)) {
+            if (entity instanceof Player player && java.util.Optional.of(player.getData(com.aetherteam.aether.attachment.AetherDataAttachments.AETHER_PLAYER)).map(AetherPlayerAttachment::isJumping).orElse(false)) {
                 Vec3 motion = entity.getDeltaMovement();
                 entity.setDeltaMovement(motion.x, Math.max(motion.y, 0.12), motion.z);
             }
@@ -106,7 +106,7 @@ public final class PhoenixMageSet {
 
         entity.setHealth(entity.getMaxHealth() * REBIRTH_HEALTH);
         List.copyOf(entity.getActiveEffects()).stream()
-                .filter(effect -> effect.getEffect().getCategory() == MobEffectCategory.HARMFUL)
+                .filter(effect -> effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL)
                 .forEach(effect -> entity.removeEffect(effect.getEffect()));
         entity.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 200));
         entity.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 100, 1));
@@ -116,7 +116,7 @@ public final class PhoenixMageSet {
         for (LivingEntity target : server.getEntitiesOfClass(LivingEntity.class, entity.getBoundingBox().inflate(REBIRTH_RADIUS),
                 t -> t != entity && t.isAlive() && !t.isSpectator() && !t.isAlliedTo(entity) && !entity.isAlliedTo(t))) {
             target.hurt(flame, REBIRTH_DAMAGE);
-            target.setSecondsOnFire(6);
+            target.igniteForSeconds(6);
             Vec3 away = target.position().subtract(entity.position()).multiply(1, 0, 1);
             if (away.lengthSqr() > 1.0E-4) {
                 target.knockback(1.2, -away.x, -away.z);

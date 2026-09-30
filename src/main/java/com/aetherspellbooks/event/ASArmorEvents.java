@@ -5,20 +5,20 @@ import com.aetherspellbooks.armor.PhoenixMageSet;
 import com.aetherspellbooks.armor.ValkyrieMageSet;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /** Set abilities of the Valkyrie and Phoenix mage armour. */
-@Mod.EventBusSubscriber(modid = AetherSpellbooks.MODID)
+@EventBusSubscriber(modid = AetherSpellbooks.MODID)
 public class ASArmorEvents {
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity entity = event.getEntity();
+    public static void onLivingTick(EntityTickEvent.Post event) {
+        if (!(event.getEntity() instanceof LivingEntity entity)) return;
         if (PhoenixMageSet.isWornBy(entity)) {
             PhoenixMageSet.tick(entity);
         }
@@ -28,7 +28,7 @@ public class ASArmorEvents {
     }
 
     @SubscribeEvent
-    public static void onLivingAttack(LivingAttackEvent event) {
+    public static void onLivingAttack(LivingIncomingDamageEvent event) {
         if (PhoenixMageSet.blocksDamage(event.getEntity(), event.getSource())) {
             event.setCanceled(true);
         }

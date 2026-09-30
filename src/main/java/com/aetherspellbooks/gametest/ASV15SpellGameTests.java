@@ -24,9 +24,9 @@ import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.UUID;
 
@@ -188,7 +188,7 @@ public class ASV15SpellGameTests {
         helper.getLevel().addFreshEntity(meteor);
         meteor.shatter(husk.position());
         helper.assertTrue(husk.getHealth() < max, "the blast should damage the husk");
-        helper.assertTrue(husk.hasEffect(MobEffectRegistry.CHILLED.get()), "the husk should be chilled");
+        helper.assertTrue(husk.hasEffect(MobEffectRegistry.CHILLED), "the husk should be chilled");
         helper.assertTrue(husk.getTicksFrozen() > 0, "the husk should be frozen");
         helper.assertBlockPresent(Blocks.FROSTED_ICE, new BlockPos(6, 0, 4));
         helper.assertTrue(meteor.isRemoved(), "the meteor should be gone after shattering");

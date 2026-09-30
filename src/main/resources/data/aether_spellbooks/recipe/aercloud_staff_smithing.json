@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:smithing_transform",
+  "template": {
+    "item": "aether_spellbooks:aether_arcane_upgrade_smithing_template"
+  },
+  "base": {
+    "item": "aether:cloud_staff"
+  },
+  "addition": {
+    "item": "irons_spellbooks:evocation_rune"
+  },
+  "result": {
+    "id": "aether_spellbooks:aercloud_staff"
+  }
+}

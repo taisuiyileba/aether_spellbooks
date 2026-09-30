@@ -13,7 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkHooks;
+
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -48,8 +48,8 @@ public class StormBolt extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(DATA_HEIGHT, 6f);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        builder.define(DATA_HEIGHT, 6f);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class StormBolt extends Entity {
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket(net.minecraft.server.level.ServerEntity entity) {
+        return new net.minecraft.network.protocol.game.ClientboundAddEntityPacket(this, entity);
     }
 }

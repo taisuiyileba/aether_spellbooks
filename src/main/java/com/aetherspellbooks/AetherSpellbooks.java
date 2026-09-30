@@ -11,10 +11,10 @@ import com.aetherspellbooks.registry.ASSpells;
 import com.aetherspellbooks.registry.ASStructures;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.ModContainer;
 import org.slf4j.Logger;
 
 @Mod(AetherSpellbooks.MODID)
@@ -22,10 +22,11 @@ public class AetherSpellbooks {
     public static final String MODID = "aether_spellbooks";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public AetherSpellbooks(FMLJavaModLoadingContext context) {
-        IEventBus modBus = context.getModEventBus();
+    public AetherSpellbooks(IEventBus modBus, ModContainer context) {
+
 
         ASBlocks.register(modBus);
+        com.aetherspellbooks.registry.ASArmorMaterials.MATERIALS.register(modBus);
         ASItems.register(modBus);
         ASEntities.register(modBus);
         ASSpells.register(modBus);
@@ -33,6 +34,7 @@ public class AetherSpellbooks {
         ASCreativeTabs.register(modBus);
         ASBiomeModifiers.register(modBus);
         ASStructures.register(modBus);
+        modBus.addListener(com.aetherspellbooks.compat.AccessoriesCompat::setup);
         modBus.addListener(ASEntities::onAttributeCreation);
         modBus.addListener(ASEntities::onSpawnPlacements);
         modBus.addListener(ASCreativeTabs::addToVanillaTabs);

@@ -10,15 +10,11 @@ import io.redspace.ironsspellbooks.item.armor.ImbuableChestplateArmorItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.fml.loading.FMLEnvironment;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 
 import java.util.List;
@@ -32,7 +28,7 @@ public class AetherMageArmorItem extends ImbuableChestplateArmorItem implements 
     private final ASArmorMaterials set;
 
     public AetherMageArmorItem(ASArmorMaterials set, Type type, Properties properties) {
-        super(set, type, properties);
+        super(set.holder(), type, properties.durability(set.getDurabilityForType(type)), set.attributeContainers());
         this.set = set;
     }
 
@@ -45,14 +41,8 @@ public class AetherMageArmorItem extends ImbuableChestplateArmorItem implements 
         return AetherSpellbooks.id("textures/models/armor/" + set.id() + "_cape.png");
     }
 
-    /** The vanilla armour layer asks for a texture before handing over to GeckoLib; point it at the real atlas. */
     @Override
-    public @Nullable String getArmorTexture(ItemStack stack, Entity entity, EquipmentSlot slot, String type) {
-        return AetherSpellbooks.MODID + ":textures/models/armor/" + set.id() + ".png";
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         int worn = FMLEnvironment.dist == Dist.CLIENT ? ArmorTooltipHelper.piecesWorn(set) : 0;
         tooltip.add(Component.translatable("tooltip.aether_spellbooks.set_bonus", worn).withStyle(worn == 4 ? ChatFormatting.GOLD : ChatFormatting.GRAY));

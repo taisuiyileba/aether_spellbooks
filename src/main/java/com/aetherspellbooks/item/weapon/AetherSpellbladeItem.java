@@ -1,6 +1,6 @@
 package com.aetherspellbooks.item.weapon;
 
-import com.aetherteam.aether.capability.lightning.LightningTracker;
+
 import com.aetherteam.aether.item.EquipmentUtil;
 import io.redspace.ironsspellbooks.api.item.weapons.MagicSwordItem;
 import io.redspace.ironsspellbooks.api.registry.SpellDataRegistryHolder;
@@ -11,13 +11,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -41,7 +39,7 @@ public class AetherSpellbladeItem extends MagicSwordItem {
     private final Ability ability;
 
     public AetherSpellbladeItem(ExtendedWeaponTier tier, Ability ability, Properties properties, SpellDataRegistryHolder... spells) {
-        super(tier, properties, spells);
+        super(tier, properties.attributes(createAttributes(tier)), spells);
         this.ability = ability;
     }
 
@@ -60,7 +58,7 @@ public class AetherSpellbladeItem extends MagicSwordItem {
                 case LIGHTNING -> {
                     LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(attacker.level());
                     if (bolt != null) {
-                        LightningTracker.get(bolt).ifPresent(tracker -> tracker.setOwner(attacker));
+                        bolt.getData(com.aetherteam.aether.attachment.AetherDataAttachments.LIGHTNING_TRACKER).setOwner(attacker);
                         if (attacker instanceof ServerPlayer player) {
                             bolt.setCause(player);
                         }
@@ -82,19 +80,19 @@ public class AetherSpellbladeItem extends MagicSwordItem {
 
     /** Flaming: how long the target burns. */
     public static int burnSeconds(LivingEntity attacker) {
-        return 30 + 4 * EnchantmentHelper.getFireAspect(attacker);
+        return 30 + 4 * EnchantmentHelper.getEnchantmentLevel(attacker.registryAccess().holderOrThrow(Enchantments.FIRE_ASPECT), attacker);
     }
 
     /** Holy: bonus damage against this target, or 0. */
     public static float holyBonus(ItemStack stack, LivingEntity target) {
-        if (target.getMobType() != MobType.UNDEAD && !target.isInvertedHealAndHarm()) {
+        if (!target.getType().is(net.minecraft.tags.EntityTypeTags.UNDEAD) && !target.isInvertedHealAndHarm()) {
             return 0;
         }
-        return HOLY_BONUS + 2.5f * stack.getEnchantmentLevel(Enchantments.SMITE);
+        return HOLY_BONUS + 2.5f * stack.getEnchantmentLevel(target.registryAccess().holderOrThrow(Enchantments.SMITE));
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         tooltip.add(Component.translatable("tooltip.aether_spellbooks.spellblade." + ability.name().toLowerCase()).withStyle(ChatFormatting.GOLD));
     }

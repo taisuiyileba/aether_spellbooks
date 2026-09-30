@@ -1,0 +1,208 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.75,
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.85,
+            "per_level_above_first": 0.1
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether:victory_medal"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether:ambrosium_shard",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            },
+            {
+              "function": "minecraft:enchanted_count_increase",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 1
+              },
+              "enchantment": "minecraft:looting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:arcane_essence",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            },
+            {
+              "function": "minecraft:enchanted_count_increase",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 1
+              },
+              "enchantment": "minecraft:looting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.12,
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.15,
+            "per_level_above_first": 0.03
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "aether_spellbooks:aether_arcane_upgrade_smithing_template"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:killed_by_player"
+        },
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.3,
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.35,
+            "per_level_above_first": 0.05
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:scroll",
+          "functions": [
+            {
+              "function": "irons_spellbooks:randomize_spell",
+              "quality": {
+                "type": "minecraft:uniform",
+                "min": 0.2,
+                "max": 0.7
+              },
+              "spell_filter": {
+                "spells": [
+                  "aether_spellbooks:thunder_crystal",
+                  "aether_spellbooks:valkyrie_lunge",
+                  "aether_spellbooks:zephyr_blast",
+                  "aether_spellbooks:gravitite_surge",
+                  "aether_spellbooks:radiant_javelin",
+                  "aether_spellbooks:thunderhead"
+                ],
+                "force": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.3,
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.35,
+            "per_level_above_first": 0.05
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:uncommon_ink",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:rare_ink",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "conditions": [
+        {
+          "condition": "minecraft:random_chance_with_enchanted_bonus",
+          "enchantment": "minecraft:looting",
+          "unenchanted_chance": 0.2,
+          "enchanted_chance": {
+            "type": "minecraft:linear",
+            "base": 0.25,
+            "per_level_above_first": 0.05
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:lightning_rune",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "irons_spellbooks:holy_rune",
+          "weight": 2
+        }
+      ]
+    }
+  ]
+}

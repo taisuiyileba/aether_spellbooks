@@ -6,19 +6,17 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import io.redspace.ironsspellbooks.api.registry.AttributeRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.SlotContext;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * Mirrors the Aether's zanite tools, which grow stronger as they wear down:
@@ -54,12 +52,12 @@ public class ZaniteFocusPendantItem extends MultiSlotCurioItem {
     }
 
     @Override
-    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(SlotContext slotContext, UUID uuid, ItemStack stack) {
+    public Multimap<net.minecraft.core.Holder<Attribute>, AttributeModifier> getAttributeModifiers(SlotContext slotContext, ResourceLocation id, ItemStack stack) {
         if (!appliesTo(slotContext) || isDepleted(stack)) {
             return ImmutableMultimap.of();
         }
-        return ImmutableMultimap.of(AttributeRegistry.SPELL_POWER.get(),
-                new AttributeModifier(uuid, "aether_spellbooks_zanite_pendant", getSpellPowerBonus(stack), AttributeModifier.Operation.MULTIPLY_BASE));
+        return ImmutableMultimap.of(AttributeRegistry.SPELL_POWER,
+                new AttributeModifier(id, getSpellPowerBonus(stack), AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
     }
 
     @Override
@@ -73,7 +71,7 @@ public class ZaniteFocusPendantItem extends MultiSlotCurioItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
         if (isDepleted(stack)) {
             tooltip.add(Component.translatable("item.aether_spellbooks.zanite_focus_pendant.depleted").withStyle(ChatFormatting.RED));

@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * Homing crystal inspired by the Valkyrie Queen's thunder crystals.
@@ -87,7 +86,7 @@ public class ThunderCrystalProjectile extends AbstractMagicProjectile {
     }
 
     @Override
-    public Optional<Supplier<SoundEvent>> getImpactSound() {
+    public Optional<net.minecraft.core.Holder<SoundEvent>> getImpactSound() {
         return Optional.of(AetherSoundEvents.ENTITY_THUNDER_CRYSTAL_EXPLODE);
     }
 

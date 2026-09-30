@@ -25,13 +25,12 @@ public final class RenderHelper {
     private static void vertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float u, float v, int r, int g, int b, int a) {
         Matrix4f poseMatrix = pose.pose();
         Matrix3f normalMatrix = pose.normal();
-        consumer.vertex(poseMatrix, x, y, 0f)
-                .color(r, g, b, a)
-                .uv(u, v)
-                .overlayCoords(OverlayTexture.NO_OVERLAY)
-                .uv2(LightTexture.FULL_BRIGHT)
-                .normal(normalMatrix, 0f, 1f, 0f)
-                .endVertex();
+        consumer.addVertex(poseMatrix, x, y, 0f)
+                .setColor(r, g, b, a)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightTexture.FULL_BRIGHT)
+                .setNormal(pose, 0f, 1f, 0f);
     }
 
     /**
@@ -50,9 +49,9 @@ public final class RenderHelper {
     }
 
     private static void triangle(VertexConsumer consumer, Matrix4f m, float tx, float ty, float tz, float[] p0, float[] p1, int r, int g, int b, int a) {
-        consumer.vertex(m, tx, ty, tz).color(r, g, b, a).endVertex();
-        consumer.vertex(m, p0[0], p0[1], p0[2]).color(r, g, b, a).endVertex();
-        consumer.vertex(m, p1[0], p1[1], p1[2]).color(r, g, b, a).endVertex();
-        consumer.vertex(m, p1[0], p1[1], p1[2]).color(r, g, b, a).endVertex();
+        consumer.addVertex(m, tx, ty, tz).setColor(r, g, b, a);
+        consumer.addVertex(m, p0[0], p0[1], p0[2]).setColor(r, g, b, a);
+        consumer.addVertex(m, p1[0], p1[1], p1[2]).setColor(r, g, b, a);
+        consumer.addVertex(m, p1[0], p1[1], p1[2]).setColor(r, g, b, a);
     }
 }

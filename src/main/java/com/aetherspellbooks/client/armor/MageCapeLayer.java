@@ -32,7 +32,7 @@ public class MageCapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, AbstractClientPlayer player, float limbSwing, float limbSwingAmount,
                        float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
         if (!(player.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof AetherMageArmorItem armor)
-                || player.isInvisible() || !player.isModelPartShown(PlayerModelPart.CAPE) || player.getCloakTextureLocation() != null) {
+                || player.isInvisible() || !player.isModelPartShown(PlayerModelPart.CAPE) || player.getSkin().capeTexture() != null) {
             return;
         }
         poseStack.pushPose();

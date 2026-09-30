@@ -2,7 +2,7 @@
   "type": "irons_spellbooks:append_loot",
   "conditions": [
     {
-      "condition": "forge:loot_table_id",
+      "condition": "neoforge:loot_table_id",
       "loot_table_id": "aether:chests/dungeon/silver/silver_dungeon"
     }
   ],

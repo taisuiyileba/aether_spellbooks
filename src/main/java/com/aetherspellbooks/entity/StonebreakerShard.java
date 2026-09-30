@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * Tumbling holystone shard fired by Stonebreaker Shard. Its entity type is listed in
@@ -81,8 +80,8 @@ public class StonebreakerShard extends AbstractMagicProjectile {
     }
 
     @Override
-    public Optional<Supplier<SoundEvent>> getImpactSound() {
-        return Optional.of(() -> SoundEvents.DEEPSLATE_BREAK);
+    public Optional<net.minecraft.core.Holder<SoundEvent>> getImpactSound() {
+        return Optional.of(net.minecraft.core.Holder.direct(SoundEvents.DEEPSLATE_BREAK));
     }
 
     @Override
@@ -104,7 +103,7 @@ public class StonebreakerShard extends AbstractMagicProjectile {
         }
         if (DamageSources.applyDamage(target, amount, ASSpells.STONEBREAKER_SHARD.get().getDamageSource(this, getOwner()))
                 && target instanceof LivingEntity living) {
-            living.addEffect(new MobEffectInstance(MobEffectRegistry.SLOWED.get(), STAGGER_TICKS, 0));
+            living.addEffect(new MobEffectInstance(MobEffectRegistry.SLOWED, STAGGER_TICKS, 0));
         }
         consumeEntityImpact(result, true);
     }

@@ -3,22 +3,22 @@ package com.aetherspellbooks.world;
 import com.aetherspellbooks.config.ASConfig;
 import com.aetherspellbooks.registry.ASBiomeModifiers;
 import com.aetherspellbooks.registry.ASEntities;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MobSpawnSettings;
-import net.minecraftforge.common.world.BiomeModifier;
-import net.minecraftforge.common.world.ModifiableBiomeInfo;
+import net.neoforged.neoforge.common.world.BiomeModifier;
+import net.neoforged.neoforge.common.world.ModifiableBiomeInfo;
 
 /**
  * Adds the Aether spellcasters to the given biomes, with spawn weights read from the config
  * (so pack makers can tune or disable them without a data pack).
  */
 public record SpellcasterSpawnsModifier(HolderSet<Biome> biomes) implements BiomeModifier {
-    public static final Codec<SpellcasterSpawnsModifier> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final MapCodec<SpellcasterSpawnsModifier> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Biome.LIST_CODEC.fieldOf("biomes").forGetter(SpellcasterSpawnsModifier::biomes)
     ).apply(instance, SpellcasterSpawnsModifier::new));
 
@@ -37,7 +37,7 @@ public record SpellcasterSpawnsModifier(HolderSet<Biome> biomes) implements Biom
     }
 
     @Override
-    public Codec<? extends BiomeModifier> codec() {
+    public MapCodec<? extends BiomeModifier> codec() {
         return ASBiomeModifiers.SPELLCASTER_SPAWNS.get();
     }
 }
