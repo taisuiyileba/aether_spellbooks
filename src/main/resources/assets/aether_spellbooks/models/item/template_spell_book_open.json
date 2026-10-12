@@ -1,0 +1,492 @@
+{
+  "credit": "Aether Spellbooks; original pixel art at one texel per model unit",
+  "texture_size": [
+    32,
+    32
+  ],
+  "elements": [
+    {
+      "name": "open_front_cover",
+      "from": [
+        6,
+        -5,
+        3
+      ],
+      "to": [
+        7,
+        2,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14.5,
+            0.0,
+            15.0,
+            3.5
+          ],
+          "texture": "#book"
+        },
+        "south": {
+          "uv": [
+            14.5,
+            0.0,
+            15.0,
+            3.5
+          ],
+          "texture": "#book"
+        },
+        "east": {
+          "uv": [
+            8.0,
+            0.0,
+            11.5,
+            5.0
+          ],
+          "texture": "#book",
+          "rotation": 270
+        },
+        "west": {
+          "uv": [
+            0.0,
+            0.0,
+            3.5,
+            5.0
+          ],
+          "texture": "#book",
+          "rotation": 90
+        },
+        "up": {
+          "uv": [
+            13.5,
+            0.0,
+            14.0,
+            5.0
+          ],
+          "texture": "#book"
+        },
+        "down": {
+          "uv": [
+            13.5,
+            0.0,
+            14.0,
+            5.0
+          ],
+          "texture": "#book"
+        }
+      }
+    },
+    {
+      "name": "open_back_cover",
+      "from": [
+        6,
+        2,
+        3
+      ],
+      "to": [
+        7,
+        9,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14.5,
+            0.0,
+            15.0,
+            3.5
+          ],
+          "texture": "#book"
+        },
+        "south": {
+          "uv": [
+            14.5,
+            0.0,
+            15.0,
+            3.5
+          ],
+          "texture": "#book"
+        },
+        "east": {
+          "uv": [
+            8.0,
+            0.0,
+            11.5,
+            5.0
+          ],
+          "texture": "#book",
+          "rotation": 270
+        },
+        "west": {
+          "uv": [
+            4.0,
+            0.0,
+            7.5,
+            5.0
+          ],
+          "texture": "#book",
+          "rotation": 90
+        },
+        "up": {
+          "uv": [
+            13.5,
+            0.0,
+            14.0,
+            5.0
+          ],
+          "texture": "#book"
+        },
+        "down": {
+          "uv": [
+            13.5,
+            0.0,
+            14.0,
+            5.0
+          ],
+          "texture": "#book"
+        }
+      }
+    },
+    {
+      "name": "left_pages",
+      "from": [
+        7,
+        -3,
+        4
+      ],
+      "to": [
+        8,
+        2,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            8.0,
+            6.0,
+            8.5,
+            8.5
+          ],
+          "texture": "#book"
+        },
+        "south": {
+          "uv": [
+            8.0,
+            6.0,
+            8.5,
+            8.5
+          ],
+          "texture": "#book"
+        },
+        "east": {
+          "uv": [
+            0.0,
+            6.0,
+            2.5,
+            10.0
+          ],
+          "texture": "#book",
+          "rotation": 270
+        },
+        "west": {
+          "uv": [
+            0.0,
+            6.0,
+            2.5,
+            10.0
+          ],
+          "texture": "#book",
+          "rotation": 90
+        },
+        "up": {
+          "uv": [
+            6.0,
+            6.0,
+            6.5,
+            10.0
+          ],
+          "texture": "#book"
+        },
+        "down": {
+          "uv": [
+            6.0,
+            6.0,
+            6.5,
+            10.0
+          ],
+          "texture": "#book"
+        }
+      }
+    },
+    {
+      "name": "right_pages",
+      "from": [
+        7,
+        2,
+        4
+      ],
+      "to": [
+        8,
+        7,
+        12
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            8.5,
+            6.0,
+            9.0,
+            8.5
+          ],
+          "texture": "#book"
+        },
+        "south": {
+          "uv": [
+            8.5,
+            6.0,
+            9.0,
+            8.5
+          ],
+          "texture": "#book"
+        },
+        "east": {
+          "uv": [
+            3.0,
+            6.0,
+            5.5,
+            10.0
+          ],
+          "texture": "#book",
+          "rotation": 270
+        },
+        "west": {
+          "uv": [
+            3.0,
+            6.0,
+            5.5,
+            10.0
+          ],
+          "texture": "#book",
+          "rotation": 90
+        },
+        "up": {
+          "uv": [
+            6.5,
+            6.0,
+            7.0,
+            10.0
+          ],
+          "texture": "#book"
+        },
+        "down": {
+          "uv": [
+            6.5,
+            6.0,
+            7.0,
+            10.0
+          ],
+          "texture": "#book"
+        }
+      }
+    },
+    {
+      "name": "left_leaf",
+      "from": [
+        8,
+        -3,
+        4
+      ],
+      "to": [
+        8,
+        2,
+        12
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          2,
+          8
+        ],
+        "axis": "z",
+        "angle": 22.5
+      },
+      "faces": {
+        "east": {
+          "uv": [
+            0.0,
+            6.0,
+            2.5,
+            10.0
+          ],
+          "texture": "#book",
+          "rotation": 270
+        },
+        "west": {
+          "uv": [
+            0.0,
+            6.0,
+            2.5,
+            10.0
+          ],
+          "texture": "#book",
+          "rotation": 90
+        }
+      }
+    },
+    {
+      "name": "right_leaf",
+      "from": [
+        8,
+        2,
+        4
+      ],
+      "to": [
+        8,
+        7,
+        12
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          2,
+          8
+        ],
+        "axis": "z",
+        "angle": -22.5
+      },
+      "faces": {
+        "east": {
+          "uv": [
+            3.0,
+            6.0,
+            5.5,
+            10.0
+          ],
+          "texture": "#book",
+          "rotation": 270
+        },
+        "west": {
+          "uv": [
+            3.0,
+            6.0,
+            5.5,
+            10.0
+          ],
+          "texture": "#book",
+          "rotation": 90
+        }
+      }
+    }
+  ],
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [
+        90,
+        180,
+        0
+      ],
+      "translation": [
+        0,
+        -2,
+        2
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        90,
+        180,
+        0
+      ],
+      "translation": [
+        0,
+        -2,
+        2
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        -137,
+        10,
+        90
+      ],
+      "translation": [
+        -4.25,
+        3,
+        -3.75
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        -137,
+        10,
+        -90
+      ],
+      "translation": [
+        4.25,
+        3,
+        -3.25
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "ground": {
+      "rotation": [
+        -89,
+        0,
+        0
+      ],
+      "translation": [
+        0,
+        0,
+        -4
+      ],
+      "scale": [
+        0.75,
+        0.75,
+        0.75
+      ]
+    },
+    "head": {
+      "rotation": [
+        0,
+        0,
+        -90
+      ],
+      "translation": [
+        4,
+        8.5,
+        0
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        -90,
+        0,
+        90
+      ],
+      "translation": [
+        -4.5,
+        0,
+        0
+      ]
+    }
+  }
+}

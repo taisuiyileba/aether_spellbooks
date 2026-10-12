@@ -3,7 +3,7 @@
 Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.0.0 · MIT
 
 - 本目录：Forge 1.20.1。
-- [NeoForge 1.21.1 移植版](neoforge-1.21.1/README.md)：独立构建工程与依赖说明。
+- [NeoForge 1.21.1 移植版](../aether_spellbooks_1.21.1/README.md)：独立构建工程与依赖说明。
 
 项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，正式版本统一为 1.0.0。
 设计方案见 `../DESIGN_Aether_Spellbooks.md`，市场分析见 `../ANALYSIS.md`。
@@ -24,6 +24,8 @@ python tools/gen_textures.py  # 重新生成全部贴图（会覆盖现有 png�
 ASB_RENDER_CHECK=mobs ./gradlew runClient    # 自动建平坦世界、摆好施法生物、截图到 run/screenshots/asb_*.png 后退出
 ASB_RENDER_CHECK=armor ./gradlew runClient   # 同上，展示两套法师盔甲（盔甲架 + 第三人称玩家，带披风）
 ASB_RENDER_CHECK=weapons ./gradlew runClient # 同上，展示法杖和法剑（物品展示框、第三/第一人称、物品栏图标）
+ASB_RENDER_CHECK=books ./gradlew runClient   # 法术书与铁魔法参考对照、环绕、左右手及第三人称截图
+ASB_RENDER_CHECK=slider ./gradlew runClient  # 幽冥锤攻击滑行魔石的正面和侧面连续帧
 ASB_RENDER_CHECK=items ./gradlew runClient   # 同上，生存背包里把本模组图标和铁魔法/Aether/原版的同类物品排在一起对比
 ASB_RENDER_CHECK=spells ./gradlew runClient  # 同上，对一排尸壳依次施放 v1.5 的法术并在关键时刻截图（asb_spell_*.png）
 ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结构生成），平坦世界里放置两座神殿，再去 Aether 找自然生成的神殿截图（asb_shrine_*.png）
@@ -136,7 +138,36 @@ ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结
 | 可选数据包 | `aether_spellbooks:ice_magic_is_cold`（默认关闭）：开启后铁魔法所有冰系法术都能伤害未冻结的烈阳巨灵 |
 | 数据生成 | `python tools/gen_data.py` 重新生成战利品、标签、配方、模型和粒子定义 |
 
-## 自动化测试（44 项，不会打进 jar）
+## 法术书模型（1.20.1）
+
+魔石法典、武神圣典和烈阳法典的 3D 模型参考铁魔法的冰霜、金制和烈焰法术书，以每模型单位 1 像素、7×10 像素封面重绘。分别保留灰蓝石面与青色眼纹、蓝色皮面与银白羽翼、暗红皮面与金黄太阳，使用成片的材质明暗和铜／金包角。合书外形为 4×7×10，封皮厚度为 1，书页内收 1，与铁魔法常规书籍的体量一致。32×32 图集为封面、背面、内衬、书脊及书页分配独立 UV；原 16×16 背包图标保持不变。
+
+左右手持显示正面纹饰，第一人称略微缩小、上移，展示框朝向与展开模型同步修正。可重建的图集和模型源脚本为 `tools/build_spellbook_models.py`（需要 Pillow），带 `--check` 参数时只校验导出资源。运行 `ASB_RENDER_CHECK=books` 可生成与铁魔法参考书同尺度、同光照的实机对照、36 帧环绕记录以及左右手和第三人称截图。检查辅助类不进入发布 JAR。
+
+资源与检查记录见 [法术书模型说明](docs/spellbook_models.md)。
+
+## 铁魔法与滑行魔石联动
+
+- **投掷**：扔出的镐子及其他符合天境挖掘工具规则的物品可以唤醒并伤害滑行魔石。投掷工具的伤害为 **法术伤害 + 该工具的攻击伤害**，支持主手／副手、锋利附魔及力量等攻击属性加成；不会借用另一只手中武器的攻击力或重复叠加。物品与伤害在发射时确定，换手或修改原物品不影响飞行中的投射物。普通物品不会因此获得破防能力。
+- 无额外加成时，一级投掷的木／石／铁／钻石／下界合金镐面板伤害分别为 **3 / 4 / 5 / 6 / 7**。实际伤害继续经过目标抗性和天境的 `tools_debuff` 规则；默认情况下，天境还会削弱外来投射物，因此实际扣血可能低于面板数值。
+- **幽冥锤**：可以直接瞄准 16 格内的滑行魔石施放，复用原有锤子模型、动画和音效，按原动画中锤头下缘的位置对齐滑行魔石顶面，在第 13 tick（约 0.65 秒）落锤时结算一次伤害。生成时锁定挥击方向，尚未消失的锤子特效不阻挡后续施法。目标离开落点、出现墙体遮挡或施法者离开地牢房间时会落空。攻击分支不会挖掉周围方块，普通挖矿用法保持原样。
+- 幽冥锤默认基础伤害为 **6 / 8 / 10 / 12 / 14**，受法术强度、唤魔强度、铁魔法的法术倍率配置和目标抗性影响。法术详情新增中英文滑行魔石伤害提示。
+- 保留天境的和平难度、地牢房间边界、首次命中唤醒并回满生命、仇恨和受击流程；幽冥锤仍遵守冒险模式限制。碎岩飞刃等既有兼容继续生效。
+
+配置位于 `config/aether_spellbooks-common.toml`；修改后重启游戏／服务器生效：
+
+```toml
+[sliderCompatibility]
+thrownToolsDamageSlider = true
+spectralHammerDamageSlider = true
+hammerBaseDamage = 6.0
+hammerDamagePerLevel = 2.0
+```
+
+联机时以服务端数值为准，客户端使用相同配置可保持法术详情显示一致。兼容通过本附属的四个 Mixin 实现，不需要替换天境或铁魔法的 JAR。
+
+## 自动化测试（58 项，不会打进 jar）
+- `ASSliderCompatGameTests`（14 项）：真实投掷与换手、工具材质和实际扣血、副手附魔与物品快照、力量加成且不重复计算武器属性；幽冥锤起手、唤醒、单次伤害、射程／遮挡、冒险／和平、房间边界、移动目标、配置开关及原有挖矿。
 - `ASGameTests`：云台、Slider 联动、烈阳巨灵冻结、召唤恐鸟、烈焰奴仆结盟、Aether 独占、金牢战利品、配方与可选数据包
 - `ASSpellGameTests`：重力涌动先抛起再砸地、武神突进路径伤害、西风冲击击退方向、旋风卷起并造成伤害、烈阳耀斑自动开火、境云护卫数量、碎岩飞刃齐射与穿透、风暴雷球电弧连锁、冰结球击跟随准星俯仰角
 - `ASV15SpellGameTests`：烈阳耀斑总伤害上限；武神突进可再次施放、烙印后第二段 +50% 伤害并消耗烙印、最后一段落地冲击波；光辉圣枪贯穿两名敌人并在落点爆发；雷暴境云向下方敌人落雷；天鲸之歌伤害/震起敌人并只给盟友缓降和跳跃提升；冰石陨落伤害、冻结、冰寒并把水冻成霜冰
@@ -146,11 +177,15 @@ ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结
 - `ASShrineGameTests`（单独批次）：两座神殿的模板里各有两名对应的术师（不会消失）和带正确战利品表的箱子；两个箱子每次至少掷出 4 组物品；两座神殿都能在 Aether 里自然生成并被找到
 - `ClientRenderCheck`：开发用的客户端截图检查（见“常用命令”），实机效果图存在 `docs/screenshots/`
 
+已通过 Java 17 构建与全部 58 项 GameTest（原有 44 项，加 14 项兼容测试）。Forge 发布 JAR 使用 MixinGradle 生成的 refmap 映射幽冥锤 `tick` 方法，并在清单中注册 Mixin；开发截图和 GameTest 类不打入发布包。
+
+1.20.1 实机记录：[法术书](docs/screenshots/asb_books_comparison.png)、[幽冥锤正面](docs/screenshots/slider_hammer_front.gif)、[幽冥锤侧面](docs/screenshots/slider_hammer_side.gif)。
+
 ## 还需要进游戏手动检查的项目
 - 所有投射物和特效的实际观感（翻滚的圣石块、发光雷晶、迷你烈阳、旋风粒子）
 - 恐鸟的空中连跳手感；下坐骑 5 秒后是否消散
 - 武神突进的冲刺距离手感（按速度推进，地面上会比空中短一些）
-- 法术书挂在腰间的 3D 渲染（使用铁魔法的书本模板加上本模组的贴图）
+- 法术书挂在腰间的 Curios 装备效果（独立的合书／展开模型）
 - 在 Aether 饰品界面里，两件饰品能否放进对应槽位；加成是否生效
 - 神殿在不同种子下的实际密度（间距 14 / 17 区块，在 GameTest 世界里离原点最近的约 20~900 格）和两名术师一起上时的难度
 - 武神法者套的飞行手感（逻辑和 Aether 原版相同，但需要在联机服务器上确认不会被判定为飞行）
@@ -159,4 +194,4 @@ ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结
 - 平衡性数值（全部可以通过铁魔法的 spell_config 或本模组配置覆盖）
 
 ## 素材授权
-Aether 和铁魔法的美术素材都是**保留所有权利**。本模组的贴图、盔甲模型和动画全部由 `tools/gen_textures.py`、`tools/gen_mob_textures.py`、`tools/gen_armor_models.py`、`tools/gen_weapon_models.py` 原创生成，只沿用了铁魔法 3D 书本模板的 UV 布局和标准 64×64 玩家皮肤布局（施法生物直接使用铁魔法运行时自带的人形模型，没有复制它的文件）。云块、烈焰奴仆、恐鸟在运行时直接使用 Aether 自己的模型和渲染器，**没有**复制它的文件。
+Aether 和铁魔法的美术素材都是**保留所有权利**。本模组的贴图、盔甲模型和动画全部由 `tools/gen_textures.py`、`tools/gen_mob_textures.py`、`tools/gen_armor_models.py`、`tools/gen_weapon_models.py`、`tools/build_spellbook_models.py` 原创生成；法术书使用独立 UV 图集，其他资源沿用标准 64×64 玩家皮肤布局（施法生物直接使用铁魔法运行时自带的人形模型，没有复制它的文件）。云块、烈焰奴仆、恐鸟在运行时直接使用 Aether 自己的模型和渲染器，**没有**复制它的文件。

@@ -1,4 +1,5 @@
 {
+  "ui.aether_spellbooks.slider_damage": "对滑行魔石伤害：%s（直接瞄准滑行魔石施放）",
   "itemGroup.aether_spellbooks": "天境魔法书",
   "item.aether_spellbooks.slider_codex": "魔石法典",
   "item.aether_spellbooks.valkyrie_grimoire": "武神圣典",

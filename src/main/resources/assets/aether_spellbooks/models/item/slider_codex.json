@@ -2,7 +2,7 @@
   "parent": "minecraft:item/handheld",
   "loader": "forge:separate_transforms",
   "base": {
-    "parent": "irons_spellbooks:item/template_spell_book_model",
+    "parent": "aether_spellbooks:item/template_spell_book",
     "textures": {
       "book": "aether_spellbooks:item/spell_book_models/slider_codex",
       "particle": "aether_spellbooks:item/spell_book_models/slider_codex"
@@ -16,7 +16,7 @@
       }
     },
     "head": {
-      "parent": "irons_spellbooks:item/template_spell_book_model_open",
+      "parent": "aether_spellbooks:item/template_spell_book_open",
       "textures": {
         "book": "aether_spellbooks:item/spell_book_models/slider_codex",
         "particle": "aether_spellbooks:item/spell_book_models/slider_codex"

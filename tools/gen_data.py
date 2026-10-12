@@ -321,16 +321,19 @@ def optional_pack():
 
 
 def assets():
+    import build_spellbook_models
     a = f"assets/{NS}"
+    for suffix, model in zip(("", "_open"), build_spellbook_models.models()):
+        w(f"{a}/models/item/template_spell_book{suffix}.json", model)
     for book in ["slider_codex", "valkyrie_grimoire", "solar_codex"]:
         tex = {"book": f"{NS}:item/spell_book_models/{book}", "particle": f"{NS}:item/spell_book_models/{book}"}
         w(f"{a}/models/item/{book}.json", {
             "parent": "minecraft:item/handheld",
             "loader": "forge:separate_transforms",
-            "base": {"parent": "irons_spellbooks:item/template_spell_book_model", "textures": tex},
+            "base": {"parent": f"{NS}:item/template_spell_book", "textures": tex},
             "perspectives": {
                 "gui": {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{book}"}},
-                "head": {"parent": "irons_spellbooks:item/template_spell_book_model_open", "textures": tex}}})
+                "head": {"parent": f"{NS}:item/template_spell_book_open", "textures": tex}}})
     for item in ["ambrosium_ring", "zanite_focus_pendant", "gravitite_casting_gloves", "valkyrie_mantle"]:
         w(f"{a}/models/item/{item}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}})
     for item in [f"{mage}_{piece}" for mage in MAGE_SETS for piece in ARMOR_PIECES] + [TEMPLATE]:

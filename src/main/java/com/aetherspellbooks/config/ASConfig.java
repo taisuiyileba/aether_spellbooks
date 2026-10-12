@@ -13,6 +13,10 @@ public class ASConfig {
     public static final ForgeConfigSpec.DoubleValue PENDANT_MAX_SPELL_POWER;
     public static final ForgeConfigSpec.IntValue VALKYRIE_SORCERESS_SPAWN_WEIGHT;
     public static final ForgeConfigSpec.IntValue SOLAR_ACOLYTE_SPAWN_WEIGHT;
+    public static final ForgeConfigSpec.BooleanValue THROWN_TOOLS_DAMAGE_SLIDER;
+    public static final ForgeConfigSpec.BooleanValue SPECTRAL_HAMMER_DAMAGE_SLIDER;
+    public static final ForgeConfigSpec.DoubleValue SLIDER_HAMMER_BASE_DAMAGE;
+    public static final ForgeConfigSpec.DoubleValue SLIDER_HAMMER_DAMAGE_PER_LEVEL;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -21,6 +25,21 @@ public class ASConfig {
         AETHER_EXCLUSIVE_SPELLS = builder
                 .comment("If true, spells from this mod only drop from Aether loot (dungeons, Aether mobs) and never from Iron's Spells' generic loot.")
                 .define("aetherExclusiveSpells", true);
+        builder.pop();
+
+        builder.push("sliderCompatibility");
+        THROWN_TOOLS_DAMAGE_SLIDER = builder
+                .comment("Allow Iron's Spells' Throw to damage the Slider when its projectile carries a valid mining tool.")
+                .define("thrownToolsDamageSlider", true);
+        SPECTRAL_HAMMER_DAMAGE_SLIDER = builder
+                .comment("Allow Spectral Hammer to target and strike the Slider while preserving dungeon restrictions.")
+                .define("spectralHammerDamageSlider", true);
+        SLIDER_HAMMER_BASE_DAMAGE = builder
+                .comment("Level-one Spectral Hammer damage to the Slider, before spell power and resistance.")
+                .defineInRange("hammerBaseDamage", 6.0, 0.0, 100.0);
+        SLIDER_HAMMER_DAMAGE_PER_LEVEL = builder
+                .comment("Additional Slider damage for each Spectral Hammer level after the first.")
+                .defineInRange("hammerDamagePerLevel", 2.0, 0.0, 100.0);
         builder.pop();
 
         builder.push("spells");
@@ -71,5 +90,21 @@ public class ASConfig {
     public static boolean aetherExclusive() {
         // Config may be queried before it is loaded (e.g. during registry scans); default to exclusive.
         return !SPEC.isLoaded() || AETHER_EXCLUSIVE_SPELLS.get();
+    }
+
+    public static boolean thrownToolsDamageSlider() {
+        return !SPEC.isLoaded() || THROWN_TOOLS_DAMAGE_SLIDER.get();
+    }
+
+    public static boolean spectralHammerDamageSlider() {
+        return !SPEC.isLoaded() || SPECTRAL_HAMMER_DAMAGE_SLIDER.get();
+    }
+
+    public static double sliderHammerBaseDamage() {
+        return SPEC.isLoaded() ? SLIDER_HAMMER_BASE_DAMAGE.get() : SLIDER_HAMMER_BASE_DAMAGE.getDefault();
+    }
+
+    public static double sliderHammerDamagePerLevel() {
+        return SPEC.isLoaded() ? SLIDER_HAMMER_DAMAGE_PER_LEVEL.get() : SLIDER_HAMMER_DAMAGE_PER_LEVEL.getDefault();
     }
 }
