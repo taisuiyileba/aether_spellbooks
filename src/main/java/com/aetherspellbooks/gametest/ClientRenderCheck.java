@@ -39,7 +39,7 @@ import java.util.UUID;
 
 /**
  * Development-only visual check (excluded from the jar). With the environment variable ASB_RENDER_CHECK set to
- * "mobs" (or "1"), "armor", "weapons", "items", "spells" or "shrines", the client creates a flat world, sets up that scene, saves screenshots
+ * "mobs" (or "1"), "armor", "weapons", "items", "books", "spells", "shrines" or "slider", the client creates a flat world, sets up that scene, saves screenshots
  * (run/screenshots/asb_*.png) and quits.
  */
 @EventBusSubscriber(modid = AetherSpellbooks.MODID, value = Dist.CLIENT)
@@ -147,8 +147,13 @@ public class ClientRenderCheck {
             commands.addAll(List.of("kill @e[type=minecraft:armor_stand]", "kill @e[type=minecraft:item_frame]", "kill @e[type=minecraft:item]", "clear @p"));
             commands.add("fill " + (bx - 7) + " " + by + " " + (bz - 4) + " " + (bx + 7) + " " + (by + 4) + " " + (bz - 4) + " minecraft:smooth_quartz");
             commands.add("fill " + (bx + 2) + " " + (by - 1) + " " + (bz - 2) + " " + (bx + 5) + " " + (by - 1) + " " + (bz + 1) + " minecraft:water");
+        } else if ("slider".equals(SCENE)) {
+            // The moving hammer is captured from two views by SliderRenderCheck.
         } else if ("shrines".equals(SCENE)) {
             // the shrines are placed or found per shot
+        } else if ("books".equals(SCENE)) {
+            commands.add("clear @p");
+            commands.add("effect give @p minecraft:night_vision infinite 0 true");
         } else if ("items".equals(SCENE)) {
             // inventory icons only
         } else if ("armor".equals(SCENE)) {
@@ -165,6 +170,21 @@ public class ClientRenderCheck {
     }
 
     private static List<Shot> sceneShots() {
+        if ("books".equals(SCENE)) {
+            List<Shot> result = new ArrayList<>();
+            for (String book : BookModelRenderCheck.BOOKS) {
+                for (boolean left : new boolean[]{false, true}) {
+                    result.add(new Shot("asb_books_" + book + (left ? "_left" : "_right"), new Vec3(0, 0, 5),
+                            180, 16, CameraType.FIRST_PERSON,
+                            List.of("clear @p", "item replace entity @p weapon." + (left ? "offhand" : "mainhand")
+                                    + " with aether_spellbooks:" + book), Mode.HAND));
+                }
+                result.add(new Shot("asb_books_" + book + "_thirdperson", new Vec3(0, 0, 5),
+                        180, 10, CameraType.THIRD_PERSON_FRONT,
+                        List.of("clear @p", "item replace entity @p weapon.mainhand with aether_spellbooks:" + book)));
+            }
+            return result;
+        }
         if ("weapons".equals(SCENE)) {
             List<String> give = new ArrayList<>(List.of("clear @p"));
             for (String item : STAFFS) {
@@ -310,6 +330,16 @@ public class ClientRenderCheck {
             return;
         }
         int shot = stage - 2;
+        if ("books".equals(SCENE) && !BookModelRenderCheck.tick(mc, timer)) {
+            // The comparison screen owns the first 116 ticks, then hand shots
+            // resume through the existing world-camera workflow.
+            if (timer >= 116) timer = 0;
+            return;
+        }
+        if ("slider".equals(SCENE)) {
+            SliderRenderCheck.tick(mc, server, origin, timer);
+            return;
+        }
         if ("shrines".equals(SCENE)) {
             if (shot < SHRINE_SHOTS.size()) {
                 shrineShot(mc, server, SHRINE_SHOTS.get(shot));

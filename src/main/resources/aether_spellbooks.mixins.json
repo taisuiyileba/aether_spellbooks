@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.aetherspellbooks.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "SliderMixin",
+    "ThrowSpellMixin",
+    "SpectralHammerSpellMixin",
+    "SpectralHammerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

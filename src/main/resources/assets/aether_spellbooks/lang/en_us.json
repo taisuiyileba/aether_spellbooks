@@ -1,4 +1,5 @@
 {
+  "ui.aether_spellbooks.slider_damage": "Slider Damage: %s (aim directly at the Slider)",
   "itemGroup.aether_spellbooks": "Aether Spellbooks",
   "item.aether_spellbooks.slider_codex": "Slider's Codex",
   "item.aether_spellbooks.valkyrie_grimoire": "Valkyrie Grimoire",
