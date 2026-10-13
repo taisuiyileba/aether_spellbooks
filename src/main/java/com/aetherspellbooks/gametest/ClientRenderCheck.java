@@ -100,32 +100,40 @@ public class ClientRenderCheck {
             new ShrineShot("asb_shrine_aether_solar_altar", "solar_altar", true, 0),
             new ShrineShot("asb_shrine_aether_solar_altar_near", "solar_altar", true, 0));
     private static int[] shrineChunk;
-    private static final String[] SPELL_ENTITIES = {"radiant_javelin", "storm_cloud", "storm_bolt", "spectral_aerwhale", "icestone_meteor"};
+    private static final String[] SPELL_ENTITIES = {"radiant_javelin", "storm_cloud", "storm_bolt", "spectral_aerwhale", "icestone_meteor",
+            "thunder_crystal", "zephyr_orb", "solar_orb", "solar_bolt"};
 
     private static final String[] STAFFS = {"zanite_staff", "aercloud_staff", "gravitite_staff", "valkyrie_scepter", "solar_scepter"};
     private static final String[] BLADES = {"sunfire_spellblade", "stormcaller_spellblade", "hallowed_spellblade", "sanguine_spellblade"};
 
     private static final String[] ICONS = {
-            "aether_spellbooks:slider_codex", "aether_spellbooks:valkyrie_grimoire", "aether_spellbooks:solar_codex",
-            "irons_spellbooks:gold_spell_book", "irons_spellbooks:diamond_spell_book", "irons_spellbooks:blaze_spell_book",
-            "aether_spellbooks:zanite_focus_pendant", "aether:zanite_pendant", "aether:golden_pendant",
+            "aether_spellbooks:zanite_staff", "aether_spellbooks:aercloud_staff", "aether_spellbooks:gravitite_staff",
+            "aether_spellbooks:valkyrie_scepter", "aether_spellbooks:solar_scepter", "aether_spellbooks:sunfire_spellblade",
+            "aether_spellbooks:stormcaller_spellblade", "aether_spellbooks:hallowed_spellblade", "aether_spellbooks:sanguine_spellblade",
             "aether_spellbooks:valkyrie_mage_helmet", "aether_spellbooks:valkyrie_mage_chestplate", "aether_spellbooks:valkyrie_mage_leggings",
             "aether_spellbooks:valkyrie_mage_boots", "aether:valkyrie_helmet", "aether:valkyrie_chestplate", "aether:valkyrie_leggings",
             "aether:valkyrie_boots", "minecraft:iron_boots",
             "aether_spellbooks:phoenix_mage_helmet", "aether_spellbooks:phoenix_mage_chestplate", "aether_spellbooks:phoenix_mage_leggings",
             "aether_spellbooks:phoenix_mage_boots", "aether:phoenix_helmet", "aether:phoenix_chestplate", "aether:phoenix_leggings",
             "aether:phoenix_boots", "minecraft:diamond_boots",
-            "aether_spellbooks:gravitite_casting_gloves", "aether:gravitite_gloves", "aether:zanite_gloves",
-            "aether_spellbooks:aether_arcane_upgrade_smithing_template", "minecraft:netherite_upgrade_smithing_template",
-            "minecraft:ward_armor_trim_smithing_template"};
+            "aether_spellbooks:zanite_focus_pendant", "aether:zanite_pendant", "aether_spellbooks:ambrosium_ring",
+            "aether:golden_ring", "aether_spellbooks:gravitite_casting_gloves", "aether:gravitite_gloves",
+            "aether_spellbooks:valkyrie_mantle", "aether:valkyrie_cape", "aether_spellbooks:aether_arcane_upgrade_smithing_template"};
 
     private static List<String> setupCommands() {
         String y = fmt(origin.y), z = fmt(origin.z);
         List<String> commands = new ArrayList<>(List.of("gamerule doDaylightCycle false", "gamerule doMobSpawning false", "time set noon", "weather clear"));
+        if ("weapons".equals(SCENE) || "armor".equals(SCENE) || "mobs".equals(SCENE) || "1".equals(SCENE)) {
+            // the world is reused between runs: remove the stands, frames, casters and worn armour the last run left behind
+            commands.addAll(List.of("kill @e[type=minecraft:armor_stand]", "kill @e[type=minecraft:item_frame]", "kill @e[type=minecraft:item]",
+                    "kill @e[type=aether_spellbooks:valkyrie_sorceress]", "kill @e[type=aether_spellbooks:solar_acolyte]", "clear @p"));
+        }
         if ("weapons".equals(SCENE)) {
             // a wall of item frames (staffs above, spellblades below) and armour stands holding them
             double wz = origin.z - 2;
             int bx = (int) Math.floor(origin.x), by = (int) Math.floor(origin.y), bz = (int) Math.floor(wz);
+            // the origin follows the player, who ends each run elsewhere: clear walls earlier runs left in front of this one
+            commands.add("fill " + (bx - 6) + " " + by + " " + (bz + 1) + " " + (bx + 6) + " " + (by + 4) + " " + (bz + 10) + " minecraft:air");
             commands.add("fill " + (bx - 5) + " " + by + " " + bz + " " + (bx + 5) + " " + (by + 3) + " " + bz + " minecraft:smooth_quartz");
             for (int i = 0; i < STAFFS.length; i++) {
                 commands.add("summon item_frame " + fmt(origin.x - 2 + i) + " " + fmt(origin.y + 2) + " " + fmt(wz + 1) + " {Facing:3b,Fixed:1b,Invisible:1b,Item:{id:\"aether_spellbooks:" + STAFFS[i] + "\",Count:1b}}");
@@ -193,19 +201,30 @@ public class ClientRenderCheck {
             for (String item : BLADES) {
                 give.add("give @p aether_spellbooks:" + item);
             }
-            return List.of(
+            List<Shot> list = new ArrayList<>(List.of(
                     new Shot("asb_weapons_wall", new Vec3(0, 0.1, 3.6), 180, 12),
                     new Shot("asb_weapons_stands", new Vec3(0, -0.4, 3.4), 180, 4),
                     new Shot("asb_weapons_thirdperson", new Vec3(0, 0, 5), 180, 5, CameraType.THIRD_PERSON_FRONT,
                             List.of("item replace entity @p weapon.mainhand with aether_spellbooks:solar_scepter",
                                     "item replace entity @p weapon.offhand with aether_spellbooks:hallowed_spellblade")),
-                    new Shot("asb_weapons_hand", new Vec3(0, 0, 5), 180, 10, CameraType.FIRST_PERSON, List.of("item replace entity @p weapon.mainhand with aether_spellbooks:solar_scepter"), Mode.HAND),
-                    new Shot("asb_weapons_inventory", new Vec3(0, 0, 5), 180, 10, CameraType.FIRST_PERSON, give, Mode.INVENTORY));
+                    new Shot("asb_weapons_hand", new Vec3(0, 0, 5), 180, 10, CameraType.FIRST_PERSON, List.of("item replace entity @p weapon.mainhand with aether_spellbooks:solar_scepter"), Mode.HAND)));
+            // every staff in first person, to judge how much of the view its head takes
+            for (String staff : STAFFS) {
+                list.add(new Shot("asb_weapons_hand_" + staff, new Vec3(0, 0, 5), 180, 10, CameraType.FIRST_PERSON,
+                        List.of("item replace entity @p weapon.offhand with minecraft:air", "item replace entity @p weapon.mainhand with aether_spellbooks:" + staff), Mode.HAND));
+            }
+            list.add(new Shot("asb_weapons_inventory", new Vec3(0, 0, 5), 180, 10, CameraType.FIRST_PERSON, give, Mode.INVENTORY));
+            return list;
         }
         if ("spells".equals(SCENE)) {
             Vec3 front = new Vec3(0, 0, 7);
             Vec3 back = new Vec3(0, 1, 12);
             return List.of(
+                    // projectile sprites and particles repainted in the 1.21.1 art pass
+                    spellShot("asb_spell_thunder_crystal", back, 6, "thunder_crystal", 3, 4),
+                    spellShot("asb_spell_zephyr_blast", back, 6, "zephyr_blast", 3, 3),
+                    spellShot("asb_spell_gravitite_surge", front, 10, "gravitite_surge", 3, 6),
+                    spellShot("asb_spell_solar_flare", front, 10, "solar_flare", 3, 32, 1, CameraType.THIRD_PERSON_FRONT),
                     spellShot("asb_spell_valkyrie_lunge", back, 4, "valkyrie_lunge", 6, 3),
                     // level 1 chains two dashes: the second ends in the Valkyrie's Verdict shockwave
                     spellShot("asb_spell_valkyrie_lunge_verdict", front, 4, "valkyrie_lunge", 1, 7, 2, CameraType.THIRD_PERSON_BACK),

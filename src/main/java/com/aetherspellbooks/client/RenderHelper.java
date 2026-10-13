@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 /**
@@ -24,13 +23,14 @@ public final class RenderHelper {
 
     private static void vertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float u, float v, int r, int g, int b, int a) {
         Matrix4f poseMatrix = pose.pose();
-        Matrix3f normalMatrix = pose.normal();
+        // an untransformed world-up normal: lit render types (entityTranslucentEmissive) then get full diffuse light
+        // whichever way the billboard has been turned towards the camera, instead of dimming with the view angle
         consumer.addVertex(poseMatrix, x, y, 0f)
                 .setColor(r, g, b, a)
                 .setUv(u, v)
                 .setOverlay(OverlayTexture.NO_OVERLAY)
                 .setLight(LightTexture.FULL_BRIGHT)
-                .setNormal(pose, 0f, 1f, 0f);
+                .setNormal(0f, 1f, 0f);
     }
 
     /**

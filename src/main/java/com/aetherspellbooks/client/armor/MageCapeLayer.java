@@ -11,9 +11,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import software.bernie.geckolib.cache.texture.AnimatableTexture;
 
 /**
  * The cape of a mage chestplate. It swings like the vanilla cape (same cloak physics) but hangs just behind
@@ -55,7 +57,11 @@ public class MageCapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         poseStack.mulPose(Axis.XP.rotationDegrees(6.0F + swing / 2.0F + lift));
         poseStack.mulPose(Axis.ZP.rotationDegrees(sway / 2.0F));
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - sway / 2.0F));
-        VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutoutNoCull(armor.getCapeTexture()));
+        ResourceLocation texture = armor.getCapeTexture();
+        // the capes are mcmeta-animated (phoenix hem flames, valkyrie sapphire glint); GeckoLib loads them as
+        // AnimatableTexture, which only advances when asked to
+        AnimatableTexture.setAndUpdate(texture);
+        VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutoutNoCull(texture));
         getParentModel().renderCloak(poseStack, consumer, packedLight, OverlayTexture.NO_OVERLAY);
         poseStack.popPose();
     }

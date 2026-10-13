@@ -11,10 +11,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
+import software.bernie.geckolib.cache.texture.AnimatableTexture;
 
 /**
- * A miniature sun: two counter-rotating ray layers, a pulsing white-hot core and a wide halo,
- * all additive and full-bright.
+ * A miniature sun: two counter-rotating additive ray layers and a wide additive halo around a boiling,
+ * alpha-blended core, all full-bright.
  */
 public class SolarOrbRenderer extends EntityRenderer<SolarOrb> {
     private static final ResourceLocation CORE = AetherSpellbooks.id("textures/entity/solar_core.png");
@@ -38,20 +39,23 @@ public class SolarOrbRenderer extends EntityRenderer<SolarOrb> {
         poseStack.mulPose(Axis.YP.rotationDegrees(180f));
         poseStack.scale(grow, grow, grow);
 
-        layer(poseStack, buffer, GLOW, 4.2f * pulse, 0, 255, 170, 80, 170);
-        layer(poseStack, buffer, RAYS, 3.4f, age * 1.5f, 255, 200, 90, 220);
-        layer(poseStack, buffer, RAYS, 2.6f * pulse, -age * 2.4f + 20, 255, 230, 140, 200);
-        layer(poseStack, buffer, CORE, 1.5f * pulse, age * 3f, 255, 255, 255, 255);
+        layer(poseStack, buffer, RenderType.eyes(GLOW), 4.2f * pulse, 0, 255, 170, 80, 170);
+        layer(poseStack, buffer, RenderType.eyes(RAYS), 3.4f, age * 1.5f, 255, 200, 90, 220);
+        layer(poseStack, buffer, RenderType.eyes(RAYS), 2.6f * pulse, -age * 2.4f + 20, 255, 230, 140, 200);
+        // the core is alpha blended, not additive, so the sun keeps a solid, dark-rimmed heart against the bright sky;
+        // its frames (solar_core.png.mcmeta) make it boil
+        AnimatableTexture.setAndUpdate(CORE);
+        layer(poseStack, buffer, RenderType.entityTranslucentEmissive(CORE), 1.5f * pulse, age * 3f, 255, 255, 255, 255);
 
         poseStack.popPose();
         super.render(entity, yaw, partialTicks, poseStack, buffer, light);
     }
 
-    private static void layer(PoseStack poseStack, MultiBufferSource buffer, ResourceLocation texture, float size, float spin, int r, int g, int b, int a) {
+    private static void layer(PoseStack poseStack, MultiBufferSource buffer, RenderType type, float size, float spin, int r, int g, int b, int a) {
         poseStack.pushPose();
         poseStack.scale(size, size, size);
         poseStack.mulPose(Axis.ZP.rotationDegrees(spin));
-        RenderHelper.quad(buffer.getBuffer(RenderType.eyes(texture)), poseStack.last(), r, g, b, a);
+        RenderHelper.quad(buffer.getBuffer(type), poseStack.last(), r, g, b, a);
         poseStack.popPose();
     }
 

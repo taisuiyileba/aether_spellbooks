@@ -12,9 +12,10 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
+import software.bernie.geckolib.cache.texture.AnimatableTexture;
 
 /**
- * A spinning, glowing octahedral crystal: an additive outer shell, a bright inner core and a soft halo.
+ * A glowing crystal: a camera-facing animated crystal sprite, a spinning additive octahedral core inside it and a soft halo.
  */
 public class ThunderCrystalRenderer extends EntityRenderer<ThunderCrystalProjectile> {
     private static final ResourceLocation GLOW = AetherSpellbooks.id("textures/entity/thunder_glow.png");
@@ -39,13 +40,23 @@ public class ThunderCrystalRenderer extends EntityRenderer<ThunderCrystalProject
         RenderHelper.quad(buffer.getBuffer(RenderType.eyes(GLOW)), poseStack.last(), 255, 240, 170, 190);
         poseStack.popPose();
 
-        // crystal
+        // the crystal itself: an alpha-blended sprite with a dark rim, so it still reads against the Aether's bright
+        // sky where additive light vanishes; its facet frames (thunder_crystal.png.mcmeta) make it seem to turn
+        poseStack.pushPose();
+        poseStack.mulPose(entityRenderDispatcher.cameraOrientation());
+        poseStack.mulPose(Axis.YP.rotationDegrees(180f));
+        poseStack.scale(0.8f, 0.8f, 0.8f);
+        AnimatableTexture.setAndUpdate(TEXTURE);
+        RenderHelper.quad(buffer.getBuffer(RenderType.entityTranslucentEmissive(TEXTURE)), poseStack.last(), 255, 255, 255, 255);
+        poseStack.popPose();
+
+        // a hot, spinning core of light inside it
         poseStack.mulPose(Axis.YP.rotationDegrees(age * 14f));
         poseStack.mulPose(Axis.ZP.rotationDegrees(Mth.sin(age * 0.2f) * 15f));
         VertexConsumer lightning = buffer.getBuffer(RenderType.lightning());
         var matrix = poseStack.last().pose();
-        RenderHelper.octahedron(lightning, matrix, 0.2f, 0.38f, 255, 214, 60, 150);
-        RenderHelper.octahedron(lightning, matrix, 0.1f, 0.22f, 255, 255, 230, 230);
+        RenderHelper.octahedron(lightning, matrix, 0.12f, 0.24f, 255, 214, 60, 150);
+        RenderHelper.octahedron(lightning, matrix, 0.06f, 0.14f, 255, 255, 230, 230);
         poseStack.popPose();
         super.render(entity, yaw, partialTicks, poseStack, buffer, light);
     }
