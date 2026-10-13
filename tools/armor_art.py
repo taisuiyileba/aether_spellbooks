@@ -38,7 +38,15 @@ Conventions
   cube, inflate 0.1, over the chest hem) so the leggings stay visible; no skirt over the thighs (1px hip tassets and a
   back coat-tail only); boots are 5 rows tall; no cube face is coplanar with another one (no z-fighting).
 - Wings, flame crest, plumes and ankle feathers are zero-thickness planes (as in Iron's Spells' hats). Both faces of a
-  plane are painted so every texel shows the same colour from either side.
+  plane are painted so every texel shows the same colour from either side. A single flat plane cannot face the front,
+  back and side cameras at once, so each wing / plume / ankle feather is a fan of two root-anchored leaves (xfan) with
+  the same rake and lean, 50-60 degrees apart in sweep; plane_report() scores every piece against the render-check
+  cameras (ClientRenderCheck "armor" scene) and --check fails if any piece drops below PLANE_MIN (would read as an
+  edge-on sliver, the bug of the first in-game pass).
+- GeckoLib 4.7.5.1 convention (read from BakedModelFactory$Builtin / RenderUtil / BakedAnimationsAdapter): bone pivot
+  baked as (-x, y, z), bone and cube rotation as radians(-x, -y, z), cube origin x as -(origin.x + size.x), applied
+  as PoseStack Z then Y then X; animation rotation keys get the same (-x, -y, z) and are added to the rest rotation.
+  bone_matrices() and the perspective ShotRaster use exactly this, and reproduce the in-game screenshots.
 - Each plate face gets a 1px bevel after mirroring (top/left edges one step lighter, bottom/right one step darker),
   applied only to the base tone of the listed materials, so hand-placed trims and gems are never touched.
 - Palettes: o s m l h w = main plate (dark..specular), d g G Y = gold, k b B c = cloth, p P q W = gem (rim, body, facet,
@@ -46,6 +54,7 @@ Conventions
 """
 import argparse
 import io
+import re
 import json
 import math
 from pathlib import Path
@@ -215,6 +224,25 @@ def bevel(rows, specs, face):
     return [''.join(r) for r in out]
 
 
+def xfan(root, h, d, faces, leaves, anim=None, parent='armorHead', name='helmWing'):
+    """A feathered piece as one or more zero-thickness leaves anchored at `root`: [right bones] + [left twins].
+
+    The painted map has its root at the bottom-front corner (last column, last row as seen from the wearer's
+    right), so each leaf is placed with that corner on the bone pivot and spreads up and back from it; rotating
+    the bone swings the whole leaf about its root, never through the head. `leaves` is [(rx, ry, rz), ...] in
+    Bedrock degrees for the right side (the left twin is mirrored by Bone.mirrored). Several leaves at different
+    angles keep the piece readable from cameras on every side (see plane_report).
+    """
+    px, py, pz = root
+    right = []
+    for i, rot in enumerate(leaves):
+        bone = Bone(name + ('', 'B', 'C')[i] + 'Right', parent, [px, py, pz], tuple(rot))
+        bone.cubes.append(Cube((px, py - 1, pz - 1), (0, h, d), faces=xplane(faces)))
+        bone.anim = anim
+        right.append(bone)
+    return right + [b.mirrored() for b in right]
+
+
 def xplane(rows):
     """Faces of a zero-width (YZ) plane: `rows` as seen from the wearer's right; the other face is its mirror."""
     return {'right': rows, 'left': lambda fw, fh, f: hflip(resolve(rows, fw, fh, f))}
@@ -285,6 +313,10 @@ class ArmorModel:
         self.bone(bone_name).cubes.extend(cubes)
         if mirror:
             self.bone(bone_name.replace('Right', 'Left')).cubes.extend(c.mirrored() for c in cubes)
+
+    def add_bones(self, *bones):
+        for bone in bones:
+            self.bones.append(bone)
 
     def add_bone(self, bone, mirror=False):
         self.bones.append(bone)
@@ -430,16 +462,17 @@ def flick(*maps):
 
 
 # ============================================================================ Valkyrie Mage
-VALK_WING = ['5.........',
-             '45........',
-             '445..5....',
-             '3445.45...',
-             '23445445..',
-             '.2344344.5',
-             '..2334345.',
-             '...233445.',
-             '....2dgGYg',
-             '.....ddgg.']
+VALK_WING = ['5..........',
+             '45.........',
+             '445..5.....',
+             '3445.45....',
+             '23445445...',
+             '.2344344.5.',
+             '..2334345..',
+             '...233445..',
+             '....2dgGYg.',
+             '.....ddgg..',
+             '...........']
 VALK_HEEL = ['..4.5.',
              '.43453',
              '434353',
@@ -496,9 +529,12 @@ def valkyrie_mage():
           Cube((-1, 29, -5.5), (2, 2, 1), note='brow sapphire', faces={'front': gem, 'top': 'G', 'all': 'g'}))
     m.add('armorHead', Cube((-5.5, 28.5, -1.5), (1, 2, 3), note='wing root', faces={
         'right': ['GYG', 'dgg'], 'front': ['G', 'g'], 'back': ['g', 'd'], 'top': 'Y', 'bottom': 'd', 'left': 'g'}), mirror=True)
-    m.add_bone(Bone('helmWingRight', 'armorHead', (-5.4, 29, 0), (15, -45, -8), [
-        Cube((-5.4, 28, -1.5), (0, 10, 10), note='helm wing', faces=xplane(VALK_WING))],
-        anim=sway(3.0, (1, 6, 1, 0), (0, 2.5, 2, 0.6))), mirror=True)
+    # inner leaf lies along the side of the helm (the side camera sees it head-on), outer leaf sweeps back
+    # three leaves: one lying along the helm's side, one mid, one swept right back - every camera sees one
+    # two leaves per wing, same rake and lean, 60 deg apart in sweep: a layered wing that no render-check camera
+    # sees edge-on (tuned with plane_report; a single flat plane cannot face the front, back and side at once)
+    m.add_bones(*xfan((-5.4, 28.5, -1.0), 11, 11, VALK_WING, ((-10, -20, 20), (-10, -80, 20)),
+                      anim=sway(3.0, (1, 6, 1, 0), (0, 2.5, 2, 0.6)), name='helmWing'))
 
     # ------------------------------------------------------------ chest: plate over a blue tunic, raised plastron
     m.add('armorBody',
@@ -576,9 +612,8 @@ def valkyrie_mage():
           Cube((-4, 0, -3), (4, 2, 1), 0.25, note='toe cap', faces={
               'front': ['GYYG', 'dggd'], 'top': 'Y', 'sides': 'g', 'bottom': 'd'}),
           mirror=True)
-    m.add_bone(Bone('bootWingRight', 'armorRightBoot', (-5.2, 2.5, 0.5), (0, -45, -12), [
-        Cube((-5.2, 1.5, -0.5), (0, 4, 6), note='heel wing', faces=xplane(VALK_HEEL))],
-        anim=sway(3.0, (1, 5, 2, 1.0))), mirror=True)
+    m.add_bones(*xfan((-5.2, 1.5, 0.5), 4, 6, VALK_HEEL, ((-10, -20, 20), (-10, -70, 20)),
+                      anim=sway(3.0, (1, 5, 2, 1.0)), parent='armorRightBoot', name='heelWing'))
     return m
 
 
@@ -592,11 +627,10 @@ PHX_CREST_SIDE = (['.2....', '.32.2.', '2342.3', '334323', '344543', '445554', '
                   ['2.....', '32..2.', '342.32', '334323', '344543', '445554', 'gGGYGg'],
                   ['.2..2.', '.32.3.', '23423.', '334323', '344543', '445554', 'gGGYGg'],
                   ['......', '.2..2.', '2342.3', '334323', '344543', '445554', 'gGGYGg'])
-PHX_PLUME = ['...2334455G',
-             '.12334455YG',
-             '12334445555',
-             '.123344554g',
-             '...12334...']
+PHX_PLUME = ['..12334455G',
+             '.122334455Y',
+             '1223344455G',
+             '..123344.gg']
 PHX_ANKLE = ['..3.4.',
              '.34453',
              '343453',
@@ -639,9 +673,8 @@ def phoenix_mage():
         Cube((-3.5, 32.5, -1.5), (7, 7, 0), note='flame crest', faces=zplane(flick(*PHX_CREST))),
         Cube((0, 32.5, -2.5), (0, 7, 6), note='flame crest (side)', faces=xplane(flick(*PHX_CREST_SIDE)))],  # noqa
         anim=sway(3.6, (0, 4, 2, 0), (2, 2, 3, 0.4))))
-    m.add_bone(Bone('plumeRight', 'armorHead', (-2.5, 32, 4), (10, -45, 6), [
-        Cube((-2.5, 30, 3.5), (0, 5, 11), note='tail plume', faces=xplane(PHX_PLUME))],
-        anim=sway(3.6, (0, 6, 1, 0.6), (1, 3, 2, 0))), mirror=True)
+    m.add_bones(*xfan((-3.0, 32.5, 3.5), 4, 11, PHX_PLUME, ((-30, -20, -20), (-30, -80, -20)),
+                      anim=sway(3.6, (0, 6, 1, 0.6), (1, 3, 2, 0)), name='plume'))
     # ------------------------------------------------------------ chest: crimson plate with a gold phoenix, opal heart
     m.add('armorBody',
           Cube((-4, 12, -2), (8, 12, 4), 1.01, bevel=PLATE_P, note='breastplate', faces={
@@ -706,9 +739,8 @@ def phoenix_mage():
           Cube((-4, 0, -3), (4, 2, 1), 0.25, note='toe cap', faces={
               'front': ['GYYG', 'dggd'], 'top': 'Y', 'sides': 'g', 'bottom': 'd'}),
           mirror=True)
-    m.add_bone(Bone('bootFeatherRight', 'armorRightBoot', (-5.2, 2.5, 0.5), (0, -45, -12), [
-        Cube((-5.2, 1.5, -0.5), (0, 4, 6), note='ankle feather', faces=xplane(PHX_ANKLE))],
-        anim=sway(3.6, (1, 5, 2, 0))), mirror=True)
+    m.add_bones(*xfan((-5.2, 1.5, 0.5), 4, 6, PHX_ANKLE, ((-20, -10, 10), (-20, -70, 10)),
+                      anim=sway(3.6, (1, 5, 2, 0)), parent='armorRightBoot', name='ankleFeather'))
     return m
 
 
@@ -1281,53 +1313,6 @@ def draw_stand(r, model, atlas, stand, pose=None):
                        m4[:3, :3] @ np.array(ex, float), m4[:3, :3] @ np.array(ey, float), mc_light(N, c.size))
 
 
-# ClientRenderCheck "armor" scene: stands at origin.x -/+ 1.2, camera = origin + offset (+1.62 eye height)
-CHECK_SHOTS = [('asb_armor_front', (0, 0.3, 3.4), 180, 6), ('asb_armor_back', (0, 0.5, -3.4), 0, 8),
-               ('asb_armor_side', (3.6, 0.6, 0), 90, 8)]
-# every flat piece (wings, plumes, crest, ankle feathers) must face the camera well enough in all three shots
-PLANE_MIN = 0.55
-
-
-def plane_report(models, verbose=True):
-    """Worst |cos| between each zero-thickness piece and the camera it is seen from in the render-check shots.
-    Near 0 means that piece is edge-on (a sliver) from that camera. Returns the smallest value found."""
-    rot = np.diag([-1.0, 1.0, -1.0])
-    worst = 1.0
-    for model, _ in models:
-        mats = bone_matrices(model.bones)
-        for bone in model.bones:
-            axes = [np.array([1, 0, 0] if c.size[0] == 0 else [0, 0, 1], float) for c in bone.cubes if 0 in c.size]
-            if not axes or not any(bone.rotation):
-                continue
-            for name, off, yaw, pitch in CHECK_SHOTS:
-                stand = 1.2 if 'Right' in bone.name else -1.2      # phoenix stand is at +x, valkyrie at -x
-                view = np.array([off[0] - stand, off[1] + 1.62, off[2]], np.float64)
-                view /= np.linalg.norm(view)
-                for ax in axes:
-                    n = rot @ (mats[bone.name][:3, :3] @ ax)
-                    n /= np.linalg.norm(n)
-                    c = abs(float(n @ view))
-                    worst = min(worst, c)
-                    if verbose and c < PLANE_MIN:
-                        print(f'  ! {model.name}.{bone.name} is {math.degrees(math.acos(min(1, c))):.0f} deg off '
-                              f'face-on in {name} ({c:.2f})')
-    if verbose:
-        print(f'  plane visibility: worst |cos| = {worst:.2f} (want >= {PLANE_MIN:.2f})')
-    return worst
-
-
-def ingame_shots(models, scale=0.5):
-    w, h = int(854 * scale), int(480 * scale)
-    sheet = Image.new('RGB', (w * len(CHECK_SHOTS), h + 16), (30, 32, 38))
-    for i, (name, off, yaw, pitch) in enumerate(CHECK_SHOTS):
-        r = ShotRaster(w, h, (off[0], off[1] + 1.62, off[2]), yaw, pitch)
-        for (model, frames_), x in zip(models, (-1.2, 1.2)):
-            draw_stand(r, model, frames_[0], (x, 0.0, 0.0))
-        sheet.paste(r.image(), (i * w, 16))
-        ImageDraw.Draw(sheet).text((i * w + 4, 2), name + ' (predicted)', fill=(255, 255, 255))
-    return sheet
-
-
 ICON_REFS = {'valkyrie_mage': [('aether valkyrie', 'aether/assets/aether/textures/item/armor/valkyrie_{}.png'),
                                ('iss priest', 'iss/assets/irons_spellbooks/textures/item/priest_{}.png')],
              'phoenix_mage': [('aether phoenix', 'aether/assets/aether/textures/item/armor/phoenix_{}.png'),
@@ -1356,19 +1341,95 @@ def icon_sheet(icon_imgs):
         d.text((6, i * cell + 60), lab, fill=(0, 0, 0))
         for j, im in enumerate(imgs):
             sheet.alpha_composite(im.resize((16 * s, 16 * s), Image.NEAREST), (150 + j * cell, i * cell + 4))
-    # inventory strip: slots like the vanilla GUI, 1x and 2x
     y0 = cell * len(rows) + 8
     for k, scale in enumerate((1, 2)):
         x = 150
         for set_ in ICON_REFS:
-            for p in PIECES:
+            for p_ in PIECES:
                 slot = Image.new('RGBA', (18 * scale, 18 * scale), (55, 55, 55, 255))
                 slot.paste((139, 139, 139, 255), (scale, scale, 18 * scale, 18 * scale))
-                slot.alpha_composite(icon_imgs[f'{set_}_{p}'][0][0].resize((16 * scale, 16 * scale), Image.NEAREST), (scale, scale))
+                slot.alpha_composite(icon_imgs[f'{set_}_{p_}'][0][0].resize((16 * scale, 16 * scale), Image.NEAREST), (scale, scale))
                 sheet.alpha_composite(slot, (x, y0 + k * 30))
                 x += 18 * scale + 2
     d.text((6, y0 + 4), 'inventory 1x / 2x', fill=(0, 0, 0))
     return sheet
+
+
+def ingame_shots(models, w=854, h=480):
+    """The three render-check "armor" cameras, so a preview can be compared with a real screenshot."""
+    sheet = Image.new('RGB', (w * len(CHECK_SHOTS), h + 16), (30, 32, 38))
+    for i, (name, off, yaw, pitch) in enumerate(CHECK_SHOTS):
+        r = ShotRaster(w, h, (off[0], off[1] + 1.62, off[2]), yaw, pitch)
+        for (model, frames_), x in zip(models, (-1.2, 1.2)):
+            draw_stand(r, model, frames_[0], (x, 0.0, 0.0))
+        sheet.paste(r.image(), (i * w, 16))
+        ImageDraw.Draw(sheet).text((i * w + 4, 2), name, fill=(255, 255, 255))
+    return sheet
+
+
+# ClientRenderCheck "armor" scene: stands at origin.x -/+ 1.2, camera = origin + offset (+1.62 eye height)
+CHECK_SHOTS = [('asb_armor_front', (0, 0.3, 3.4), 180, 6), ('asb_armor_back', (0, 0.5, -3.4), 0, 8),
+               ('asb_armor_side', (3.6, 0.6, 0), 90, 8)]
+# every flat piece (wings, plumes, crest, ankle feathers) must face the camera well enough in all three shots
+PLANE_MIN = 0.55
+
+
+# the stand each set is shown on in ClientRenderCheck's "armor" scene
+STAND_X = {'valkyrie_mage': -1.2, 'phoenix_mage': 1.2}
+
+
+def leaf_geometry(model, stand):
+    """World-space (normal, centre, corners) of every zero-thickness cube, via the preview renderer's transforms
+    (bone_matrices + to_world), which reproduce the in-game screenshots."""
+    mats = bone_matrices(model.bones)
+    out = {}
+    for b in model.bones:
+        for c in b.cubes:
+            if 0 not in c.size:
+                continue
+            m4 = to_world((stand, 0.0, 0.0), mats[b.name])
+            (x, y, z), (w, h, d) = c.origin, c.size
+            x0 = -(x + w)
+            corners = [np.array([x0 + i * w, y + j * h, z + k * d], float) for i in (0, 1) for j in (0, 1) for k in (0, 1)]
+            corners = [m4[:3, :3] @ q + m4[:3, 3] for q in corners]
+            axis = np.array([1.0, 0, 0]) if w == 0 else np.array([0, 0, 1.0])
+            n = m4[:3, :3] @ axis
+            out.setdefault(b.name, []).append((n / np.linalg.norm(n), sum(corners) / len(corners), corners))
+    return out
+
+
+def plane_report(models, verbose=True):
+    """Worst |cos| between each flat feathered piece and each render-check camera, from true world positions.
+
+    Pieces are grouped as fans (helmWing + helmWingB + ... on one side); a camera is satisfied when some leaf of
+    the fan faces it at a decent angle. A value near 0 is the in-game bug this guards against: one of a mirrored
+    pair seen edge-on as a sliver.
+    """
+    worst, rows = 1.0, []
+    for model, _ in models:
+        stand = STAND_X[model.name]
+        geo = leaf_geometry(model, stand)
+        fans = {}
+        for name, leaves in geo.items():
+            key = re.sub('[BC]?(Right|Left)$', r' \1', name)
+            fans.setdefault(key, []).extend(leaves)
+        for key, leaves in sorted(fans.items()):
+            seen = []
+            for shot, off, yaw, pitch in CHECK_SHOTS:
+                cam = np.array([off[0], off[1] + 1.62, off[2]], float)
+                best = 0.0
+                for n, centre, _ in leaves:
+                    v = cam - centre
+                    best = max(best, abs(float(n @ (v / np.linalg.norm(v)))))
+                seen.append((shot.replace('asb_armor_', ''), best))
+            lo = min(c for _, c in seen)
+            worst = min(worst, lo)
+            rows.append(('  ! ' if lo < PLANE_MIN else '    ') + f'{model.name}.{key}: ' +
+                        ' '.join(f'{n} {c:.2f}' for n, c in seen))
+    if verbose:
+        print('\n'.join(rows))
+        print(f'  plane visibility: worst |cos| = {worst:.2f} (want >= {PLANE_MIN:.2f})')
+    return worst
 
 
 def previews(models, capes, icon_imgs):
@@ -1421,7 +1482,7 @@ def previews(models, capes, icon_imgs):
         capesheet.alpha_composite(strip.resize((64 * 4, strip.height * 4), Image.NEAREST), (i * (64 * 4 + 20), 0))
     capesheet.save(PREVIEW / 'capes.png')
     icon_sheet(icon_imgs).save(PREVIEW / 'icons.png')
-    ingame_shots(models, 1.0).save(PREVIEW / 'ingame_shots_predicted.png')
+    ingame_shots(models, 427, 240).save(PREVIEW / "ingame_shots_predicted.png")
     anim = [(n, fr) for n, (fr, meta) in icon_imgs.items() if meta]
     strip = Image.new('RGBA', (16 * 8 * 8 + 160, len(anim) * 136), (139, 139, 139, 255))
     d = ImageDraw.Draw(strip)
@@ -1509,6 +1570,9 @@ def main():
         for rel in STALE:
             if rel not in out and (ASSETS / rel).exists():
                 bad.append(f'stale {rel}')
+        vis = plane_report(built, verbose=False)
+        if vis < PLANE_MIN:
+            bad.append(f'a flat piece is near edge-on from a render-check camera (|cos| {vis:.2f} < {PLANE_MIN})')
         print('\n'.join(bad) if bad else f'OK: {len(out)} files match')
         raise SystemExit(1 if bad else 0)
     for rel, data in ([] if args.dry else out.items()):
