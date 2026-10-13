@@ -21,7 +21,9 @@ Conventions followed (only silhouettes and composition are shared with the host 
   * ring: Aether ring layout (round band seen at a slight angle) with the gem set on its upper left, the way
     Iron's Spells' gem rings carry theirs.
   * pendant: Aether pendant layout - chain loop drawn towards the gem at the bottom right.
-  * gloves: Aether gloves layout - two mitts overlapping on the diagonal, wrists/cuffs bottom-left.
+  * gloves: one caster gauntlet for a single hand (the Aether gloves are a PAIR of mitts, so we deliberately do
+    not copy their composition): cuffed sleeve mouth with the gold strap and gem, hem line, back of the hand,
+    then four digits. Verified apart from theirs by an alpha-mask IoU check (see GLOVE_IOU_TARGET).
   * mantle: Aether cape icon layout - collar on top, cloth widening to a hem.
   * template: vanilla smithing template layout - upright stone tablet with a motif.
   * empty_slot_rune: vanilla empty-slot ghost style - one 1px #555555 line drawing, everything else transparent.
@@ -292,55 +294,72 @@ ZANITE_FOCUS_PENDANT = {  # gold chain loop towards a faceted zanite focus cryst
     },
 }
 
-GRAVITITE_CASTING_GLOVES = {  # gravitite mitts, gold cuffs, glowing algiz rune on the back of the front hand
+GRAVITITE_CASTING_GLOVES = {  # ONE caster gauntlet for one hand (the Aether glove icons are a PAIR of mitts).
+    # Reads top-down: a cuffed sleeve mouth (rows 1-3) with the gold trim strap and the gravitite focus gem set
+    # into it, a dark hem line under the cuff (row 4), then the back of the hand (rows 5-9) which steps out past
+    # the cuff on the thumb side, and finally four digits (rows 10-14) hanging from the knuckle line - index and
+    # middle 2px and longest, ring shorter, pinky narrowest - each divided from its neighbour by an outline column.
+    # Composition note: the Aether glove icons all share ONE silhouette - a rounded diamond with no cuff, no
+    # wrist and no digits, widest across rows 7-9. This one reads as an actual gauntlet instead (cuff / hem /
+    # knuckles / four digits), which both differentiates it and is what makes it legible at 1x in a slot. The
+    # alpha-mask IoU against the reference icons is printed by every run and by --check.
     'rows': [
         "................",
-        "......PPP.......",
-        ".....P564O......",
-        "....P55433OPP...",
-        "...P45432O554O..",
-        "..P444322O5543O.",
-        "..P43321O55443O.",
-        ".Pd3221O4R4R32O.",
-        ".P1c21O443R332O.",
-        "..O1bO3433Q321O.",
-        "...OOd33322221O.",
-        "....P1c32211OO..",
-        ".....O1c211O....",
-        "......O1bOO.....",
-        ".......OO.......",
+        "..OOOOOOOOOOO...",
+        ".O66665555443...",
+        ".O655554444b43..",
+        ".OObbbbbbbdjjO..",
+        "OO6665544432O...",
+        "OO6555544432O...",
+        "O65555444432O...",
+        "O65555444432O...",
+        "O5555444432O....",
+        "OO55O55O44O4O...",
+        ".O55O55O44O4O...",
+        ".O44O44O33O3O...",
+        ".O33O33O22O2O...",
+        ".O22O22O11O1O...",
         "................",
     ],
     'pal': {
-        'O': '#2a0828', 'P': '#6a1e64', '1': '#561852', '2': '#842a7e', '3': '#b0409c', '4': '#d866c4', '5': '#f6a0e6',
-        '6': '#ffe0fa', 'b': '#a86c18', 'c': '#e0a830', 'd': '#ffe080',
-        'Q': '#2ab8e0', 'R': '#bff8ff', 'S': '#7ee8ff', 'W': '#ffffff',
+        'O': '#22081e',                                                   # outline, darkest magenta (never black)
+        '1': '#45103f', '2': '#7c2274', '3': '#ab34a0', '4': '#d25ac4',   # plate ramp, dark -> light
+        '5': '#ec90dd', '6': '#ffc8f4',
+        'b': '#a46414', 'c': '#dc9c24', 'd': '#ffd468',                   # gold trim strap
+        'g': '#3a0c34', 'i': '#c040b0', 'j': '#f070e0', 'w': '#ffffff',   # gem: rim, body, lit facet, glint
+        'Q': '#2ab8e0', 'R': '#bff8ff', 'S': '#7ee8ff', 'W': '#ffffff',   # cyan rune glow / halo
     },
 }
 
-VALKYRIE_MANTLE = {  # white valkyrie mantle, gold collar with a sapphire clasp, gold wing emblem, gold/blue hem
+VALKYRIE_MANTLE = {  # valkyrie shoulder mantle: a skirted pauldron-cape worn OVER the shoulders, not a neck-hung cape.
+    # Widest at the SHOULDERS (14 px across rows 4-7 incl. the gold epaulettes), never at the hem (8 px), so the
+    # silhouette is the inverse of the Aether capes (which flare downward, widest at the hem). Reads top-down: a tall
+    # standing fur collar (K/k), gold-edged shoulder wings that step out and down, a faceted zanite chest clasp in the
+    # gold collar band, then a short feather-skirted body carrying three gold feather courses to a fringed hem.
+    # Left lit, right in shade; outline is the darkest tone of the local material (A on gold, K on fur, b on cloth).
     'rows': [
         "................",
-        ".....AAAAAA.....",
-        "....AcdZzdcA....",
-        "....AbcyxcbA....",
-        "....kWWvWvuK....",
-        "...kWWWvWWvuK...",
-        "...kWcWvWWcuK...",
-        "...kWbcvWcbuK...",
-        "..kWWWbyybvutK..",
-        "..kWvWWxxWvutK..",
-        "..kWvWWvWWvutK..",
-        ".kWWvWWvWWvuvtK.",
-        ".kWWvWWvWvvuvtK.",
-        ".AcdccdcccccbaA.",
-        ".XzyXzyXzyXzyxX.",
-        "..XX.XX.XX.XXX..",
+        ".....AKKKKA.....",
+        "....AKkkkkKA....",
+        "..AAbWwWWvWbAA..",
+        ".AcdbWwWkZZkWvbA",
+        "AcdbWwWkxxkWvbAb",
+        ".AcdbWwWWWWvbdA.",
+        "..AbvWwWWWWvWbA.",
+        "...AvWwWWWWvA...",
+        "....AvWWWuvA....",
+        "....AbWWuutbA...",
+        ".....AWWWWA.....",
+        ".....AvWWvA.....",
+        ".....AcddcA.....",
+        ".....AcddcA.....",
+        "......b..b......",
     ],
     'pal': {
         'K': '#3a4258', 'k': '#5c6680', 'W': '#ffffff', 'w': '#eef2fa', 'v': '#d2daea', 'u': '#a8b2ca', 't': '#7c86a2',
         'A': '#5a3a0a', 'a': '#9a6414', 'b': '#cc9028', 'c': '#f0c048', 'd': '#fff0a0', 'e': '#ffffff',
         'X': '#14245e', 'x': '#1e3a8a', 'y': '#2f64c8', 'z': '#6aa6f0', 'Z': '#c4e4ff',
+        'O': '#5c6680', 'G': '#c8f4ff',
     },
 }
 
@@ -415,11 +434,13 @@ def pendant_frames():
 
 
 def gloves_frames():
-    rune = [(9, 7), (11, 7), (10, 8)]
-    stem = [(10, 9)]
-    halo = [(10, 7), (9, 8), (11, 8), (9, 9), (11, 9)]
-    up1 = {p: 'W' for p in rune} | {p: 'R' for p in stem}
-    up2 = up1 | {p: 'S' for p in halo}
+    # A cyan rune sigil etched across the back of the hand, pulsing outward from the wrist end of the hand
+    # (the glow pips, then the whole sigil, then a dimmer tail) before it settles back down.
+    sigil = [(3, 6), (6, 6), (4, 7), (7, 7), (5, 8)]
+    tail = [(4, 6), (5, 7), (6, 7)]
+    halo = [(2, 6), (8, 6), (2, 7), (8, 7), (4, 8), (7, 8)]
+    up1 = {p: 'R' for p in sigil} | {p: 'S' for p in tail}
+    up2 = {p: 'W' for p in sigil} | {p: 'R' for p in tail} | {p: 'Q' for p in halo}
     frames, timing = glint_frames(GRAVITITE_CASTING_GLOVES['rows'], [up1, up2, up2, up1], 44)
     timing[2]['time'] = 3
     timing[3]['time'] = 3
@@ -435,15 +456,22 @@ def template_frames():
 
 
 def mantle_frames():
-    hem = [(x, 12) for x in range(2, 14)]
+    """A golden glint runs along the gold hem: left-to-right across the upper hem course (row 13), then back
+    right-to-left along the lower one (row 14), so it reads as one sweep wrapping the fringe.
+    Only texels that are already gold in the resting frame are recoloured, so the alpha silhouette is identical in
+    every frame (the frame builder asserts this) and no colour outside the palette is ever introduced
+    ('e' is the glint white, 'd'/'c' the light/dark gold the hem already uses)."""
+    hem = [(x, 13) for x in range(6, 10)] + [(x, 14) for x in range(9, 5, -1)]
     steps = []
-    for head in range(0, len(hem) + 1, 2):
+    for head in range(len(hem) + 1):
         ch = {}
         for i, p in enumerate(hem):
-            if head - 1 <= i <= head:
+            if i == head:
                 ch[p] = 'e'
-            elif i == head - 2 or i == head + 1:
+            elif i in (head - 1, head + 1):
                 ch[p] = 'd'
+            elif i == head - 2 or i == head + 2:
+                ch[p] = 'c'
         steps.append(ch)
     frames = [VALKYRIE_MANTLE['rows']] + [apply(VALKYRIE_MANTLE['rows'], s) for s in steps]
     timing = [{'index': 0, 'time': 90}] + [{'index': i, 'time': 1} for i in range(1, len(frames))]
@@ -605,12 +633,104 @@ def write_previews(built):
         gif[0].save(PREVIEW / f'anim_{n}.gif', save_all=True, append_images=gif[1:], duration=durs, loop=0, disposal=1)
 
 
+# =====================================================================================================================
+# silhouette-IoU helpers (shared by the two mask checks below: the mantle vs the Aether capes, the gauntlet vs gloves)
+# =====================================================================================================================
+
+
+def icon_alpha_mask(im):
+    """-> list of 16 bytearrays (one per row) holding the icon's alpha coverage, 1 = opaque."""
+    a = im.getchannel('A').tobytes()
+    return [bytearray(1 if a[y * im.width + x] else 0 for x in range(16)) for y in range(16)]
+
+
+def icon_mask_iou(m1, m2):
+    """Intersection over union of two 16x16 alpha masks in row-of-bytearrays form."""
+    inter = union = 0
+    for r1, r2 in zip(m1, m2):
+        for v1, v2 in zip(r1, r2):
+            if v1 or v2:
+                union += 1
+                if v1 and v2:
+                    inter += 1
+    return inter / union if union else 0.0
+
+
+def icon_iou_against(icon_im, ref_dir, names):
+    """-> list of (name, iou) for every reference icon found. Compares 16x16 alpha masks."""
+    ours, out = icon_alpha_mask(icon_im), []
+    for name in names:
+        p = Path(ref_dir) / f'{name}.png'
+        if not p.exists():
+            out.append((name, None))
+            continue
+        out.append((name, icon_mask_iou(ours, icon_alpha_mask(Image.open(p).convert('RGBA').crop((0, 0, 16, 16))))))
+    return out
+
+
+# =====================================================================================================================
+# valkyrie_mantle silhouette check (self-contained; does not touch any other icon's code)
+# =====================================================================================================================
+# The mantle must not read as "just another Aether cape". The Aether capes all share one silhouette: a trapezoid that
+# is NARROW at the collar and WIDEST AT THE HEM. This check measures the alpha-mask IoU of the mantle against every
+# cape texture and warns if it gets too close to any of them (target <= TARGET).
+MANTLE_IOU_TARGET = 0.65
+MANTLE_IOU_REFS = [
+    'valkyrie_cape', 'white_cape', 'agility_cape', 'blue_cape', 'red_cape', 'invisibility_cloak',
+]
+MANTLE_IOU_DIR = Path(r'C:\Users\suiyi\AppData\Local\Temp\asb_ref\aether\assets\aether\textures\item\accessories')
+
+
+def print_mantle_iou(mantle_im):
+    """Print the mantle's silhouette IoU against each Aether cape. -> list of (name, iou) that exceed the target."""
+    over, lines = [], []
+    for name, v in icon_iou_against(mantle_im, MANTLE_IOU_DIR, MANTLE_IOU_REFS):
+        if v is None:
+            lines.append(f'    {name:22s} (reference not found, skipped)')
+            continue
+        lines.append(f'    {name:22s} {v:.3f}{"  <-- OVER TARGET" if v > MANTLE_IOU_TARGET else ""}')
+        if v > MANTLE_IOU_TARGET:
+            over.append((name, v))
+    print(f'  valkyrie_mantle silhouette IoU vs the Aether capes (target <= {MANTLE_IOU_TARGET:.2f}):')
+    print('\n'.join(lines))
+    return over
+
+
+# =====================================================================================================================
+# gauntlet silhouette-vs-Aether-gloves check (self-contained; does not touch any other icon's code)
+# =====================================================================================================================
+# The Aether glove icons (gravitite/valkyrie/phoenix/netherite/zanite) all share ONE alpha mask - a rounded diamond
+# blob with no cuff, no wrist line and no digits, widest across rows 7-9. Ours is a single cuffed gauntlet with a
+# distinct wrist edge, a thumb and four digits, so it reads as a glove of its own while its mask stays apart from
+# theirs. Recognisability comes first: the target is a ceiling, not a goal. Printed by every run and by --check.
+GLOVE_IOU_TARGET = 0.65
+GLOVE_IOU_REFS = ['gravitite_gloves', 'valkyrie_gloves', 'phoenix_gloves', 'netherite_gloves', 'zanite_gloves']
+GLOVE_IOU_DIR = Path(r'C:\Users\suiyi\AppData\Local\Temp\asb_ref\aether\assets\aether\textures\item\accessories')
+
+
+def print_glove_iou(gauntlet_im):
+    """Print the gauntlet's silhouette IoU against each Aether glove icon. -> True when the gravitite one is on target."""
+    lines, grav = [], None
+    for name, v in icon_iou_against(gauntlet_im, GLOVE_IOU_DIR, GLOVE_IOU_REFS):
+        if v is None:
+            lines.append(f'    {name:22s} (reference not found, skipped)')
+            continue
+        if name == 'gravitite_gloves':
+            grav = v
+        lines.append(f'    {name:22s} {v:.3f}{"  <-- OVER TARGET" if v > GLOVE_IOU_TARGET else ""}')
+    print(f'  gravitite_casting_gloves silhouette IoU vs the Aether gloves (target <= {GLOVE_IOU_TARGET:.2f}):')
+    print('\n'.join(lines))
+    return grav is not None and grav <= GLOVE_IOU_TARGET
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--check', action='store_true', help='verify the exported files instead of writing them')
     ap.add_argument('--no-preview', action='store_true')
     args = ap.parse_args()
     built = {n: build(n) for n in ICONS}
+    over_target = print_mantle_iou(built['valkyrie_mantle'][2][0])
+    gloves_ok = print_glove_iou(built['gravitite_casting_gloves'][2][0])
     bad = []
     for n, (strip, meta, _) in built.items():
         png = TEX / f'{n}.png'
@@ -639,6 +759,11 @@ def main():
         return
     if not args.no_preview:
         write_previews(built)
+    if over_target:
+        print('WARNING: valkyrie_mantle is too close to the Aether capes: '
+              + ', '.join(f'{n} {v:.3f}' for n, v in over_target))
+    if not gloves_ok:
+        print('WARNING: gravitite_casting_gloves is too close to the Aether glove silhouette')
     print(f'wrote {len(built)} item textures to {TEX}')
 
 
