@@ -54,17 +54,17 @@ public class ASItems {
 
     // --- Mage accessories (work in both Aether and default Curios slots) ---
     public static final DeferredHolder<Item, Item> AMBROSIUM_RING = ITEMS.register("ambrosium_ring",
-            () -> new MultiSlotCurioItem(ItemPropertiesHelper.equipment(1).rarity(Rarity.UNCOMMON), Set.of("aether_ring"),
+            () -> new MultiSlotCurioItem(ItemPropertiesHelper.equipment(1).rarity(Rarity.UNCOMMON), Set.of("aether_ring", "ring"),
                     new AttributeContainer(AttributeRegistry.MANA_REGEN, 0.15, Operation.ADD_MULTIPLIED_BASE)));
     public static final DeferredHolder<Item, Item> ZANITE_FOCUS_PENDANT = ITEMS.register("zanite_focus_pendant",
             () -> new ZaniteFocusPendantItem(new Item.Properties().durability(300).rarity(Rarity.UNCOMMON)));
 
     public static final DeferredHolder<Item, Item> GRAVITITE_CASTING_GLOVES = ITEMS.register("gravitite_casting_gloves",
-            () -> new MultiSlotCurioItem(ItemPropertiesHelper.equipment(1).rarity(Rarity.RARE), Set.of("aether_gloves"),
+            () -> new MultiSlotCurioItem(ItemPropertiesHelper.equipment(1).rarity(Rarity.RARE), Set.of("aether_gloves", "hands"),
                     new AttributeContainer(AttributeRegistry.CAST_TIME_REDUCTION, 0.10, Operation.ADD_MULTIPLIED_BASE),
                     new AttributeContainer(AttributeRegistry.ENDER_SPELL_POWER, 0.08, Operation.ADD_MULTIPLIED_BASE)));
     public static final DeferredHolder<Item, Item> VALKYRIE_MANTLE = ITEMS.register("valkyrie_mantle",
-            () -> new MultiSlotCurioItem(ItemPropertiesHelper.equipment(1).rarity(Rarity.RARE), Set.of("aether_cape"),
+            () -> new MultiSlotCurioItem(ItemPropertiesHelper.equipment(1).rarity(Rarity.RARE), Set.of("aether_cape", "back"),
                     new AttributeContainer(AttributeRegistry.HOLY_SPELL_POWER, 0.10, Operation.ADD_MULTIPLIED_BASE),
                     new AttributeContainer(AttributeRegistry.MAX_MANA, 50, Operation.ADD_VALUE)));
 

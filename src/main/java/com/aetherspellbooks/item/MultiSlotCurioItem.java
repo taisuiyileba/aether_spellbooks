@@ -17,10 +17,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * An accessory that grants its attributes only in the named slots. On 1.21.1 The Aether's accessory slots belong to
- * Accessories ({@code aether:ring_slot} and friends, mapped to {@code aether_ring} etc. by AccessoriesCompat), and the
- * items are tagged for those slots only: they are not Curios curios, so nothing can put them in a slot that The
- * Aether's accessory menu does not show.
+ * An accessory that grants its attributes in its Aether slot, matching standard Curios slot and generic curio slot.
+ * The Aether uses Accessories ({@code aether:ring_slot} and friends), mapped to {@code aether_ring} etc.
+ * by AccessoriesCompat; Curios uses {@code ring}, {@code necklace}, {@code hands}, and {@code back}.
  */
 public class MultiSlotCurioItem extends CurioBaseItem {
     private final Set<String> slots;
@@ -33,7 +32,12 @@ public class MultiSlotCurioItem extends CurioBaseItem {
     }
 
     protected boolean appliesTo(SlotContext slotContext) {
-        return slots.contains(slotContext.identifier());
+        return supportsSlot(slotContext.identifier());
+    }
+
+    /** Attributes and active effects use the same policy, including Curios' generic slot. */
+    public boolean supportsSlot(String identifier) {
+        return "curio".equals(identifier) || slots.contains(identifier);
     }
 
     @Override

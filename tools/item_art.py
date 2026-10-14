@@ -33,6 +33,8 @@ Run:   python tools/item_art.py            (writes the textures and the preview 
 Previews go to build/art_preview/items/ (zoomed sheets next to the reference icons, frame strips, GIFs).
 """
 import argparse
+import tempfile
+import os
 import json
 import sys
 from pathlib import Path
@@ -43,7 +45,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'src/main/resources/assets/aether_spellbooks'
 TEX = ASSETS / 'textures/item'
 PREVIEW = ROOT / 'build/art_preview/items'
-REF = Path(r'C:\Users\suiyi\AppData\Local\Temp\asb_ref')  # optional, only used for the preview sheets
+REF = Path(os.environ.get('ASB_REF', str(Path(tempfile.gettempdir()) / 'asb_ref')))  # optional, previews only
 
 
 def rgba(h):

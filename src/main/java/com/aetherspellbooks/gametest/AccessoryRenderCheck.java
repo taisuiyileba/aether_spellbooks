@@ -79,8 +79,10 @@ public final class AccessoryRenderCheck {
             Screenshot.grab(mc.gameDirectory, "asb_accessories_drag.png", mc.getMainRenderTarget(), m -> {});
         }
         if (timer == 340) {
-            AetherSpellbooks.LOGGER.info("[ASB-ACC] finished");
-            mc.stop();
+            reset(mc, server, List.of());
+        }
+        if (timer >= 350) {
+            AccessorySyncCheck.tick(mc, server, timer);
         }
     }
 

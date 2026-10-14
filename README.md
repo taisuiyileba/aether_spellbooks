@@ -1,6 +1,6 @@
-# Aether Spellbooks 1.0.0 — NeoForge 1.21.1
+# Aether Spellbooks 1.1.0 — NeoForge 1.21.1
 
-原 Forge 1.20.1 版本位于上一级目录。本目录是独立的 Minecraft 1.21.1 移植工程，保留 16 个法术、两种施法生物、两座神殿、法术书、饰品、两套盔甲和法杖／法剑。
+Forge 1.20.1 版本位于同仓库的 [`1.20.1` 分支](https://github.com/taisuiyileba/aether_spellbooks/tree/1.20.1)。本目录是独立的 Minecraft 1.21.1 移植工程，保留 16 个法术、两种施法生物、两座神殿、法术书、饰品、两套盔甲和法杖／法剑。
 
 原创代码及素材采用 [MIT License](LICENSE)。第三方模组、运行时引用的模型与纹理仍遵循各自许可证；本工程不将这些依赖打包进发布 JAR。
 
@@ -23,7 +23,7 @@
 
 Aether 自带 Nitrogen 和 Cumulus；需另装表中的 Accessories 新版以替换 Aether 内置的旧版（旧版在开发环境有 Mixin 兼容问题）。玩家安装时需要另外安装上表中的依赖（启动器通常会自动处理依赖）；务必选择 **1.21.1 NeoForge** 文件。
 
-四件饰品只装在天境饰品栏（Accessories）对应的槽位：神能法戒进戒指槽、紫晶律动项链进吊坠槽、重力晶施法护手进手套槽、武神法者披风进披风槽，右键或在天境饰品界面里拖放都可以装上，项链的动态属性、施法磨损和披风减伤照常生效。它们不再挂 Curios 的 `ring`／`necklace`／`hands`／`back` 标签：1.21.1 的天境界面只显示 Accessories 的槽位，旧标签会让右键把饰品装进界面里看不到的 Curios 槽，看起来像物品消失。法术书仍使用 Curios 的 `spellbook` 槽。物品标签可由整合包覆盖。
+四件饰品同时支持天境饰品栏（Accessories）和对应的通用 Curios 槽：神能法戒支持天境戒指槽／Curios `ring`，紫晶律动项链支持天境吊坠槽／Curios `necklace`，重力晶施法护手支持天境手套槽／Curios `hands`，武神法者披风支持天境披风槽／Curios `back`。两套槽位中的属性、项链施法磨损及披风减伤均生效。天境界面只显示 Accessories 槽位；装备到 Curios 的饰品需通过 Curios 界面查看和取下。四件饰品也支持泛用 Curios `curio` 槽，在其中提供完整属性、项链磨损和披风减伤；不匹配的专用槽位不会触发这些效果。此兼容只声明物品适用的槽位，不额外增加玩家槽位，通用槽位需由其他模组或整合包配置提供。法术书仍使用 Curios 的 `spellbook` 槽。物品标签可由整合包覆盖。
 
 ## 构建与运行
 
@@ -35,7 +35,7 @@ Aether 自带 Nitrogen 和 Cumulus；需另装表中的 Accessories 新版以替
 .\gradlew.bat runClient
 ```
 
-发布文件为 `build/libs/aether_spellbooks-1.21.1-1.0.0-neoforge.jar`。Linux/macOS 使用 `./gradlew`。
+发布文件为 `build/libs/aether_spellbooks-1.21.1-1.1.0-neoforge.jar`。Linux/macOS 使用 `./gradlew`。
 
 客户端截图检查沿用原工程：
 
@@ -100,11 +100,11 @@ hammerDamagePerLevel = 2.0
 
 ## 验证
 
-已通过 `build` 和 60 项 GameTest（原有 45 项，加上 14 项滑行魔石兼容测试和 1 项饰品槽位测试）。新增测试覆盖真实投掷施法和换手、各材质镐的投射物伤害与实际扣血、副手锋利附魔及物品快照、力量加成且不重复叠加工具伤害、工具筛选、普通法术仍被拒绝、幽冥锤唤醒与单次扣血、射程／墙体／实体遮挡、冒险与和平模式、地牢边界、移动目标、配置开关、原有挖矿和攻击时不挖方块。
+已通过 `build` 和 64 项 GameTest（58 项其他测试和 6 项饰品测试）。新增测试覆盖真实投掷施法和换手、各材质镐的投射物伤害与实际扣血、副手锋利附魔及物品快照、力量加成且不重复叠加工具伤害、工具筛选、普通法术仍被拒绝、幽冥锤唤醒与单次扣血、射程／墙体／实体遮挡、冒险与和平模式、地牢边界、移动目标、配置开关、原有挖矿和攻击时不挖方块。
 
 资源侧另有离线校验：`tools/` 下五个生成脚本的 `--check` 全部通过（法术书 3 本 2 模型、法剑与锻造 6 张、法杖 30 个文件、盔甲 27 个文件、生物与特效 31 个文件），25 个 `.png.mcmeta` 的帧数、帧尺寸与帧序号均在图片范围内。
 
-新增的饰品槽位测试确认四件饰品各自只能放进对应的天境槽位、不能放进任何 Curios 槽，法术书仍可放进 Curios 法术书槽；`ASB_RENDER_CHECK=accessories` 在真实客户端里模拟右键和天境界面拖放，并截图记录装备结果。
+饰品槽位测试确认四件饰品可放进对应的天境和通用 Curios 槽、拒绝不匹配的 Curios 专用槽，且两套 API 提供相同的属性；另有测试验证 Curios 项链施法只磨损一次、磨损后加成增长、耗尽后加成归零，以及 Curios 披风减伤和脱下后恢复正常。Curios 的泛用 `curio` 槽遵循其默认接纳规则，并提供与对应槽位相同的完整效果。饰品效果测试通过正常玩家 tick 读取实际属性，覆盖装备、施法磨损、耗尽、修复和卸下；不匹配的专用槽位不会触发磨损或减伤。测试数据包为玩家提供四种对应槽位及四个泛用槽位，不进入发布 JAR。法术书仍可放进 Curios 法术书槽；`ASB_RENDER_CHECK=accessories` 在真实客户端里模拟右键和天境界面拖放，并截图记录装备结果，随后对比真实客户端与服务端网络同步后的项链耐久和实际法术强度；装备、磨损、耗尽、修复、卸下五个阶段全部一致时输出 `[ASB-ACC-SYNC] all 5 stages passed`。
 
 客户端幽冥锤已从正面和侧面各检查完整的 32 帧序列，包含起手、命中和收招，记录见 [正面动画](docs/screenshots/slider_hammer_front.gif) 与 [侧面动画](docs/screenshots/slider_hammer_side.gif)。运行 `ASB_RENDER_CHECK=slider` 可重新生成连续截图。真实多人联机手感仍需人工体验。
 
@@ -121,4 +121,8 @@ GameTest 神殿测试使用真实天境噪声，在结构注册的放置候选�
 - 数据包迁移至单数目录、1.21.1 配方输出和附魔战利品格式；内置冰系伤害数据包保持可选。
 - NeoForge 的 FakePlayer 禁止骑乘，骑乘测试使用带空连接的 ServerPlayer。专用 GameTest 服务器默认丢弃模组维度，因此测试环境提供独立的平坦主世界与固定天境生物群系预设；只用于测试，随发布 JAR 排除。
 
-完整内容、配方及玩法介绍见 [Forge 1.20.1 README](../aether_spellbooks_1.20.1/README.md)。
+完整内容、配方及玩法介绍见 [Forge 1.20.1 README](https://github.com/taisuiyileba/aether_spellbooks/blob/1.20.1/README.md)。
+
+饰品泛用槽修复及实际属性、客户端同步检查说明见 [饰品实际属性与同步验证](docs/accessory_effects_fix.md)。
+
+源码布局和工具入口见 [开发文档索引](docs/README.md)，本次更新见 [更新记录](CHANGELOG.md)。

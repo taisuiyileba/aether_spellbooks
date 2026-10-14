@@ -14,7 +14,7 @@ import net.neoforged.neoforge.event.AddPackFindersEvent;
 public final class ASGameTestPacks {
     @SubscribeEvent
     public static void addPack(AddPackFindersEvent event) {
-        if (Boolean.getBoolean("asb.gametest")) {
+        if (Boolean.getBoolean("asb.gametest") || "accessories".equals(System.getenv("ASB_RENDER_CHECK"))) {
             event.addPackFinders(AetherSpellbooks.id("datapacks/asb_gametest_world"), PackType.SERVER_DATA,
                     Component.literal("Aether Spellbooks GameTest world"), PackSource.BUILT_IN, true, Pack.Position.TOP);
         }

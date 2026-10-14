@@ -55,6 +55,8 @@ Conventions
   glint), 1-5 = feathers / flame (dark..bright), r R = glowing rune, ' ' = transparent, '.' = keep the layer below.
 """
 import argparse
+import tempfile
+import os
 import io
 import re
 import json
@@ -67,7 +69,7 @@ from PIL import Image, ImageDraw
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'src/main/resources/assets/aether_spellbooks'
 PREVIEW = ROOT / 'build/art_preview/armor'
-REFS = Path(r'C:/Users/suiyi/AppData/Local/Temp/asb_ref')       # only used for the preview comparison sheet
+REFS = Path(os.environ.get('ASB_REF', str(Path(tempfile.gettempdir()) / 'asb_ref')))  # optional, previews only
 ATLAS = 128
 FACES = ('top', 'bottom', 'right', 'front', 'left', 'back')
 SIDES = ('right', 'front', 'left', 'back')

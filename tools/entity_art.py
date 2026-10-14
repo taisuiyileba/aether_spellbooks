@@ -42,6 +42,7 @@ Run:  python tools/entity_art.py            write the assets and the previews (b
 Requires Pillow and numpy. Deterministic.
 """
 import argparse
+import tempfile
 import io
 import json
 import math
@@ -56,7 +57,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'src/main/resources/assets/aether_spellbooks'
 PREVIEW = ROOT / 'build/art_preview/entities'
 BEFORE = PREVIEW / '_before'          # optional copy of the previous art, shown in the previews when present
-REF = Path(os.environ.get('ASB_REF', 'C:/Users/suiyi/AppData/Local/Temp/asb_ref'))   # optional, previews only
+REF = Path(os.environ.get('ASB_REF', str(Path(tempfile.gettempdir()) / 'asb_ref')))  # optional, previews only
 
 
 # ============================================================================ basics
