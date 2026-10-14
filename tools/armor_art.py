@@ -4,7 +4,7 @@ Everything here is hand-placed pixel art: every character in the maps below is o
 dithering, no smooth gradients). Requires Pillow and numpy. Writes straight into the assets:
 
     geo/<set>_armor.geo.json                     bones + cubes (box UV, 128x128 atlas)
-    animations/<set>_armor.animation.json        "idle" loop (helm wings / flame crest / plumes / ankle wings sway)
+    animations/<set>_armor.animation.json        "idle" loop (helm wings / flame crest / ankle wings sway)
     textures/models/armor/<set>.png (+ .mcmeta)   atlas, N frames stacked vertically (GeckoLib AnimatableTexture)
     textures/models/armor/<set>_cape.png (+ .mcmeta)  vanilla 64x32 cape layout, frames stacked (MageCapeLayer)
     textures/item/<set>_{helmet,chestplate,leggings,boots}.png (+ .mcmeta where animated)
@@ -37,9 +37,11 @@ Conventions
 - Kept from earlier in-game iterations: the chest body (inflate 1.01) never encloses the leggings' sash (a 10x3x6
   cube, inflate 0.1, over the chest hem) so the leggings stay visible; no skirt over the thighs (1px hip tassets and a
   back coat-tail only); boots are 5 rows tall; no cube face is coplanar with another one (no z-fighting).
-- Wings, flame crest, plumes and ankle feathers are zero-thickness planes (as in Iron's Spells' hats). Both faces of a
+- The phoenix hood keeps only its central flame crest (no side plumes) and opens from the brow row like the
+  valkyrie helm, so the wearer's eyes stay visible.
+- Wings, flame crest and ankle feathers are zero-thickness planes (as in Iron's Spells' hats). Both faces of a
   plane are painted so every texel shows the same colour from either side. A single flat plane cannot face the front,
-  back and side cameras at once, so each wing / plume / ankle feather is a fan of two root-anchored leaves (xfan) with
+  back and side cameras at once, so each wing / ankle feather is a fan of two root-anchored leaves (xfan) with
   the same rake and lean, 50-60 degrees apart in sweep; plane_report() scores every piece against the render-check
   cameras (ClientRenderCheck "armor" scene) and --check fails if any piece drops below PLANE_MIN (would read as an
   edge-on sliver, the bug of the first in-game pass).
@@ -627,10 +629,6 @@ PHX_CREST_SIDE = (['.2....', '.32.2.', '2342.3', '334323', '344543', '445554', '
                   ['2.....', '32..2.', '342.32', '334323', '344543', '445554', 'gGGYGg'],
                   ['.2..2.', '.32.3.', '23423.', '334323', '344543', '445554', 'gGGYGg'],
                   ['......', '.2..2.', '2342.3', '334323', '344543', '445554', 'gGGYGg'])
-PHX_PLUME = ['..12334455G',
-             '.122334455Y',
-             '1223344455G',
-             '..123344.gg']
 PHX_ANKLE = ['..3.4.',
              '.34453',
              '343453',
@@ -655,10 +653,11 @@ def phoenix_mage():
     m.add('armorHead',
           Cube((-4, 24, -4), (8, 8, 8), 1.0, bevel=PLATE_P, note='helm shell', faces={
               'top': ['llllllll', 'llllllll', 'llhhllll', 'lhhwllll', 'llhhllll', 'llllllll', 'llllllll', 'llllllll'],
+              # the face opening starts on row 3, like the valkyrie helm, so the brow sits above the eyes
               'front': ['llllllll',
                         'llllllll',
-                        'llllllll',
                         'mllllllm',
+                        'l      s',
                         'l      s',
                         'lG    gs',
                         'lG    gs',
@@ -666,15 +665,13 @@ def phoenix_mage():
               'right': side, 'left': hflip(side),
               'back': ['llllllll', 'llllllll', 'llllllll', 'mllllllm', 'llllllll', 'llllllll', 'ssssssss', 'dggggggd'],
               'bottom': 's'}),
-          Cube((-5, 29, -5), (10, 1, 10), 0.2, note='circlet', faces={
+          Cube((-5, 30, -5), (10, 1, 10), 0.2, note='circlet', faces={
               'sides': ['GGGGGGGGGG'], 'front': ['GGGYGGYGGG'], 'top': 'G', 'bottom': 'd'}),
-          Cube((-1, 28.5, -5.6), (2, 2, 1), note='circlet opal', faces={'front': opal, 'top': 'G', 'all': 'g'}))
+          Cube((-1, 29.5, -5.6), (2, 2, 1), note='circlet opal', faces={'front': opal, 'top': 'G', 'all': 'g'}))
     m.add_bone(Bone('crestCenter', 'armorHead', (0, 33, -1.5), (-12, 0, 0), [
         Cube((-3.5, 32.5, -1.5), (7, 7, 0), note='flame crest', faces=zplane(flick(*PHX_CREST))),
         Cube((0, 32.5, -2.5), (0, 7, 6), note='flame crest (side)', faces=xplane(flick(*PHX_CREST_SIDE)))],  # noqa
         anim=sway(3.6, (0, 4, 2, 0), (2, 2, 3, 0.4))))
-    m.add_bones(*xfan((-3.0, 32.5, 3.5), 4, 11, PHX_PLUME, ((-30, -20, -20), (-30, -80, -20)),
-                      anim=sway(3.6, (0, 6, 1, 0.6), (1, 3, 2, 0)), name='plume'))
     # ------------------------------------------------------------ chest: crimson plate with a gold phoenix, opal heart
     m.add('armorBody',
           Cube((-4, 12, -2), (8, 12, 4), 1.01, bevel=PLATE_P, note='breastplate', faces={
@@ -844,11 +841,11 @@ ICONS = {
                    '..gslhlGYlmmog..',
                    '..ddGGGqPGGgdd..',
                    '...olhlPplmso...',
-                   '...olhkkkkmso...',
-                   '...olhmoomsso...',
-                   '...olhmoomsso...',
-                   '...oGGg..Ggdo...',
-                   '....ooo..ooo....',
+                   '...olkkkkkkso...',
+                   '...oGlkkkkmgo...',
+                   '...oGlkkkkmgo...',
+                   '...odG.kk.Gdo...',
+                   '....oo....oo....',
                    '................',
                    '................'],
         'chestplate': ['................',
@@ -858,7 +855,7 @@ ICONS = {
                        '.shlllGkkGlllmo.',
                        '.slhllhGGllllmo.',
                        '.s5s4lGYYGl4s5o.',
-                       '...sslGqPglsoo..',
+                       '...sslGqPglso...',
                        '....slGPpglo....',
                        '....slhdglmo....',
                        '....sdGYYGdo....',
@@ -869,10 +866,10 @@ ICONS = {
                        '................'],
         'leggings': ['................',
                      '................',
-                     '...sssssssssso..',
-                     '...sGGGYYGGGgo..',
-                     '...sBBGqPGBbbo..',
-                     '...sBcBssBcBbo..',
+                     '...ssssssssso...',
+                     '...sGGGYYGGGo...',
+                     '...sBBGqPGBbo...',
+                     '...sBcBssBcBo...',
                      '...sBco..sBco...',
                      '...sBco..sBco...',
                      '...sdgo..sdgo...',
@@ -935,10 +932,10 @@ ICONS = {
                        '................'],
         'leggings': ['................',
                      '................',
-                     '...sssssssssso..',
-                     '...sGGGYYGGGgo..',
-                     '...smmGqPGmmso..',
-                     '...shlhssllmso..',
+                     '...ssssssssso...',
+                     '...sGGGYYGGGo...',
+                     '...smmGqPGmmo...',
+                     '...shlhssllmo...',
                      '...shYo..shYo...',
                      '...slGo..slGo...',
                      '...sdgo..sdgo...',
@@ -1370,7 +1367,7 @@ def ingame_shots(models, w=854, h=480):
 # ClientRenderCheck "armor" scene: stands at origin.x -/+ 1.2, camera = origin + offset (+1.62 eye height)
 CHECK_SHOTS = [('asb_armor_front', (0, 0.3, 3.4), 180, 6), ('asb_armor_back', (0, 0.5, -3.4), 0, 8),
                ('asb_armor_side', (3.6, 0.6, 0), 90, 8)]
-# every flat piece (wings, plumes, crest, ankle feathers) must face the camera well enough in all three shots
+# every flat piece (wings, crest, ankle feathers) must face the camera well enough in all three shots
 PLANE_MIN = 0.55
 
 

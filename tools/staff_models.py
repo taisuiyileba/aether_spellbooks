@@ -1,12 +1,10 @@
-"""Aether Spellbooks staffs: 3D item models, 64x64 face atlases and 16x16 GUI icons (NeoForge 1.21.1).
+"""Aether Spellbooks staffs: 3D item models and 64x64 face atlases (NeoForge 1.21.1).
 
 What it makes (under src/main/resources/assets/aether_spellbooks/):
-  models/item/<staff>.json       neoforge:separate_transforms wrapper: base = the 3D model, gui + fixed = the 2D icon
-  models/item/<staff>_3d.json    the 3D element model (texture_size 64x64, display transforms unchanged)
-  textures/item/<staff>.png      the 3D face atlas; animated, so frames are stacked: 64 x (64 * frames) (+ .mcmeta)
-  textures/item/<staff>_gui.png  the 16x16 inventory / item frame icon, animated with the same timing (+ .mcmeta)
+  models/item/<staff>.json       the 3D element model, shown as 3D in every view including the inventory
+  textures/item/<staff>.png      the face atlas; animated, so frames are stacked: 64 x (64 * frames) (+ .mcmeta)
 for zanite_staff, aercloud_staff, gravitite_staff, valkyrie_scepter and solar_scepter, and preview sheets in
-build/art_preview/staffs/: staffs_icons.png (icons at 10x / slot 2x / 1x next to ISS and Aether staff icons),
+build/art_preview/staffs/: staffs_icons.png (the retired 16x16 sketches, kept only as a design reference),
 staffs_models.png (software renders of the 3D models), staffs_vs_iss.png (ours beside Iron's Spells staff models,
 same renderer and scale), staffs_animation.png / .gif (every frame, and the real timing). The reference assets are
 read from %TEMP%/asb_ref when present and are never copied.
@@ -16,16 +14,16 @@ Conventions
     texel per unit (the vanilla / Iron's density). Faces that are completely inside other elements are left out.
   * Rotations: one axis, +-22.5 or +-45 degrees (the only angles vanilla accepts). The script refuses coplanar faces
     of different elements that face the same way and overlap (z-fighting) and faces of zero area.
-  * Planes (wings) carry one painted texture region; the back face reuses it mirrored so the outline matches.
+  * Planes carry one painted texture region; the back face reuses it mirrored so the outline matches. The valkyrie
+    wings are not planes: wing_rows() builds them from solid feather rows so they have thickness from every side.
   * Light comes from the top left of each face: left column one step lighter, right column one step darker, metal caps
     lit on top. Ramps are hue-shifted (shadows cooler, highlights warmer). No noise, no dithering: wood is a few long
     grain streaks, metal a bright specular column, cloth slanted wrap turns, gems dark rim + bright facet + one glint.
-  * The GUI icons are hand-placed 16x16 character grids in the vanilla / ISS / Aether diagonal staff layout (pommel at
-    the bottom left, head at the top right). Their glow pixels get the same glint / pulse as the 3D atlas.
   * Animation: frame 0 is the resting look and is shown most of the time; a glint or pulse runs every few seconds
     (the solar scepter flickers gently all the time). The icon silhouette never changes between frames.
-  * Display transforms for hand / ground / head are the previous ones; the grip wrap sits where those transforms put
-    the hand (model y 2..8). The item frame uses the 2D icon: at frame scale the 3D staff would be a sub-pixel line.
+  * Display transforms follow Iron's Spells' own staffs (models/item/ice_staff.json), GUI included, so the staffs sit
+    in the inventory and in item frames the way the reference mod's do; the GUI keeps their rotation and gui_display()
+    only shrinks/shifts each staff into the same slot footprint. The grip wrap is at model y 2..8.
 
 Run (Pillow + numpy):
   python tools/staff_models.py           write models, textures and previews
@@ -509,6 +507,62 @@ def y45(origin):
     return rot('y', 45, origin)
 
 
+def wing_rows(rows, pal, x0, y_top, layers, name='wing'):
+    """A feather map built as solid geometry instead of a zero-thickness card.
+
+    `rows` is the front-on map (row 0 on top), 1 texel = 1 model unit, placed with its left edge at x0 and its top
+    at y_top. Every row becomes a box exactly as wide as that row's run of texels, so the front silhouette is the
+    map's own; consecutive rows with the same run and layer merge into one box. `layers(row) -> (thickness,
+    z_centre)` sets each row's depth and how far it sits back, which gives the wing a sculpted side profile (thin
+    tips swept back, a thicker root). The front and back faces carry the pixels; the top, bottom and end faces take
+    the colour of the texel they border (one step lighter on top, darker below), so the edges read as a solid
+    feather rim rather than a cut-out."""
+    h, w = len(rows), len(rows[0])
+    if any(len(r) != w for r in rows):
+        raise ValueError(f'{name}: ragged map')
+    runs = []
+    for r, row in enumerate(rows):
+        cols = [x for x, ch in enumerate(row) if ch in pal]
+        if not cols:
+            continue
+        c0, c1 = min(cols), max(cols) + 1
+        if any(row[x] not in pal for x in range(c0, c1)):
+            raise ValueError(f'{name}: row {r} has a gap; split the map')
+        key = (c0, c1) + tuple(layers(r))
+        if runs and runs[-1][0] == key and runs[-1][2] == r:
+            runs[-1][2] = r + 1
+        else:
+            runs.append([key, r, r + 1])
+    els = []
+    for (c0, c1, thick, zc), r0, r1 in runs:
+        def paint(f, frame, c0=c0, c1=c1, r0=r0, r1=r1):
+            out = np.zeros((f.h, f.w, 4), np.uint8)
+
+            def put(y, x, ch, shift=0):
+                ramp, lv = pal[ch]
+                out[y, x] = col(ramp, lv + shift)
+            for y in range(f.h):
+                for x in range(f.w):
+                    if f.name == 'south':
+                        put(y, x, rows[r0 + y][c0 + x])
+                    elif f.name == 'north':
+                        put(y, x, rows[r0 + y][c1 - 1 - x])
+                    elif f.name == 'east':
+                        put(y, x, rows[r0 + y][c1 - 1], -1)
+                    elif f.name == 'west':
+                        put(y, x, rows[r0 + y][c0], -1)
+                    elif f.name == 'up':
+                        put(y, x, rows[r0][c0 + x], 1)
+                    else:
+                        put(y, x, rows[r1 - 1][c0 + x], -1)
+            return out
+
+        frm = (x0 + c0, y_top - r1, zc - thick / 2)
+        to = (x0 + c1, y_top - r0, zc + thick / 2)
+        els.append(El(frm, to, paint, name=f'{name}_{r0}'))
+    return els
+
+
 # ------------------------------------------------------------------------------------------------- the five staffs
 def zanite_staff():
     """Skyroot shaft with gold fittings; two curled skyroot claws grip a zanite crystal cluster."""
@@ -585,13 +639,11 @@ WING = [                      # left wing seen from the front: tip top left, roo
     "..qqvssq.",
     "....qqq..",
 ]
-COVERTS = [                   # pale inner feathers laid over the wing root, half a unit in front of it
-    "...qq.",
-    "..qvuq",
-    ".qvutq",
-    "qvutsq",
-    ".qvtsq",
-    "..qqq.",
+COVERTS = [                   # pale inner feathers standing one unit proud of the wing root (left wing; root at right)
+    ".qvq.",
+    "qvutq",
+    "qvtsq",
+    ".qqq.",
 ]
 WING_PAL = {'q': ('gold', 0), 'r': ('gold', 1), 's': ('gold', 2), 't': ('gold', 3), 'u': ('gold', 4),
             'v': ('feather', 5)}
@@ -611,16 +663,25 @@ def valkyrie_scepter():
         El((7, 21, 7), (9, 22, 9), g, y45((8, 19.5, 8)), name='gem_top'),
         El((7.5, 22, 7.5), (8.5, 24, 8.5), gold, name='finial'),
     ]
-    left = charmap(WING, WING_PAL)
-    right = charmap([r[::-1] for r in WING], WING_PAL)
-    els += [
-        El((-1.5, 17, 8), (7.5, 28, 8), left, rot('y', -22.5, (7.5, 20, 8)), plane_face='south', name='wing_l'),
-        El((8.5, 17, 8), (17.5, 28, 8), right, rot('y', 22.5, (8.5, 20, 8)), plane_face='south', name='wing_r'),
-        El((1.5, 19, 8.5), (7.5, 25, 8.5), charmap(COVERTS, COVERT_PAL), rot('y', -22.5, (7.5, 20, 8)),
-           plane_face='south', name='coverts_l'),
-        El((8.5, 19, 8.5), (14.5, 25, 8.5), charmap([r[::-1] for r in COVERTS], COVERT_PAL), rot('y', 22.5, (8.5, 20, 8)),
-           plane_face='south', name='coverts_r'),
-    ]
+    # The wings are solid feather rows, not flat cards: thin tips swept back, a two-unit root, and a row of pale
+    # coverts standing one unit proud of the root. The map is lifted half a unit so no face shares a plane with
+    # the neck or the gem.
+    def wing_layer(r):
+        return (1, 7.0) if r < 2 else (1, 7.5) if r < 5 else (2, 8.0)
+
+    def covert_layer(r):
+        return (1, 9.5)
+    for side, (x0, cx0, flip, ang, pivot) in {'l': (-1.5, 2.5, False, -22.5, (7.5, 20, 8)),
+                                             'r': (8.5, 8.5, True, 22.5, (8.5, 20, 8))}.items():
+        wing = [r[::-1] for r in WING] if flip else WING
+        cov = [r[::-1] for r in COVERTS] if flip else COVERTS
+        parts = wing_rows(wing, WING_PAL, x0, 28.5, wing_layer, name='wing_' + side)
+        parts += wing_rows(cov, COVERT_PAL, cx0, 23.5, covert_layer, name='coverts_' + side)
+        for el in parts:
+            el.rot = rot('y', ang, pivot)
+            el.matrix = ROT['y'](math.radians(ang))
+            el.origin = np.array(pivot, np.float64)
+        els += parts
     return els, 1 + n
 
 
@@ -678,13 +739,38 @@ STAFFS = {
 DISPLAY = {
     'thirdperson_righthand': {'translation': [0, 3, 1.25]},
     'thirdperson_lefthand': {'translation': [0, 3, 1.25]},
-    'firstperson_righthand': {'translation': [1.5, -1.5, -2.75], 'scale': [0.8, 0.8, 0.8]},
-    'firstperson_lefthand': {'translation': [1.5, -1.5, -2.75], 'scale': [0.8, 0.8, 0.8]},
+    'firstperson_righthand': {'translation': [1.5, 0, -2.75]},
+    'firstperson_lefthand': {'translation': [1.5, 0, -2.75]},
     'ground': {'translation': [0, 9.5, 0], 'scale': [0.5, 0.5, 0.5]},
-    'gui': {'rotation': [-15, 125, 60], 'translation': [0, -0.4, 0], 'scale': [0.45, 0.45, 0.45]},
+    # GUI: replaced per staff by gui_display(), which keeps this rotation (Iron's Spells' own staffs, e.g.
+    # assets/irons_spellbooks/models/item/ice_staff.json) and only fits scale and translation to the slot
+    'gui': {'rotation': [-13, 128, 65], 'translation': [0.75, 0.5, 0], 'scale': [0.75, 0.75, 0.75]},
     'fixed': {'translation': [0, 1.75, -0.75], 'scale': [0.55, 0.55, 0.55]},
     'head': {'translation': [0, 14, -8]},
 }
+# The screen box (GUI pixels around the slot centre) that Iron's Spells' ice, blood, graybeard staffs and artificer cane
+# fill with the transform above, averaged. Ours are longer (up to y 29 instead of 24) and the valkyrie wings and sun
+# disc are wide, so the same scale pushes the heads past the slot; gui_display() fits each staff into this box.
+ISS_GUI_BOX = ((-8.8, -9.3), (9.1, 8.9))
+
+
+def gui_display(els):
+    """The GUI transform for one staff: the reference rotation, then the largest scale (at most the reference 0.75) and
+    the translation that put the projected model inside ISS_GUI_BOX with its centre on the box centre."""
+    rx, ry, rz = (math.radians(a) for a in DISPLAY['gui']['rotation'])
+    r = rot_x(rx) @ rot_y(ry) @ rot_z(rz)          # JOML rotationXYZ, as ItemTransform applies it
+    pts = []
+    for el in els:
+        (x1, y1, z1), (x2, y2, z2) = el.frm, el.to
+        for c in ((x, y, z) for x in (x1, x2) for y in (y1, y2) for z in (z1, z2)):
+            pts.append(el.world(c))
+    q = (np.array(pts) - 8.0) @ r.T
+    lo, hi = q[:, :2].min(0), q[:, :2].max(0)
+    (bx0, by0), (bx1, by1) = ISS_GUI_BOX
+    k = min(0.75, (bx1 - bx0) / (hi[0] - lo[0]), (by1 - by0) / (hi[1] - lo[1]))
+    t = (np.array([bx0 + bx1, by0 + by1]) - k * (lo + hi)) / 2
+    k, tx, ty = round(k, 3), round(float(t[0]), 2), round(float(t[1]), 2)
+    return dict(DISPLAY['gui'], translation=[tx, ty, 0], scale=[k, k, k])
 
 
 # ------------------------------------------------------------------------------------------------ validation
@@ -829,8 +915,9 @@ def build_staff(name, fn):
         entry['faces'] = faces
         out.append(entry)
     tex = f'{NS}:item/{name}'
+    display = dict(DISPLAY, gui=gui_display(els))
     model3d = {'credit': 'Generated by tools/staff_models.py', 'texture_size': [TEX, TEX], 'gui_light': 'front',
-               'textures': {'0': tex, 'particle': tex}, 'elements': out, 'display': DISPLAY}
+               'textures': {'0': tex, 'particle': tex}, 'elements': out, 'display': display}
     strip = Image.fromarray(atlas.reshape(frames * TEX, TEX, 4), 'RGBA')
     return {'els': els, 'model3d': model3d, 'atlas': atlas, 'strip': strip, 'frames': frames, 'problems': problems}
 
@@ -838,15 +925,6 @@ def build_staff(name, fn):
 def num(v):
     v = round(float(v), 4)
     return int(v) if v == int(v) else v
-
-
-def wrapper_model(name):
-    icon = f'{NS}:item/{name}_gui'
-    flat = {'parent': 'minecraft:item/generated', 'textures': {'layer0': icon}}
-    return {'parent': 'minecraft:item/handheld', 'loader': 'neoforge:separate_transforms',
-            'textures': {'particle': icon},
-            'base': {'parent': f'{NS}:item/{name}_3d'},
-            'perspectives': {'gui': flat, 'fixed': dict(flat)}}
 
 
 def dump_model(model):
@@ -1307,13 +1385,13 @@ def outputs():
             problems.append(f'{name}: icon silhouette changes between frames')
         if max(SEQ[name][1]) != st['frames'] - 1:
             problems.append(f'{name}: sequence and texture frame counts differ')
-        files[f'models/item/{name}.json'] = json.dumps(wrapper_model(name), indent=2) + '\n'
-        files[f'models/item/{name}_3d.json'] = dump_model(st['model3d'])
+        files[f'models/item/{name}.json'] = dump_model(st['model3d'])
+        files[f'models/item/{name}_3d.json'] = None
         files[f'textures/item/{name}.png'] = st['strip']
-        files[f'textures/item/{name}_gui.png'] = Image.fromarray(ic.reshape(-1, 16, 4), 'RGBA')
+        files[f'textures/item/{name}_gui.png'] = None
         anim = st['frames'] > 1
         files[f'textures/item/{name}.png.mcmeta'] = mcmeta(name) if anim else None
-        files[f'textures/item/{name}_gui.png.mcmeta'] = mcmeta(name) if anim else None
+        files[f'textures/item/{name}_gui.png.mcmeta'] = None
     return built, icons, files, problems
 
 
