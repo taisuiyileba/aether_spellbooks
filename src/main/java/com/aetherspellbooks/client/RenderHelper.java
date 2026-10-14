@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 /**
@@ -24,13 +23,13 @@ public final class RenderHelper {
 
     private static void vertex(VertexConsumer consumer, PoseStack.Pose pose, float x, float y, float u, float v, int r, int g, int b, int a) {
         Matrix4f poseMatrix = pose.pose();
-        Matrix3f normalMatrix = pose.normal();
+        // Keep the normal world-up so emissive billboards remain bright from every camera angle.
         consumer.vertex(poseMatrix, x, y, 0f)
                 .color(r, g, b, a)
                 .uv(u, v)
                 .overlayCoords(OverlayTexture.NO_OVERLAY)
                 .uv2(LightTexture.FULL_BRIGHT)
-                .normal(normalMatrix, 0f, 1f, 0f)
+                .normal(0f, 1f, 0f)
                 .endVertex();
     }
 

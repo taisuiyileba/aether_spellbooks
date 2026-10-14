@@ -1,12 +1,12 @@
 """
 Generates the data-driven JSON of Aether Spellbooks: loot injection, tags, recipes, the optional
 data pack, particle definitions and item/block models.
-Usage:  python tools/gen_data.py      (overwrites the generated files)
+Usage:  python tools/legacy/gen_data.py      (overwrites the generated files)
 """
 import json
 import os
 
-RES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "main", "resources")
+RES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "src", "main", "resources")
 NS = "aether_spellbooks"
 
 
@@ -340,7 +340,7 @@ def assets():
         w(f"{a}/models/item/{item}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}})
     for blade in SPELLBLADES:
         w(f"{a}/models/item/{blade}.json", {"parent": "minecraft:item/handheld", "textures": {"layer0": f"{NS}:item/{blade}"}})
-    # staff models (3D) are written by tools/gen_weapon_models.py
+    # staff models (3D) are written by tools/legacy/gen_weapon_models.py
     for egg in ["valkyrie_sorceress_spawn_egg", "solar_acolyte_spawn_egg"]:
         w(f"{a}/models/item/{egg}.json", {"parent": "minecraft:item/template_spawn_egg"})
     for cloud in ["cold", "blue", "golden"]:

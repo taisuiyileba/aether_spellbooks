@@ -1,6 +1,7 @@
 package com.aetherspellbooks.event;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.item.MultiSlotCurioItem;
 import com.aetherspellbooks.item.ZaniteFocusPendantItem;
 import com.aetherspellbooks.registry.ASItems;
 import com.aetherspellbooks.spells.FrostboundCrystalSpell;
@@ -31,7 +32,8 @@ public class ASEvents {
             return;
         }
         CuriosApi.getCuriosInventory(player).ifPresent(inventory ->
-                inventory.findCurios(stack -> stack.getItem() instanceof ZaniteFocusPendantItem)
+                inventory.findCurios(stack -> stack.getItem() instanceof ZaniteFocusPendantItem).stream()
+                        .filter(slot -> ((MultiSlotCurioItem) slot.stack().getItem()).supportsSlot(slot.slotContext().identifier()))
                         .forEach(slot -> ZaniteFocusPendantItem.wear(slot.stack())));
         CloudSentinels.volley(player);
     }
@@ -61,7 +63,9 @@ public class ASEvents {
     public static void onFall(LivingFallEvent event) {
         LivingEntity entity = event.getEntity();
         if (event.getDistance() > 3 && CuriosApi.getCuriosInventory(entity)
-                .map(inventory -> inventory.isEquipped(ASItems.VALKYRIE_MANTLE.get())).orElse(false)) {
+                .map(inventory -> inventory.findCurios(ASItems.VALKYRIE_MANTLE.get()).stream()
+                        .anyMatch(slot -> ((MultiSlotCurioItem) slot.stack().getItem()).supportsSlot(slot.slotContext().identifier())))
+                .orElse(false)) {
             event.setDamageMultiplier(event.getDamageMultiplier() * MANTLE_FALL_DAMAGE_MULTIPLIER);
         }
     }

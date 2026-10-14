@@ -1,0 +1,7 @@
+# Use portable line endings and preserve binary assets unchanged.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.png binary
+*.gif binary
+*.nbt binary
+*.jar binary

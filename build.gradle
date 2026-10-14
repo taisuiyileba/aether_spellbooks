@@ -47,6 +47,7 @@ minecraft {
 
         gameTestServer {
             property 'forge.enabledGameTestNamespaces', mod_id
+            property 'asb.gametest', 'true'
         }
     }
 }
@@ -119,6 +120,7 @@ tasks.named('processResources', ProcessResources).configure {
 tasks.named('jar', Jar).configure {
     // GameTests and their template are for development only
     exclude 'com/aetherspellbooks/gametest/**'
+    exclude 'datapacks/asb_gametest_world/**'
     exclude 'data/aether_spellbooks/structures/empty.nbt'
     manifest {
         attributes(["MixinConfigs"           : 'aether_spellbooks.mixins.json',

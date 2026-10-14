@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import software.bernie.geckolib.cache.texture.AnimatableTexture;
 import software.bernie.geckolib.renderer.GeoRenderer;
 
 /**
@@ -52,6 +53,8 @@ public class SolarHaloLayer extends BoneAnchoredLayer {
         poseStack.pushPose();
         poseStack.translate(0, 0, 0.02f);
         poseStack.scale(0.55f * pulse, 0.55f * pulse, 1);
+        // solar_core.png is animated (it boils); vanilla render types only tick it when asked
+        AnimatableTexture.setAndUpdate(CORE);
         RenderHelper.quad(bufferSource.getBuffer(RenderType.eyes(CORE)), poseStack.last(), glow, (int) (glow * 0.85f), (int) (glow * 0.6f), 255);
         poseStack.popPose();
     }

@@ -16,7 +16,7 @@ Everything is deterministic (all randomness is seeded).
 Replace any PNG with hand-drawn art later; re-running this script overwrites them.
 
 Requires: Pillow, numpy
-Usage:  python tools/gen_textures.py            (also writes build/texture_preview.png)
+Usage:  python tools/legacy/gen_textures.py            (also writes build/texture_preview.png)
 """
 import math
 import os
@@ -26,7 +26,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PROJECT = os.path.normpath(os.path.join(HERE, ".."))
+PROJECT = os.path.normpath(os.path.join(HERE, "..", ".."))
 ROOT = os.path.join(PROJECT, "src", "main", "resources", "assets", "aether_spellbooks", "textures")
 PREVIEW = os.path.join(PROJECT, "build", "texture_preview.png")
 

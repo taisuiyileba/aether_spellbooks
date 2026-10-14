@@ -186,6 +186,7 @@ def main():
         else:
             im.save(path)
         wrapper = json.loads((ASSETS / f'models/item/{name}.json').read_text(encoding='utf-8'))
+        assert wrapper['loader'] == 'forge:separate_transforms', f'{name}: expected the Forge 1.20.1 model loader'
         assert wrapper['base']['parent'] == 'aether_spellbooks:item/template_spell_book'
         assert wrapper['perspectives']['head']['parent'] == 'aether_spellbooks:item/template_spell_book_open'
         assert wrapper['perspectives']['gui']['textures']['layer0'] == f'aether_spellbooks:item/{name}'

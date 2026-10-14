@@ -1,12 +1,12 @@
 # Aether Spellbooks（天境魔法书）
 
-Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.0.0 · MIT
+Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.1.0 · MIT
 
 - 本目录：Forge 1.20.1。
-- [NeoForge 1.21.1 移植版](../aether_spellbooks_1.21.1/README.md)：独立构建工程与依赖说明。
+- [NeoForge 1.21.1 移植版](https://github.com/taisuiyileba/aether_spellbooks/blob/1.21.1/README.md)：独立构建工程与依赖说明。
 
-项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，正式版本统一为 1.0.0。
-设计方案见 `../DESIGN_Aether_Spellbooks.md`，市场分析见 `../ANALYSIS.md`。
+项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，正式版本统一为 1.1.0。
+源码布局、工具入口和验证记录见 [开发文档索引](docs/README.md)，本次更新见 [更新记录](CHANGELOG.md)。
 
 ## 依赖
 | 模组 | 版本 |
@@ -20,18 +20,37 @@ Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.0.0 · MIT
 ./gradlew build               # 输出 build/libs/aether_spellbooks-1.20.1-<版本>.jar
 ./gradlew runClient           # 开发客户端
 ./gradlew runGameTestServer   # 运行自动化 GameTest（见下），全部通过时退出码为 0
-python tools/gen_textures.py  # 重新生成全部贴图（会覆盖现有 png），并输出 build/mob_preview.png 皮肤预览
+python tools/item_art.py --check   # 校验法剑和锻造图标；新版美术生成命令见下
 ASB_RENDER_CHECK=mobs ./gradlew runClient    # 自动建平坦世界、摆好施法生物、截图到 run/screenshots/asb_*.png 后退出
 ASB_RENDER_CHECK=armor ./gradlew runClient   # 同上，展示两套法师盔甲（盔甲架 + 第三人称玩家，带披风）
 ASB_RENDER_CHECK=weapons ./gradlew runClient # 同上，展示法杖和法剑（物品展示框、第三/第一人称、物品栏图标）
 ASB_RENDER_CHECK=books ./gradlew runClient   # 法术书与铁魔法参考对照、环绕、左右手及第三人称截图
 ASB_RENDER_CHECK=slider ./gradlew runClient  # 幽冥锤攻击滑行魔石的正面和侧面连续帧
+ASB_RENDER_CHECK=accessories ./gradlew runClient # 右键装备和天境饰品界面拖放检查
 ASB_RENDER_CHECK=items ./gradlew runClient   # 同上，生存背包里把本模组图标和铁魔法/Aether/原版的同类物品排在一起对比
 ASB_RENDER_CHECK=spells ./gradlew runClient  # 同上，对一排尸壳依次施放 v1.5 的法术并在关键时刻截图（asb_spell_*.png）
 ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结构生成），平坦世界里放置两座神殿，再去 Aether 找自然生成的神殿截图（asb_shrine_*.png）
 ```
 
-## 内容（1.0.0）
+## 从 1.21.1 同步的美术与饰品改动
+
+本版本同步了 NeoForge 1.21.1 当前工作区的美术资源和后续渲染修复，包括五把法杖的 3D 模型与图集、武神权杖的立体羽翼、两套法师甲的模型与动画、法剑和盔甲图标、施法生物皮肤、投射物和四组粒子。保留四件饰品的原有手绘图标。25 张动画贴图包含宝石闪烁、符文脉动和披风流光；披风、雷晶和烈阳核心由 GeckoLib 主动推进动画。羽毛按往返帧序翻动，境云粒子靠近第一人称镜头时淡出，发光投射物使用固定向上的法线，保持不同视角下的亮度。
+
+1.20.1 的天境饰品栏和通用饰品栏都通过 Curios 实现。四件饰品分别支持 `aether_ring`／`ring`、`aether_pendant`／`necklace`、`aether_gloves`／`hands`、`aether_cape`／`back`，可右键装备或在界面拖放；两套槽位提供相同属性，项链施法磨损和披风减伤均适用。天境界面只显示其自身槽位，通用槽位需通过 Curios 界面查看，且需由其他模组或整合包配置提供。四件饰品也支持泛用 `curio` 槽，在其中提供完整属性、项链磨损和披风减伤；不匹配的专用槽位不会触发这些效果。本附属只声明适用槽位；测试时提供的通用槽位数据包不会进入发布 JAR。
+
+当前资源由以下五个脚本重建；均支持 `--check`，仅校验已导出资源：
+
+```bash
+python tools/build_spellbook_models.py --check
+python tools/item_art.py --check
+python tools/staff_models.py --check
+python tools/armor_art.py --check
+python tools/entity_art.py --check
+```
+
+省略 `--check` 即生成资源与 `build/art_preview/` 中的预览。早期美术和初始化数据脚本已归档至 `tools/legacy/`，会覆盖当前资源，不用于重建 1.1.0。神殿模板仍由 `tools/gen_structures.py` 管理。工具分类和依赖见 [工具说明](tools/README.md)。
+
+## 内容（1.1.0）
 ### 法术（16 个）
 | 法术 | 学派 | 地牢档次 | 要点 |
 |---|---|---|---|
@@ -87,7 +106,7 @@ ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结
 | 凤凰法者（兜帽 / 长袍 / 护腿 / 长靴） | 护甲 3/8/6/3，韧性 2；最大法力 +125，火焰强度 +10%，火焰魔抗 +5% | 免疫火焰与熔岩（法术伤害除外），在熔岩中快速游动，周身环绕火焰；**不会**再在水中变成黑曜石，只会冒出蒸汽 | 涅槃：受到致命伤害时浴火重生，恢复 40% 生命、清除负面效果，并灼烧、击退 4.5 格内的敌人；冷却 5 分钟，冷却会显示在四件盔甲上 |
 
 铁魔法盔甲的特性都有：胸甲可以用奥术铁砧镶入一个法术；每一件都能用升级宝珠强化；加入了 `irons_spellbooks:armors/*` 和 `forge:armors/*` 标签。
-- **3D 模型**（GeckoLib，沿用铁魔法的 `GenericCustomArmorRenderer`）：武神套是开面战盔（金色额带和冠脊、蓝宝石），两侧有**会扇动的羽翼**；另有圆顶肩甲、凸起的胸甲片、腰侧银色短甲片（跟着腿摆动）、脚跟上的小翅膀；护腿是系在胸甲下摆外面的金边蓝腰带、蓝色马裤、银色护膝和胫甲。凤凰套是羽毛兜帽加金冠和红宝石，头顶有**会摇曳的三根冠羽和两条后垂长羽**；另有凤凰纹长袍、火焰尖羽肩甲、腰侧火羽短甲和分叉的后摆、脚踝火羽；护腿是镶红宝石的金腰带和红羽纹护腿，靴口往上窜着火苗。胸甲只到腰部、前腿不遮挡，穿上护腿能直接看出来。
+- **3D 模型**（GeckoLib，沿用铁魔法的 `GenericCustomArmorRenderer`）：武神套为带蓝宝石的开面战盔，两侧羽翼随动画扇动，搭配银白护甲与金边蓝色腰带；凤凰套为开脸羽毛兜帽，保留中间火冠，面罩开口从眉线开始，穿戴时不会遮住眼睛。两套使用 128×128 图集与独立的披风，羽翼和冠羽从多个视角均有立体厚度；头盔、胸甲与护腿图标为正面构图，靴子图标的脚尖分别朝外，轮廓左右对称。
 - **披风**：两套胸甲都自带披风（白金蓝的武神披风 / 渐变火焰、下缘镂空成火舌的凤凰披风）。它和原版披风一样随动作摆动，但挂在盔甲外侧不会穿模；玩家自己有披风时优先显示玩家的。
 - 模板获取：银牢奖励箱 35%、金牢奖励箱 50%，武神术士和烈阳祭司 3%（抢夺 +1%）；可以用 7 个奥术精华加 1 个神炼重力晶矿复制（一次得 2 个）。
 - 所有新物品都写了 Aether 知识之书（Book of Lore）里的介绍。
@@ -112,7 +131,7 @@ ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结
 | 武神权杖 `valkyrie_scepter` | 银牢奖励箱 20% | 5 | 神圣 +15%，雷电 +10%，法术强度 +5% | 杖头飘出金色星光 |
 | 烈阳权杖 `solar_scepter` | 金牢奖励箱 20% | 6 | 火焰 +15%，施法时间 -10%，法术强度 +10% | 日轮杖头飘出火星 |
 
-- 3D 模型由 `tools/gen_weapon_models.py` 生成：紫晶法杖是四根木爪托着的紫晶石；境云法杖头部是一团云和一颗金星；重力晶法杖是铁框里的重力晶；武神权杖有一对金边羽翼和一颗蓝宝石；烈阳权杖有十字交叉的日轮和一颗琥珀宝珠。
+- 3D 模型由 `tools/staff_models.py` 生成。法杖在背包、展示框、手持和地面上都使用立体模型；武神权杖每侧有覆羽肩部和四根交叠的实体羽毛。
 - 杖头粒子只在别人看你或第三人称时出现，第一人称下不会挡视线。
 - 法剑加入了 `minecraft:swords` 和 `forge:tools/swords` 标签。
 
@@ -136,7 +155,7 @@ ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结
 | Boss 联动 | 碎岩飞刃的投射物加入了 `aether:slider_damaging_projectiles`；冰结球击生成真正的 `IceCrystal`，能触发烈阳巨灵的冻结机制 |
 | 战利品 | 通过 `irons_spellbooks:append_loot` 注入铜/银/金地牢箱、女武神和西风啸云的掉落；新法术默认只在 Aether 掉落（配置项 `aetherExclusiveSpells`） |
 | 可选数据包 | `aether_spellbooks:ice_magic_is_cold`（默认关闭）：开启后铁魔法所有冰系法术都能伤害未冻结的烈阳巨灵 |
-| 数据生成 | `python tools/gen_data.py` 重新生成战利品、标签、配方、模型和粒子定义 |
+| 数据维护 | 当前战利品、标签与配方以 `src/main/resources/data/` 为准；早期初始化脚本归档于 `tools/legacy/` |
 
 ## 法术书模型（1.20.1）
 
@@ -166,7 +185,9 @@ hammerDamagePerLevel = 2.0
 
 联机时以服务端数值为准，客户端使用相同配置可保持法术详情显示一致。兼容通过本附属的四个 Mixin 实现，不需要替换天境或铁魔法的 JAR。
 
-## 自动化测试（58 项，不会打进 jar）
+## 自动化测试（65 项，不会打进 jar）
+
+- `ASAccessoriesGameTests`（7 项）：两套对应槽位与泛用 `curio` 槽的装备、属性和主动效果；通过正常玩家 tick 验证四件饰品的实际属性添加与卸下后的移除，以及项链施法只磨损一次、磨损后实际加成增长、耗尽后移除加成、修复后恢复加成和披风减伤；强制放入不匹配的专用槽位时不会磨损或减伤。
 - `ASSliderCompatGameTests`（14 项）：真实投掷与换手、工具材质和实际扣血、副手附魔与物品快照、力量加成且不重复计算武器属性；幽冥锤起手、唤醒、单次伤害、射程／遮挡、冒险／和平、房间边界、移动目标、配置开关及原有挖矿。
 - `ASGameTests`：云台、Slider 联动、烈阳巨灵冻结、召唤恐鸟、烈焰奴仆结盟、Aether 独占、金牢战利品、配方与可选数据包
 - `ASSpellGameTests`：重力涌动先抛起再砸地、武神突进路径伤害、西风冲击击退方向、旋风卷起并造成伤害、烈阳耀斑自动开火、境云护卫数量、碎岩飞刃齐射与穿透、风暴雷球电弧连锁、冰结球击跟随准星俯仰角
@@ -175,9 +196,9 @@ hammerDamagePerLevel = 2.0
 - `ASArmorGameTests`：凤凰法者套免疫火焰/熔岩（没穿的对照组会受伤）；涅槃触发一次、恢复 40% 生命、点燃旁边的敌人，第二次致命伤害时正在冷却；武神法者套免疫摔落；空中按住跳跃会被抬升，武神之佑在空中生效、落地后移除；每件的铁魔法属性只在对应槽位生效；锻造升级保留附魔、符文用错不能升级、模板可以复制
 - `ASWeaponGameTests`：烈阳法剑点燃目标约 30 秒；圣辉法剑对亡灵的额外伤害（与普通生物对比）；唤雷法剑召下落雷；血契法剑回血；三把法剑都封存着正确的法术；手持属性只在主手生效；重力晶法杖把地上的目标抛起；境云法杖召唤两只迷你云护卫；五种锻造升级和两个合成配方
 - `ASShrineGameTests`（单独批次）：两座神殿的模板里各有两名对应的术师（不会消失）和带正确战利品表的箱子；两个箱子每次至少掷出 4 组物品；两座神殿都能在 Aether 里自然生成并被找到
-- `ClientRenderCheck`：开发用的客户端截图检查（见“常用命令”），实机效果图存在 `docs/screenshots/`
+- `ClientRenderCheck`：开发用的客户端截图检查（见“常用命令”），实机效果图存在 `docs/screenshots/`。`accessories` 场景另通过真实客户端与服务端的网络同步，验证泛用槽中项链的装备、磨损、耗尽、修复、卸下五个阶段的耐久和实际法术强度一致；成功时日志输出 `[ASB-ACC-SYNC] all 5 stages passed`。
 
-已通过 Java 17 构建与全部 58 项 GameTest（原有 44 项，加 14 项兼容测试）。Forge 发布 JAR 使用 MixinGradle 生成的 refmap 映射幽冥锤 `tick` 方法，并在清单中注册 Mixin；开发截图和 GameTest 类不打入发布包。
+Forge 发布 JAR 使用 MixinGradle 生成的 refmap 映射幽冥锤 `tick` 方法，并在清单中注册 Mixin；开发截图、GameTest 类及开发用通用槽位数据包不打入发布包。验证记录见 [1.21.1 改动回移记录](docs/backport_1.21.1.md)。
 
 1.20.1 实机记录：[法术书](docs/screenshots/asb_books_comparison.png)、[幽冥锤正面](docs/screenshots/slider_hammer_front.gif)、[幽冥锤侧面](docs/screenshots/slider_hammer_side.gif)。
 
@@ -186,7 +207,7 @@ hammerDamagePerLevel = 2.0
 - 恐鸟的空中连跳手感；下坐骑 5 秒后是否消散
 - 武神突进的冲刺距离手感（按速度推进，地面上会比空中短一些）
 - 法术书挂在腰间的 Curios 装备效果（独立的合书／展开模型）
-- 在 Aether 饰品界面里，两件饰品能否放进对应槽位；加成是否生效
+- 饰品在多人联机时的装备和同步手感
 - 神殿在不同种子下的实际密度（间距 14 / 17 区块，在 GameTest 世界里离原点最近的约 20~900 格）和两名术师一起上时的难度
 - 武神法者套的飞行手感（逻辑和 Aether 原版相同，但需要在联机服务器上确认不会被判定为飞行）
 - 法师盔甲在各种动作（潜行、游泳、鞘翅）下的模型和披风表现
@@ -194,4 +215,6 @@ hammerDamagePerLevel = 2.0
 - 平衡性数值（全部可以通过铁魔法的 spell_config 或本模组配置覆盖）
 
 ## 素材授权
-Aether 和铁魔法的美术素材都是**保留所有权利**。本模组的贴图、盔甲模型和动画全部由 `tools/gen_textures.py`、`tools/gen_mob_textures.py`、`tools/gen_armor_models.py`、`tools/gen_weapon_models.py`、`tools/build_spellbook_models.py` 原创生成；法术书使用独立 UV 图集，其他资源沿用标准 64×64 玩家皮肤布局（施法生物直接使用铁魔法运行时自带的人形模型，没有复制它的文件）。云块、烈焰奴仆、恐鸟在运行时直接使用 Aether 自己的模型和渲染器，**没有**复制它的文件。
+Aether 和铁魔法的美术素材都是**保留所有权利**。本模组当前美术由 `tools/item_art.py`、`tools/staff_models.py`、`tools/armor_art.py`、`tools/entity_art.py`、`tools/build_spellbook_models.py` 原创生成，四件饰品保留原有手绘图标；法术书使用 32×32 独立 UV 图集，法杖使用 64×64 面图集，法师甲使用 128×128 图集，施法生物沿用标准 64×64 玩家皮肤布局。施法生物直接使用铁魔法运行时自带的人形模型，云块、烈焰奴仆、恐鸟在运行时直接使用 Aether 自己的模型和渲染器，没有复制其模型文件。
+
+饰品泛用槽修复及实际属性、客户端同步检查说明见 [饰品实际属性与同步验证](docs/accessory_effects_fix.md)。

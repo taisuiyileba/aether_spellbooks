@@ -1,5 +1,7 @@
 package com.aetherspellbooks.client.particle;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
@@ -8,6 +10,7 @@ import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -49,12 +52,16 @@ public final class ASParticleTypes {
 
     // ------------------------------------------------------------------ feather
     public static class Feather extends FadingParticle {
+        /** The four sprites are a feather turning edge-on and over: played back and forth, it flutters. */
+        private static final int[] FLUTTER = {0, 1, 2, 3, 2, 1};
         private final float spin;
         private final float swayPhase;
+        private final int flutterOffset;
 
         Feather(ClientLevel level, double x, double y, double z, double dx, double dy, double dz, SpriteSet sprites) {
             super(level, x, y, z, dx, dy, dz, sprites, 1f);
-            pickSprite(sprites);
+            this.flutterOffset = random.nextInt(FLUTTER.length * 4);
+            setSprite(sprites.get(FLUTTER[flutterOffset / 4 % FLUTTER.length], 3));
             this.lifetime = 40 + random.nextInt(30);
             this.gravity = 0.012f;
             this.friction = 0.94f;
@@ -70,6 +77,9 @@ public final class ASParticleTypes {
             super.tick();
             oRoll = roll;
             roll += spin;
+            if (!removed) {
+                setSprite(sprites.get(FLUTTER[(age + flutterOffset) / 4 % FLUTTER.length], 3));
+            }
             // gentle side-to-side drift while falling
             float sway = Mth.sin(age * 0.25f + swayPhase) * 0.006f;
             xd += sway;
@@ -129,6 +139,22 @@ public final class ASParticleTypes {
                 setSpriteFromAge(sprites);
             }
         }
+
+        @Override
+        public void render(@NotNull VertexConsumer buffer, @NotNull Camera camera, float partialTicks) {
+            // puffs born at the caster's eye (cast burst, orb trail) would otherwise fill the first-person view with
+            // flat, hard-edged cards: fade them out within two blocks of the camera
+            Vec3 cam = camera.getPosition();
+            double dx = Mth.lerp(partialTicks, xo, x) - cam.x, dy = Mth.lerp(partialTicks, yo, y) - cam.y, dz = Mth.lerp(partialTicks, zo, z) - cam.z;
+            float near = Mth.clamp(((float) Math.sqrt(dx * dx + dy * dy + dz * dz) - 0.6f) / 1.4f, 0f, 1f);
+            if (near <= 0f) {
+                return;
+            }
+            float alphaBefore = alpha;
+            alpha *= near;
+            super.render(buffer, camera, partialTicks);
+            alpha = alphaBefore;
+        }
     }
 
     // ------------------------------------------------------------------ storm puff
@@ -177,8 +203,8 @@ public final class ASParticleTypes {
         public void tick() {
             super.tick();
             if (!removed) {
-                // loop the 4 frames
-                setSprite(sprites.get(age % 8, 8));
+                // loop the 4 frames (rest, swell, burst, ripple), two ticks each
+                setSprite(sprites.get(age % 8 / 2, 3));
             }
         }
 

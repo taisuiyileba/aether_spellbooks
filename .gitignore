@@ -56,3 +56,7 @@ desktop.ini
 local.properties
 *.keystore
 *.jks
+
+# Python packaging outputs
+*.egg-info/
+/dist/

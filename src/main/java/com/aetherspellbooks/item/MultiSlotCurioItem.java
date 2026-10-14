@@ -19,9 +19,10 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * A curio that grants its attributes in any of several slots, so it works both in the Aether's own
- * accessory slots ({@code aether_ring}, {@code aether_pendant}) and in the default Curios slots
- * used by Iron's Spells ({@code ring}, {@code necklace}), whichever layout a modpack uses.
+ * An accessory that grants its attributes in its Aether slot, matching standard Curios slot and generic curio slot.
+ * On 1.20.1 both layouts use Curios: {@code aether_ring}/{@code ring},
+ * {@code aether_pendant}/{@code necklace}, {@code aether_gloves}/{@code hands},
+ * and {@code aether_cape}/{@code back}. Item tags determine which slots accept it.
  */
 public class MultiSlotCurioItem extends CurioBaseItem {
     private final Set<String> slots;
@@ -34,7 +35,18 @@ public class MultiSlotCurioItem extends CurioBaseItem {
     }
 
     protected boolean appliesTo(SlotContext slotContext) {
-        return slots.contains(slotContext.identifier());
+        return supportsSlot(slotContext.identifier());
+    }
+
+    /** Attributes and active effects use the same policy, including Curios' generic slot. */
+    public boolean supportsSlot(String identifier) {
+        return "curio".equals(identifier) || slots.contains(identifier);
+    }
+
+    @Override
+    public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
+        // The 1.20.1 Aether menu uses Curios, whose default disables right-click equipping.
+        return appliesTo(slotContext);
     }
 
     @Override
