@@ -39,7 +39,7 @@ import java.util.UUID;
 
 /**
  * Development-only visual check (excluded from the jar). With the environment variable ASB_RENDER_CHECK set to
- * "mobs" (or "1"), "armor", "weapons", "items", "books", "spells", "shrines" or "slider", the client creates a flat world, sets up that scene, saves screenshots
+ * "mobs" (or "1"), "armor", "weapons", "items", "books", "spells", "shrines", "slider" or "accessories", the client creates a flat world, sets up that scene, saves screenshots
  * (run/screenshots/asb_*.png) and quits.
  */
 @EventBusSubscriber(modid = AetherSpellbooks.MODID, value = Dist.CLIENT)
@@ -155,6 +155,8 @@ public class ClientRenderCheck {
             commands.addAll(List.of("kill @e[type=minecraft:armor_stand]", "kill @e[type=minecraft:item_frame]", "kill @e[type=minecraft:item]", "clear @p"));
             commands.add("fill " + (bx - 7) + " " + by + " " + (bz - 4) + " " + (bx + 7) + " " + (by + 4) + " " + (bz - 4) + " minecraft:smooth_quartz");
             commands.add("fill " + (bx + 2) + " " + (by - 1) + " " + (bz - 2) + " " + (bx + 5) + " " + (by - 1) + " " + (bz + 1) + " minecraft:water");
+        } else if ("accessories".equals(SCENE)) {
+            // AccessoryRenderCheck equips through the real right-click and menu paths
         } else if ("slider".equals(SCENE)) {
             // The moving hammer is captured from two views by SliderRenderCheck.
         } else if ("shrines".equals(SCENE)) {
@@ -357,6 +359,10 @@ public class ClientRenderCheck {
         }
         if ("slider".equals(SCENE)) {
             SliderRenderCheck.tick(mc, server, origin, timer);
+            return;
+        }
+        if ("accessories".equals(SCENE)) {
+            AccessoryRenderCheck.tick(mc, server, timer);
             return;
         }
         if ("shrines".equals(SCENE)) {

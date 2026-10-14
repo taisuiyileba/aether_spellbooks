@@ -17,9 +17,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A curio that grants its attributes in any of several slots, so it works both in the Aether's own
- * accessory slots ({@code aether_ring}, {@code aether_pendant}) and in the default Curios slots
- * used by Iron's Spells ({@code ring}, {@code necklace}), whichever layout a modpack uses.
+ * An accessory that grants its attributes only in the named slots. On 1.21.1 The Aether's accessory slots belong to
+ * Accessories ({@code aether:ring_slot} and friends, mapped to {@code aether_ring} etc. by AccessoriesCompat), and the
+ * items are tagged for those slots only: they are not Curios curios, so nothing can put them in a slot that The
+ * Aether's accessory menu does not show.
  */
 public class MultiSlotCurioItem extends CurioBaseItem {
     private final Set<String> slots;

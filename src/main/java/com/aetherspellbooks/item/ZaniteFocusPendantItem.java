@@ -24,7 +24,7 @@ import java.util.Set;
  * It never breaks; once fully worn it is depleted and grants nothing until repaired with zanite.
  */
 public class ZaniteFocusPendantItem extends MultiSlotCurioItem {
-    public static final Set<String> SLOTS = Set.of("aether_pendant", "necklace");
+    public static final Set<String> SLOTS = Set.of("aether_pendant");
 
     public ZaniteFocusPendantItem(Properties properties) {
         super(properties, SLOTS);

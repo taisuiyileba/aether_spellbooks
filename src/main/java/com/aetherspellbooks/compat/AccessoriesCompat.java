@@ -35,8 +35,7 @@ public final class AccessoriesCompat {
                             case "aether:ring_slot" -> "aether_ring";
                             case "aether:pendant_slot" -> "aether_pendant";
                             case "aether:gloves_slot" -> "aether_gloves";
-                            case "aether:cape_slot", "cape" -> "aether_cape";
-                            case "hand" -> "hands";
+                            case "aether:cape_slot" -> "aether_cape";
                             default -> reference.slotName();
                         };
                         var context = new SlotContext(slot, reference.entity(), reference.slot(), false, true);

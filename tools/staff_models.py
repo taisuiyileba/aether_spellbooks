@@ -507,59 +507,81 @@ def y45(origin):
     return rot('y', 45, origin)
 
 
-def wing_rows(rows, pal, x0, y_top, layers, name='wing'):
-    """A feather map built as solid geometry instead of a zero-thickness card.
+def feather(length, along, tip_high):
+    """Painter for one modelled feather: a bar `length` units long along `along` ('x' or 'y'), its tip at the high end
+    of that axis when `tip_high`. No painted outline - the bar's own edges and the face shading draw it. Colour runs
+    from warm gold at the quill to white at the tip; the lit side of the vane (top / left) is one step brighter."""
+    def level(d):                                      # d = texels from the tip
+        if d < 2:
+            return 'feather', 5 - d
+        return 'gold', 4 if d < length * 0.6 else 3
 
-    `rows` is the front-on map (row 0 on top), 1 texel = 1 model unit, placed with its left edge at x0 and its top
-    at y_top. Every row becomes a box exactly as wide as that row's run of texels, so the front silhouette is the
-    map's own; consecutive rows with the same run and layer merge into one box. `layers(row) -> (thickness,
-    z_centre)` sets each row's depth and how far it sits back, which gives the wing a sculpted side profile (thin
-    tips swept back, a thicker root). The front and back faces carry the pixels; the top, bottom and end faces take
-    the colour of the texel they border (one step lighter on top, darker below), so the edges read as a solid
-    feather rim rather than a cut-out."""
-    h, w = len(rows), len(rows[0])
-    if any(len(r) != w for r in rows):
-        raise ValueError(f'{name}: ragged map')
-    runs = []
-    for r, row in enumerate(rows):
-        cols = [x for x, ch in enumerate(row) if ch in pal]
-        if not cols:
-            continue
-        c0, c1 = min(cols), max(cols) + 1
-        if any(row[x] not in pal for x in range(c0, c1)):
-            raise ValueError(f'{name}: row {r} has a gap; split the map')
-        key = (c0, c1) + tuple(layers(r))
-        if runs and runs[-1][0] == key and runs[-1][2] == r:
-            runs[-1][2] = r + 1
-        else:
-            runs.append([key, r, r + 1])
-    els = []
-    for (c0, c1, thick, zc), r0, r1 in runs:
-        def paint(f, frame, c0=c0, c1=c1, r0=r0, r1=r1):
-            out = np.zeros((f.h, f.w, 4), np.uint8)
-
-            def put(y, x, ch, shift=0):
-                ramp, lv = pal[ch]
-                out[y, x] = col(ramp, lv + shift)
-            for y in range(f.h):
-                for x in range(f.w):
-                    if f.name == 'south':
-                        put(y, x, rows[r0 + y][c0 + x])
-                    elif f.name == 'north':
-                        put(y, x, rows[r0 + y][c1 - 1 - x])
-                    elif f.name == 'east':
-                        put(y, x, rows[r0 + y][c1 - 1], -1)
-                    elif f.name == 'west':
-                        put(y, x, rows[r0 + y][c0], -1)
-                    elif f.name == 'up':
-                        put(y, x, rows[r0][c0 + x], 1)
+    def paint(f, frame):
+        out = np.zeros((f.h, f.w, 4), np.uint8)
+        for v in range(f.h):
+            for u in range(f.w):
+                if along == 'y':
+                    if f.name == 'up':
+                        d = 0 if tip_high else length - 1
+                    elif f.name == 'down':
+                        d = length - 1 if tip_high else 0
                     else:
-                        put(y, x, rows[r1 - 1][c0 + x], -1)
-            return out
+                        d = v if tip_high else length - 1 - v
+                    shade = -1 if (f.name in ('south', 'north') and u > 0) or f.name in ('east', 'west', 'down') else 0
+                else:
+                    if f.name in ('east', 'west'):
+                        d = 0 if (f.name == 'east') == tip_high else length - 1
+                    elif f.name == 'north':
+                        d = u if tip_high else length - 1 - u
+                    else:
+                        d = length - 1 - u if tip_high else u
+                    shade = -1 if (f.name in ('south', 'north') and v > 0) or f.name in ('down', 'east', 'west') else 0
+                ramp, lv = level(d)
+                out[v, u] = col(ramp, lv + shade)
+        return out
+    return paint
 
-        frm = (x0 + c0, y_top - r1, zc - thick / 2)
-        to = (x0 + c1, y_top - r0, zc + thick / 2)
-        els.append(El(frm, to, paint, name=f'{name}_{r0}'))
+
+def covert(f, frame):
+    """The wing's shoulder: pale covert feathers on top, gold below, no outline."""
+    out = np.zeros((f.h, f.w, 4), np.uint8)
+    for v in range(f.h):
+        for u in range(f.w):
+            if f.name == 'up':
+                ramp, lv = 'feather', 5 if u % 2 == 0 else 4
+            elif f.name == 'down':
+                ramp, lv = 'gold', 2
+            else:
+                ramp, lv = ('feather', 4) if v == 0 else ('gold', 4) if v < f.h - 1 else ('gold', 3)
+                if f.name in ('east', 'west', 'north'):
+                    lv -= 1
+            out[v, u] = col(ramp, lv)
+    return out
+
+
+def raised_wing(side):
+    """One modelled wing beside the scepter's gem: a covert shoulder and four feathers fanned upwards and outwards at
+    0, 22.5, 45 and 67.5 degrees above the horizontal, the middle two longest. `side` is -1 for the left wing (outer
+    side towards -x), +1 for the right. Every feather sits on its own depth so no two faces share a plane."""
+    s = side
+    mx = (lambda x: x) if s < 0 else (lambda x: 16 - x)       # mirror x for the right wing
+    root = (mx(5.5), 21.5, 8)
+    els = []
+    # shoulder block over the feather roots (in front of them all)
+    x0, x1 = sorted((mx(3.5), mx(7.5)))
+    els.append(El((x0, 20.5, 6.75), (x1, 23.5, 9.75), covert, name=f'wing_{"lr"[s > 0]}_shoulder'))
+    # horizontal feather (0 deg) and one tilted 22.5 deg up: bars along x, tip at the outer end. Feathers are three
+    # units wide so neighbours overlap (each on its own depth) and the fan reads as one wing, not separate sticks.
+    for i, (length, ang, z) in enumerate(((5, 0, 8.5), (7, 22.5, 8.0))):
+        a, b = sorted((mx(5.5 - length), mx(5.5)))
+        bar = El((a, 20, z - 0.5), (b, 23, z + 0.5), feather(length, 'x', tip_high=s > 0),
+                 rot('z', -ang * -s, root) if ang else None, name=f'wing_{"lr"[s > 0]}_f{i}')
+        els.append(bar)
+    # 45 and 67.5 deg: vertical bars tilted outwards by 45 / 22.5 deg
+    for i, (length, ang, z) in enumerate(((9, 45, 7.5), (8, 22.5, 8.75)), start=2):
+        bar = El((root[0] - 1.5, 21.5, z - 0.5), (root[0] + 1.5, 21.5 + length, z + 0.5), feather(length, 'y', tip_high=True),
+                 rot('z', ang * -s, root), name=f'wing_{"lr"[s > 0]}_f{i}')
+        els.append(bar)
     return els
 
 
@@ -626,30 +648,6 @@ def gravitite_staff():
     return els, 4
 
 
-WING = [                      # left wing seen from the front: tip top left, root bottom right by the gem
-    "qq.......",
-    "qvq......",
-    "quuq.....",
-    "qtvuq....",
-    "qtttuq...",
-    "qstttuqq.",
-    "qvsttttuq",
-    "qqvssttuq",
-    ".qqvsstsq",
-    "..qqvssq.",
-    "....qqq..",
-]
-COVERTS = [                   # pale inner feathers standing one unit proud of the wing root (left wing; root at right)
-    ".qvq.",
-    "qvutq",
-    "qvtsq",
-    ".qqq.",
-]
-WING_PAL = {'q': ('gold', 0), 'r': ('gold', 1), 's': ('gold', 2), 't': ('gold', 3), 'u': ('gold', 4),
-            'v': ('feather', 5)}
-COVERT_PAL = {'q': ('gold', 0), 's': ('feather', 2), 't': ('feather', 3), 'u': ('feather', 4), 'v': ('feather', 5)}
-
-
 def valkyrie_scepter():
     """White-silver shaft with gold bands; golden wings swept back from a faceted valkyrie-blue gem."""
     n = 5
@@ -663,25 +661,8 @@ def valkyrie_scepter():
         El((7, 21, 7), (9, 22, 9), g, y45((8, 19.5, 8)), name='gem_top'),
         El((7.5, 22, 7.5), (8.5, 24, 8.5), gold, name='finial'),
     ]
-    # The wings are solid feather rows, not flat cards: thin tips swept back, a two-unit root, and a row of pale
-    # coverts standing one unit proud of the root. The map is lifted half a unit so no face shares a plane with
-    # the neck or the gem.
-    def wing_layer(r):
-        return (1, 7.0) if r < 2 else (1, 7.5) if r < 5 else (2, 8.0)
-
-    def covert_layer(r):
-        return (1, 9.5)
-    for side, (x0, cx0, flip, ang, pivot) in {'l': (-1.5, 2.5, False, -22.5, (7.5, 20, 8)),
-                                             'r': (8.5, 8.5, True, 22.5, (8.5, 20, 8))}.items():
-        wing = [r[::-1] for r in WING] if flip else WING
-        cov = [r[::-1] for r in COVERTS] if flip else COVERTS
-        parts = wing_rows(wing, WING_PAL, x0, 28.5, wing_layer, name='wing_' + side)
-        parts += wing_rows(cov, COVERT_PAL, cx0, 23.5, covert_layer, name='coverts_' + side)
-        for el in parts:
-            el.rot = rot('y', ang, pivot)
-            el.matrix = ROT['y'](math.radians(ang))
-            el.origin = np.array(pivot, np.float64)
-        els += parts
+    # Modelled wings: a covert shoulder and four fanned feather bars on each side, rising up and out from the gem.
+    els += raised_wing(-1) + raised_wing(1)
     return els, 1 + n
 
 
