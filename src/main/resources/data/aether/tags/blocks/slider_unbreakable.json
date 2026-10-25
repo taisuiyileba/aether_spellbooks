@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "aether_spellbooks:carved_vault",
+    "aether_spellbooks:angelic_vault",
+    "aether_spellbooks:hellfire_vault"
+  ]
+}

@@ -39,7 +39,7 @@ import java.util.UUID;
 
 /**
  * Development-only visual check (excluded from the jar). With the environment variable ASB_RENDER_CHECK set to
- * "mobs" (or "1"), "armor", "weapons", "items", "books", "spells", "shrines", "slider" or "accessories", the client creates a flat world, sets up that scene, saves screenshots
+ * "mobs" (or "1"), "armor", "weapons", "items", "books", "spells", "shrines", "slider", "dungeon" or "accessories", the client creates a flat world, sets up that scene, saves screenshots
  * (run/screenshots/asb_*.png) and quits.
  */
 @Mod.EventBusSubscriber(modid = AetherSpellbooks.MODID, value = Dist.CLIENT)
@@ -157,8 +157,8 @@ public class ClientRenderCheck {
             commands.add("fill " + (bx + 2) + " " + (by - 1) + " " + (bz - 2) + " " + (bx + 5) + " " + (by - 1) + " " + (bz + 1) + " minecraft:water");
         } else if ("accessories".equals(SCENE)) {
             // AccessoryRenderCheck equips through the real right-click and menu paths
-        } else if ("slider".equals(SCENE)) {
-            // The moving hammer is captured from two views by SliderRenderCheck.
+        } else if ("slider".equals(SCENE) || "dungeon".equals(SCENE)) {
+            // SliderRenderCheck / DungeonRenderCheck build and frame their own scenes.
         } else if ("shrines".equals(SCENE)) {
             // the shrines are placed or found per shot
         } else if ("books".equals(SCENE)) {
@@ -363,6 +363,10 @@ public class ClientRenderCheck {
         }
         if ("accessories".equals(SCENE)) {
             AccessoryRenderCheck.tick(mc, server, timer);
+            return;
+        }
+        if ("dungeon".equals(SCENE)) {
+            DungeonRenderCheck.tick(mc, server, origin, timer);
             return;
         }
         if ("shrines".equals(SCENE)) {

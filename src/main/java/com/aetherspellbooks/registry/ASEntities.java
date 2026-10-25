@@ -2,6 +2,7 @@ package com.aetherspellbooks.registry;
 
 import com.aetherspellbooks.AetherSpellbooks;
 import com.aetherspellbooks.entity.AetherWhirlwind;
+import com.aetherspellbooks.entity.GuardianSoul;
 import com.aetherspellbooks.entity.IcestoneMeteor;
 import com.aetherspellbooks.entity.RadiantJavelin;
 import com.aetherspellbooks.entity.SpectralAerwhale;
@@ -122,6 +123,15 @@ public class ASEntities {
                     .clientTrackingRange(80)
                     .updateInterval(1)
                     .build(AetherSpellbooks.id("icestone_meteor").toString()));
+
+    // --- What a defeated dungeon boss leaves behind ---
+    public static final RegistryObject<EntityType<GuardianSoul>> GUARDIAN_SOUL = ENTITIES.register("guardian_soul",
+            () -> EntityType.Builder.<GuardianSoul>of(GuardianSoul::new, MobCategory.MISC)
+                    .sized(0.8f, 0.8f)
+                    .fireImmune()
+                    .clientTrackingRange(10)
+                    .updateInterval(2)
+                    .build(AetherSpellbooks.id("guardian_soul").toString()));
 
     // --- Spellcasting mobs: counted against the Aether's surface monster cap, like Swets and Whirlwinds ---
     public static final RegistryObject<EntityType<ValkyrieSorceress>> VALKYRIE_SORCERESS = ENTITIES.register("valkyrie_sorceress",

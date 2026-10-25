@@ -15,6 +15,7 @@ python -m pip install -r tools/requirements.txt
 | `staff_models.py` | 五把法杖的模型与图集 |
 | `armor_art.py` | 两套法师甲模型、动画、图集、披风及图标 |
 | `entity_art.py` | 施法生物、投射物、光环与粒子贴图 |
+| `dungeon_art.py` | 三种地牢宝库立体模型与贴图、守卫残片与三件圣物、守卫之魂与仪式光柱 |
 
 每个脚本的 `--check` 都只读现有资源，并在内存中重建后对照；省略该参数会导出资源。预览写入 `build/art_preview/`，不纳入 Git。
 

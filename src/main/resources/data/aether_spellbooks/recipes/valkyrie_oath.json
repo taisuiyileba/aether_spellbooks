@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "MSM",
+    "SGS",
+    "MSM"
+  ],
+  "key": {
+    "M": {
+      "item": "aether:victory_medal"
+    },
+    "S": {
+      "item": "aether_spellbooks:guardian_shard"
+    },
+    "G": {
+      "item": "minecraft:gold_ingot"
+    }
+  },
+  "result": {
+    "item": "aether_spellbooks:valkyrie_oath",
+    "count": 1
+  }
+}

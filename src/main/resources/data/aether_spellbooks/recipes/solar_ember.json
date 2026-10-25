@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ASA",
+    "SFS",
+    "ASA"
+  ],
+  "key": {
+    "A": {
+      "item": "aether:golden_amber"
+    },
+    "S": {
+      "item": "aether_spellbooks:guardian_shard"
+    },
+    "F": {
+      "item": "irons_spellbooks:fire_rune"
+    }
+  },
+  "result": {
+    "item": "aether_spellbooks:solar_ember",
+    "count": 1
+  }
+}

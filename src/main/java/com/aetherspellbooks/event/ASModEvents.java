@@ -1,6 +1,7 @@
 package com.aetherspellbooks.event;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.dungeon.DungeonVaults;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
@@ -10,12 +11,18 @@ import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import java.nio.file.Path;
 
 @Mod.EventBusSubscriber(modid = AetherSpellbooks.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ASModEvents {
     public static final String ICE_MAGIC_IS_COLD_PACK = "ice_magic_is_cold";
+
+    @SubscribeEvent
+    public static void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(DungeonVaults::bindToVaultBlockEntity);
+    }
 
     /**
      * Registers an optional built-in data pack (disabled by default) that adds Iron's Spells ice magic

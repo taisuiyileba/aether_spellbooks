@@ -17,6 +17,11 @@ public class ASConfig {
     public static final ForgeConfigSpec.BooleanValue SPECTRAL_HAMMER_DAMAGE_SLIDER;
     public static final ForgeConfigSpec.DoubleValue SLIDER_HAMMER_BASE_DAMAGE;
     public static final ForgeConfigSpec.DoubleValue SLIDER_HAMMER_DAMAGE_PER_LEVEL;
+    public static final ForgeConfigSpec.BooleanValue TREASURE_VAULTS;
+    public static final ForgeConfigSpec.BooleanValue KEY_PER_PARTICIPANT;
+    public static final ForgeConfigSpec.BooleanValue RESET_VAULTS_ON_REVIVAL;
+    public static final ForgeConfigSpec.BooleanValue GUARDIAN_REVIVAL;
+    public static final ForgeConfigSpec.BooleanValue MODIFY_IRONS_VAULTS;
 
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
@@ -40,6 +45,33 @@ public class ASConfig {
         SLIDER_HAMMER_DAMAGE_PER_LEVEL = builder
                 .comment("Additional Slider damage for each Spectral Hammer level after the first.")
                 .defineInRange("hammerDamagePerLevel", 2.0, 0.0, 100.0);
+        builder.pop();
+
+        builder.comment("Dungeon rewards and rematches. Only bosses that belong to an Aether dungeon are affected; a summoned boss",
+                "(spawn egg, /summon, other mods) keeps the Aether's behaviour.")
+                .push("dungeons");
+        TREASURE_VAULTS = builder
+                .comment("When a dungeon boss dies, the still-locked Treasure Chest in its own room becomes a vault that each player",
+                        "can unlock once with the dungeon key, ejecting all rolled rewards at once. Chests that were already",
+                        "opened or filled by hand are left alone.")
+                .define("treasureChestsBecomeVaults", true);
+        KEY_PER_PARTICIPANT = builder
+                .comment("If the boss room holds a vault, give each participant one dungeon key directly in their inventory instead",
+                        "of dropping a single key. Offline players and full inventories keep pending keys for automatic delivery.")
+                .define("keyPerParticipant", true);
+        RESET_VAULTS_ON_REVIVAL = builder
+                .comment("When a dungeon boss is revived, clear its room's vault reward history so each player can unlock it again.",
+                        "Iron's Spells' original vaults are included only when modifyIronsSpellbooksVaults is also enabled.")
+                .define("resetVaultsOnRevival", true);
+        GUARDIAN_REVIVAL = builder
+                .comment("A defeated dungeon boss leaves its soul behind. Using the matching relic (Sentry Core, Valkyrie's Oath, Solar",
+                        "Ember) on it rebuilds the boss room and calls the boss back for a rematch.")
+                .define("guardianRevival", true);
+        MODIFY_IRONS_VAULTS = builder
+                .comment("Apply dungeon vault enhancements to Iron's Spells' original vaults (Bone Vault, Cinderous Vault, Vault):",
+                        "burst out all rolled rewards at once when opened, and refresh arena vaults when a boss (such as the Dead King)",
+                        "is revived. Disabled by default.")
+                .define("modifyIronsSpellbooksVaults", false);
         builder.pop();
 
         builder.push("spells");
@@ -106,5 +138,25 @@ public class ASConfig {
 
     public static double sliderHammerDamagePerLevel() {
         return SPEC.isLoaded() ? SLIDER_HAMMER_DAMAGE_PER_LEVEL.get() : SLIDER_HAMMER_DAMAGE_PER_LEVEL.getDefault();
+    }
+
+    public static boolean treasureVaults() {
+        return !SPEC.isLoaded() || TREASURE_VAULTS.get();
+    }
+
+    public static boolean keyPerParticipant() {
+        return !SPEC.isLoaded() || KEY_PER_PARTICIPANT.get();
+    }
+
+    public static boolean resetVaultsOnRevival() {
+        return !SPEC.isLoaded() || RESET_VAULTS_ON_REVIVAL.get();
+    }
+
+    public static boolean guardianRevival() {
+        return !SPEC.isLoaded() || GUARDIAN_REVIVAL.get();
+    }
+
+    public static boolean modifyIronsVaults() {
+        return SPEC.isLoaded() && MODIFY_IRONS_VAULTS.get();
     }
 }

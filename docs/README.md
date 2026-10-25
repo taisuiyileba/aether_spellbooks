@@ -1,11 +1,12 @@
 # 开发文档索引
 
-本分支面向 Minecraft 1.20.1 / Forge，正式模组版本为 1.1.0。
+本分支面向 Minecraft 1.20.1 / Forge，当前模组版本为 1.2.0。
 
 - [玩法、依赖和构建](../README.md)
 - [更新记录](../CHANGELOG.md)
 - [法术书模型与 UV](spellbook_models.md)
 - [饰品实际属性与客户端同步验证](accessory_effects_fix.md)
+- [地牢宝库与守卫召回](dungeon_rematch.md)
 - [资源工具说明](../tools/README.md)
 - [1.21.1 改动回移记录](backport_1.21.1.md)
 

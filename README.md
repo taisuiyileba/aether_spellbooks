@@ -1,11 +1,11 @@
 # Aether Spellbooks（天境魔法书）
 
-Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.1.0 · MIT
+Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.2.0 · MIT
 
 - 本目录：Forge 1.20.1。
 - [NeoForge 1.21.1 移植版](https://github.com/taisuiyileba/aether_spellbooks/blob/1.21.1/README.md)：独立构建工程与依赖说明。
 
-项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，正式版本统一为 1.1.0。
+项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，与模组版本号无关；当前模组版本为 1.2.0。
 源码布局、工具入口和验证记录见 [开发文档索引](docs/README.md)，本次更新见 [更新记录](CHANGELOG.md)。
 
 ## 依赖
@@ -21,6 +21,7 @@ Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.1.0 · MIT
 ./gradlew runClient           # 开发客户端
 ./gradlew runGameTestServer   # 运行自动化 GameTest（见下），全部通过时退出码为 0
 python tools/item_art.py --check   # 校验法剑和锻造图标；新版美术生成命令见下
+python tools/dungeon_art.py --check  # 校验宝库、圣物和守卫之魂贴图
 ASB_RENDER_CHECK=mobs ./gradlew runClient    # 自动建平坦世界、摆好施法生物、截图到 run/screenshots/asb_*.png 后退出
 ASB_RENDER_CHECK=armor ./gradlew runClient   # 同上，展示两套法师盔甲（盔甲架 + 第三人称玩家，带披风）
 ASB_RENDER_CHECK=weapons ./gradlew runClient # 同上，展示法杖和法剑（物品展示框、第三/第一人称、物品栏图标）
@@ -30,6 +31,7 @@ ASB_RENDER_CHECK=accessories ./gradlew runClient # 右键装备和天境饰品�
 ASB_RENDER_CHECK=items ./gradlew runClient   # 同上，生存背包里把本模组图标和铁魔法/Aether/原版的同类物品排在一起对比
 ASB_RENDER_CHECK=spells ./gradlew runClient  # 同上，对一排尸壳依次施放 v1.5 的法术并在关键时刻截图（asb_spell_*.png）
 ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结构生成），平坦世界里放置两座神殿，再去 Aether 找自然生成的神殿截图（asb_shrine_*.png）
+ASB_RENDER_CHECK=dungeon ./gradlew runClient # 三种宝库（空闲/激活/俯视）、日夜下的守卫之魂、召回仪式和背包图标（asb_dungeon_*.png）
 ```
 
 ## 从 1.21.1 同步的美术与饰品改动
@@ -185,7 +187,17 @@ hammerDamagePerLevel = 2.0
 
 联机时以服务端数值为准，客户端使用相同配置可保持法术详情显示一致。兼容通过本附属的四个 Mixin 实现，不需要替换天境或铁魔法的 JAR。
 
-## 自动化测试（65 项，不会打进 jar）
+## 地牢宝库与守卫召回（1.2.0）
+
+- **每人独立领奖的立体宝库**：地牢 boss 死亡时，它自己房间里仍上锁、内容尚未生成的藏宝箱会变成雕纹 / 天灵 / 狱炎宝库，沿用原来的战利品表。每位玩家可凭对应的青铜 / 白银 / 黄金钥匙**独立开启一次**，互不占用领取资格；开启瞬间合并后的全部战利品一次性弹出。默认在 boss 复活时清空领奖记录，让所有玩家领取下一轮奖励。宝库不可挖掘、不可炸毁，也不会被滑行魔石撞毁。
+- **每人一把钥匙，直接发到背包**：房间里有宝库时，boss 为每位参战者各发一把对应钥匙；跨维度照常发放，离线、尚未重生或背包已满时保留奖励并自动补发。关闭 `keyPerParticipant` 可恢复天境原本的一把地面钥匙掉落。
+- **守卫之魂与重战掉落**：boss 倒下后，灵魂会飘回出生点。对它使用岗哨核心、武神誓约或烈阳余烬（也可以在已攻克的房间内直接使用），房间会由外向内恢复原状，随后 boss 带着原名回到原房间。武神女王召回后直接应战，不再收取胜利奖牌。击败召回的 boss 只掉落对应的开启钥匙和天境原本击杀该 boss 会掉落的物品（雕纹石 / 金剑 / 太阳祭坛），玩家可凭新钥匙再次开启宝库。
+- **铁魔法原版宝库兼容联动**：可开启 `modifyIronsSpellbooksVaults`（默认关闭）。开启后，铁魔法原本的宝库同样一次性弹出全部战利品；同时开启 `resetVaultsOnRevival` 时，使用命匣复活死者之王会刷新附近的地下墓穴宝库。关闭兼容时，天境守卫复活也不会清空铁魔法自带宝库的记录。
+- 只处理属于地牢的 boss；刷怪蛋、指令或其他模组生成的 boss 保持天境原版行为。配置项位于 `[dungeons]`，`keyPerParticipant=true` 和 `resetVaultsOnRevival=true` 均默认开启。
+
+规则、保护措施、物品来源与验证见 [地牢宝库与守卫召回](docs/dungeon_rematch.md)。实机截图：[宝库](docs/screenshots/dungeon_vaults_active.png)、[召回仪式](docs/screenshots/dungeon_ritual.png)、[背包图标](docs/screenshots/dungeon_inventory.png)。
+
+## 自动化测试（85 项，不会打进 jar）
 
 - `ASAccessoriesGameTests`（7 项）：两套对应槽位与泛用 `curio` 槽的装备、属性和主动效果；通过正常玩家 tick 验证四件饰品的实际属性添加与卸下后的移除，以及项链施法只磨损一次、磨损后实际加成增长、耗尽后移除加成、修复后恢复加成和披风减伤；强制放入不匹配的专用槽位时不会磨损或减伤。
 - `ASSliderCompatGameTests`（14 项）：真实投掷与换手、工具材质和实际扣血、副手附魔与物品快照、力量加成且不重复计算武器属性；幽冥锤起手、唤醒、单次伤害、射程／遮挡、冒险／和平、房间边界、移动目标、配置开关及原有挖矿。
@@ -196,6 +208,7 @@ hammerDamagePerLevel = 2.0
 - `ASArmorGameTests`：凤凰法者套免疫火焰/熔岩（没穿的对照组会受伤）；涅槃触发一次、恢复 40% 生命、点燃旁边的敌人，第二次致命伤害时正在冷却；武神法者套免疫摔落；空中按住跳跃会被抬升，武神之佑在空中生效、落地后移除；每件的铁魔法属性只在对应槽位生效；锻造升级保留附魔、符文用错不能升级、模板可以复制
 - `ASWeaponGameTests`：烈阳法剑点燃目标约 30 秒；圣辉法剑对亡灵的额外伤害（与普通生物对比）；唤雷法剑召下落雷；血契法剑回血；三把法剑都封存着正确的法术；手持属性只在主手生效；重力晶法杖把地上的目标抛起；境云法杖召唤两只迷你云护卫；五种锻造升级和两个合成配方
 - `ASShrineGameTests`（单独批次）：两座神殿的模板里各有两名对应的术师（不会消失）和带正确战利品表的箱子；两个箱子每次至少掷出 4 组物品；两座神殿都能在 Aether 里自然生成并被找到
+- `ASDungeonGameTests`（20 项，单独批次）：藏宝箱安全转换、原版掉落保留、多人直接领钥匙、跨维度与离线补发、背包已满与保存重载、双人各自开箱和同人重复领取限制、完整复活后重置与下一轮分发、各项配置、藏宝室保护、宝库抵御滑行魔石撞击、女王整座神殿恢复、真实死者之王复活时的宝库刷新兼容
 - `ClientRenderCheck`：开发用的客户端截图检查（见“常用命令”），实机效果图存在 `docs/screenshots/`。`accessories` 场景另通过真实客户端与服务端的网络同步，验证泛用槽中项链的装备、磨损、耗尽、修复、卸下五个阶段的耐久和实际法术强度一致；成功时日志输出 `[ASB-ACC-SYNC] all 5 stages passed`。
 
 Forge 发布 JAR 使用 MixinGradle 生成的 refmap 映射幽冥锤 `tick` 方法，并在清单中注册 Mixin；开发截图、GameTest 类及开发用通用槽位数据包不打入发布包。验证记录见 [1.21.1 改动回移记录](docs/backport_1.21.1.md)。
@@ -215,6 +228,6 @@ Forge 发布 JAR 使用 MixinGradle 生成的 refmap 映射幽冥锤 `tick` 方�
 - 平衡性数值（全部可以通过铁魔法的 spell_config 或本模组配置覆盖）
 
 ## 素材授权
-Aether 和铁魔法的美术素材都是**保留所有权利**。本模组当前美术由 `tools/item_art.py`、`tools/staff_models.py`、`tools/armor_art.py`、`tools/entity_art.py`、`tools/build_spellbook_models.py` 原创生成，四件饰品保留原有手绘图标；法术书使用 32×32 独立 UV 图集，法杖使用 64×64 面图集，法师甲使用 128×128 图集，施法生物沿用标准 64×64 玩家皮肤布局。施法生物直接使用铁魔法运行时自带的人形模型，云块、烈焰奴仆、恐鸟在运行时直接使用 Aether 自己的模型和渲染器，没有复制其模型文件。
+Aether 和铁魔法的美术素材都是**保留所有权利**。本模组当前美术由 `tools/item_art.py`、`tools/staff_models.py`、`tools/armor_art.py`、`tools/entity_art.py`、`tools/dungeon_art.py`、`tools/build_spellbook_models.py` 原创生成，四件饰品保留原有手绘图标；法术书使用 32×32 独立 UV 图集，法杖使用 64×64 面图集，法师甲使用 128×128 图集，施法生物沿用标准 64×64 玩家皮肤布局。施法生物直接使用铁魔法运行时自带的人形模型，云块、烈焰奴仆、恐鸟在运行时直接使用 Aether 自己的模型和渲染器，没有复制其模型文件。
 
 饰品泛用槽修复及实际属性、客户端同步检查说明见 [饰品实际属性与同步验证](docs/accessory_effects_fix.md)。
