@@ -46,6 +46,7 @@ public class ASClient {
         event.registerEntityRenderer(ASEntities.STORM_BOLT.get(), StormBoltRenderer::new);
         event.registerEntityRenderer(ASEntities.SPECTRAL_AERWHALE.get(), SpectralAerwhaleRenderer::new);
         event.registerEntityRenderer(ASEntities.ICESTONE_METEOR.get(), IcestoneMeteorRenderer::new);
+        event.registerEntityRenderer(ASEntities.GUARDIAN_SOUL.get(), GuardianSoulRenderer::new);
         // Spellcasters use Iron's Spells' humanoid casting model with their own skins and layers
         event.registerEntityRenderer(ASEntities.VALKYRIE_SORCERESS.get(), context -> {
             AetherCasterRenderer renderer = new AetherCasterRenderer(context, AetherSpellbooks.id("textures/entity/valkyrie_sorceress.png"));

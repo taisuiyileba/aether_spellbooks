@@ -3,6 +3,8 @@ package com.aetherspellbooks.registry;
 import com.aetherspellbooks.AetherSpellbooks;
 import com.aetherspellbooks.block.TemporaryAercloudBlock;
 import com.aetherspellbooks.block.TemporaryBlueAercloudBlock;
+import com.aetherspellbooks.dungeon.DungeonVaultBlock;
+import com.aetherspellbooks.dungeon.VaultTier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -16,6 +18,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
+import java.util.List;
+
 public class ASBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, AetherSpellbooks.MODID);
 
@@ -25,6 +29,16 @@ public class ASBlocks {
             () -> new TemporaryBlueAercloudBlock(cloudProperties(MapColor.COLOR_LIGHT_BLUE)));
     public static final DeferredHolder<Block, Block> TEMPORARY_GOLDEN_AERCLOUD = BLOCKS.register("temporary_golden_aercloud",
             () -> new TemporaryAercloudBlock(cloudProperties(MapColor.COLOR_YELLOW)));
+
+    // --- Dungeon vaults: what a boss room's Treasure Chest becomes when its boss dies ---
+    public static final DeferredHolder<Block, Block> CARVED_VAULT = BLOCKS.register("carved_vault",
+            () -> new DungeonVaultBlock(VaultTier.CARVED, DungeonVaultBlock.vaultProperties()));
+    public static final DeferredHolder<Block, Block> ANGELIC_VAULT = BLOCKS.register("angelic_vault",
+            () -> new DungeonVaultBlock(VaultTier.ANGELIC, DungeonVaultBlock.vaultProperties()));
+    public static final DeferredHolder<Block, Block> HELLFIRE_VAULT = BLOCKS.register("hellfire_vault",
+            () -> new DungeonVaultBlock(VaultTier.HELLFIRE, DungeonVaultBlock.vaultProperties()));
+
+    public static final List<DeferredHolder<Block, Block>> VAULTS = List.of(CARVED_VAULT, ANGELIC_VAULT, HELLFIRE_VAULT);
 
     // Mirrors the Aether's aercloud properties, but without drops and removable by pistons.
     private static BlockBehaviour.Properties cloudProperties(MapColor color) {

@@ -1,7 +1,9 @@
 package com.aetherspellbooks.registry;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.dungeon.GuardianKind;
 import com.aetherspellbooks.item.AetherMageArmorItem;
+import com.aetherspellbooks.item.GuardianRelicItem;
 import com.aetherspellbooks.item.MultiSlotCurioItem;
 import com.aetherspellbooks.item.ZaniteFocusPendantItem;
 import com.aetherspellbooks.item.weapon.ASWeaponTiers;
@@ -19,9 +21,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.SmithingTemplateItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -116,6 +120,19 @@ public class ASItems {
                     ResourceLocation.withDefaultNamespace("item/empty_armor_slot_boots")),
             List.of(AetherSpellbooks.id("item/empty_slot_rune"))));
 
+    // --- Dungeon rematches: the relics that call a defeated boss back, and the shards they are made from ---
+    public static final DeferredHolder<Item, Item> GUARDIAN_SHARD = ITEMS.register("guardian_shard",
+            () -> new Item(new Item.Properties().rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> SENTRY_CORE = ITEMS.register("sentry_core",
+            () -> new GuardianRelicItem(GuardianKind.SLIDER, new Item.Properties().stacksTo(16).rarity(Rarity.UNCOMMON)));
+    public static final DeferredHolder<Item, Item> VALKYRIE_OATH = ITEMS.register("valkyrie_oath",
+            () -> new GuardianRelicItem(GuardianKind.VALKYRIE_QUEEN, new Item.Properties().stacksTo(16).rarity(Rarity.RARE)));
+    public static final DeferredHolder<Item, Item> SOLAR_EMBER = ITEMS.register("solar_ember",
+            () -> new GuardianRelicItem(GuardianKind.SUN_SPIRIT, new Item.Properties().stacksTo(16).rarity(Rarity.EPIC).fireResistant()));
+    public static final DeferredHolder<Item, Item> CARVED_VAULT = vault("carved_vault", ASBlocks.CARVED_VAULT, Rarity.UNCOMMON);
+    public static final DeferredHolder<Item, Item> ANGELIC_VAULT = vault("angelic_vault", ASBlocks.ANGELIC_VAULT, Rarity.RARE);
+    public static final DeferredHolder<Item, Item> HELLFIRE_VAULT = vault("hellfire_vault", ASBlocks.HELLFIRE_VAULT, Rarity.EPIC);
+
     // --- Spawn eggs ---
     public static final DeferredHolder<Item, Item> VALKYRIE_SORCERESS_SPAWN_EGG = ITEMS.register("valkyrie_sorceress_spawn_egg",
             () -> new DeferredSpawnEggItem(ASEntities.VALKYRIE_SORCERESS, 0xECEFF6, 0xE3B64A, new Item.Properties()));
@@ -129,6 +146,10 @@ public class ASItems {
             Item.Properties properties = ItemPropertiesHelper.equipment(1).rarity(set.rarity());
             return new AetherMageArmorItem(set, type, set == ASArmorMaterials.PHOENIX_MAGE ? properties.fireResistant() : properties);
         });
+    }
+
+    private static DeferredHolder<Item, Item> vault(String name, DeferredHolder<Block, Block> block, Rarity rarity) {
+        return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().rarity(rarity)));
     }
 
     private static Item.Properties weaponProperties(Rarity rarity) {

@@ -1,6 +1,6 @@
-# Aether Spellbooks 1.1.0 — NeoForge 1.21.1
+# Aether Spellbooks 1.2.0 — NeoForge 1.21.1
 
-Forge 1.20.1 版本位于同仓库的 [`1.20.1` 分支](https://github.com/taisuiyileba/aether_spellbooks/tree/1.20.1)。本目录是独立的 Minecraft 1.21.1 移植工程，保留 16 个法术、两种施法生物、两座神殿、法术书、饰品、两套盔甲和法杖／法剑。
+Forge 1.20.1 版本位于同仓库的 [`1.20.1` 分支](https://github.com/taisuiyileba/aether_spellbooks/tree/1.20.1)。本目录是独立的 Minecraft 1.21.1 移植工程，保留 16 个法术、两种施法生物、两座神殿、法术书、饰品、两套盔甲和法杖／法剑，并包含地牢宝库与守卫召回。
 
 原创代码及素材采用 [MIT License](LICENSE)。第三方模组、运行时引用的模型与纹理仍遵循各自许可证；本工程不将这些依赖打包进发布 JAR。
 
@@ -35,12 +35,12 @@ Aether 自带 Nitrogen 和 Cumulus；需另装表中的 Accessories 新版以替
 .\gradlew.bat runClient
 ```
 
-发布文件为 `build/libs/aether_spellbooks-1.21.1-1.1.0-neoforge.jar`。Linux/macOS 使用 `./gradlew`。
+发布文件为 `build/libs/aether_spellbooks-1.21.1-1.2.0-neoforge.jar`。Linux/macOS 使用 `./gradlew`。
 
 客户端截图检查沿用原工程：
 
 ```powershell
-$env:ASB_RENDER_CHECK = 'armor' # mobs / armor / weapons / items / books / spells / shrines / slider / accessories
+$env:ASB_RENDER_CHECK = 'armor' # mobs / armor / weapons / items / books / spells / shrines / slider / dungeon / accessories
 .\gradlew.bat runClient
 Remove-Item Env:ASB_RENDER_CHECK
 ```
@@ -57,6 +57,7 @@ Remove-Item Env:ASB_RENDER_CHECK
 | 法杖 | 5 把法杖的 3D 造型与 64×64 面图集 | `tools/staff_models.py` |
 | 法师甲 | 女武神／凤凰两套 Geo 模型、动画、128×128 图集、披风与 8 个盔甲图标 | `tools/armor_art.py` |
 | 施法生物与特效 | 女武神术士、烈阳侍僧皮肤与发光遮罩、羽翼、投射物与光环贴图、4 组粒子 | `tools/entity_art.py` |
+| 地牢宝库与召回 | 雕纹／天灵／狱炎宝库的 14 个立体模型、24 张方块贴图、守卫残片与三件圣物图标、三种守卫之魂与仪式光柱 | `tools/dungeon_art.py` |
 
 神能法戒、紫晶律动项链、重力晶施法护手和武神法者披风保留原有的手绘图标，不由脚本生成。
 
@@ -98,11 +99,22 @@ hammerDamagePerLevel = 2.0
 
 联机时以服务端数值为准，客户端使用相同配置可保持法术详情显示一致。兼容通过本附属的四个 Mixin 实现，不需要替换天境或铁魔法的 JAR。
 
+## 地牢宝库与守卫召回（1.2.0）
+
+- **宝库**：地牢 boss 死亡时，其房间中仍上锁、内容尚未生成的藏宝箱转为雕纹／天灵／狱炎立体宝库，沿用原战利品表。每位玩家每轮凭对应钥匙独立开启一次，合并后的全部奖励在开启瞬间一次性弹出。
+- **每人一把钥匙**：默认按参战者 UUID 直接发到背包，跨维度照常发放；离线、尚未重生或背包已满时保留待领取钥匙，在线后每秒尝试补发。
+- **守卫之魂**：使用岗哨核心、武神誓约或烈阳余烬恢复房间并召回 boss。武神女王恢复整座银牢并直接应战；三种宝库均能抵御滑行魔石撞击。
+- **再次挑战**：默认在 boss 复活时重置房间内宝库的领奖记录，下次击杀再次发钥匙。召回的 boss 保留天境原本的击杀掉落，奖励通过宝库领取。
+- **铁魔法宝库兼容**：可选开启一次性弹出，并在死者之王使用命匣复活时刷新周围宝库；默认关闭，不影响 Minecraft 原版试炼宝库。
+- 只处理属于地牢的 boss；刷怪蛋、指令或其他模组生成的 boss 保持天境原版行为。五个配置项位于 `[dungeons]`，详情见下方文档。
+
+规则、保护措施、物品来源与验证见 [地牢宝库与守卫召回](docs/dungeon_rematch.md)。实机截图：[宝库](docs/screenshots/dungeon_vaults_active.png)、[召回仪式](docs/screenshots/dungeon_ritual.png)、[背包图标](docs/screenshots/dungeon_inventory.png)。
+
 ## 验证
 
-已通过 `build` 和 64 项 GameTest（58 项其他测试和 6 项饰品测试）。新增测试覆盖真实投掷施法和换手、各材质镐的投射物伤害与实际扣血、副手锋利附魔及物品快照、力量加成且不重复叠加工具伤害、工具筛选、普通法术仍被拒绝、幽冥锤唤醒与单次扣血、射程／墙体／实体遮挡、冒险与和平模式、地牢边界、移动目标、配置开关、原有挖矿和攻击时不挖方块。
+本次 `build` 和全部 84 项必要 GameTest 通过（58 项其他测试、6 项饰品测试和 20 项地牢测试）；1.20.1 的构建与 85 项必要测试同样全部通过。地牢测试覆盖钥匙直接入包、跨维度及离线补发、背包已满、独立领奖与复活重置、房间保护、整座银牢恢复、滑行魔石防护和死者之王联动。此前的新增测试覆盖真实投掷施法和换手、各材质镐的投射物伤害与实际扣血、副手锋利附魔及物品快照、力量加成且不重复叠加工具伤害、工具筛选、普通法术仍被拒绝、幽冥锤唤醒与单次扣血、射程／墙体／实体遮挡、冒险与和平模式、地牢边界、移动目标、配置开关、原有挖矿和攻击时不挖方块。
 
-资源侧另有离线校验：`tools/` 下五个生成脚本的 `--check` 全部通过（法术书 3 本 2 模型、法剑与锻造 6 张、法杖 30 个文件、盔甲 27 个文件、生物与特效 31 个文件），25 个 `.png.mcmeta` 的帧数、帧尺寸与帧序号均在图片范围内。
+资源侧另有离线校验：`tools/` 下六个生成脚本的 `--check` 全部通过（法术书 3 本 2 模型、法剑与锻造 6 张、法杖 30 个文件、盔甲 27 个文件、生物与特效 31 个文件、地牢 33 张贴图与 14 个宝库模型），25 个 `.png.mcmeta` 的帧数、帧尺寸与帧序号均在图片范围内。
 
 饰品槽位测试确认四件饰品可放进对应的天境和通用 Curios 槽、拒绝不匹配的 Curios 专用槽，且两套 API 提供相同的属性；另有测试验证 Curios 项链施法只磨损一次、磨损后加成增长、耗尽后加成归零，以及 Curios 披风减伤和脱下后恢复正常。Curios 的泛用 `curio` 槽遵循其默认接纳规则，并提供与对应槽位相同的完整效果。饰品效果测试通过正常玩家 tick 读取实际属性，覆盖装备、施法磨损、耗尽、修复和卸下；不匹配的专用槽位不会触发磨损或减伤。测试数据包为玩家提供四种对应槽位及四个泛用槽位，不进入发布 JAR。法术书仍可放进 Curios 法术书槽；`ASB_RENDER_CHECK=accessories` 在真实客户端里模拟右键和天境界面拖放，并截图记录装备结果，随后对比真实客户端与服务端网络同步后的项链耐久和实际法术强度；装备、磨损、耗尽、修复、卸下五个阶段全部一致时输出 `[ASB-ACC-SYNC] all 5 stages passed`。
 

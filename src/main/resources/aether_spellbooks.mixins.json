@@ -7,7 +7,10 @@
     "SliderMixin",
     "ThrowSpellMixin",
     "SpectralHammerSpellMixin",
-    "SpectralHammerMixin"
+    "SpectralHammerMixin",
+    "VaultRewardsAccessor",
+    "VaultEjectionMixin",
+    "DeadKingSoulMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -90,6 +90,9 @@ public class ASV15SpellGameTests {
         Husk inPath = husk(helper, 5, 4);
         // beside the start, outside the dash path but inside the verdict shockwave
         Husk beside = husk(helper, 1, 2);
+        // Keep the targets in place until the delayed recast and shockwave assertions run.
+        inPath.setNoAi(true);
+        beside.setNoAi(true);
         AbstractSpell lunge = ASSpells.VALKYRIE_LUNGE.get();
         float max = inPath.getHealth();
 

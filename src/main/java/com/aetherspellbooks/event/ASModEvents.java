@@ -1,11 +1,13 @@
 package com.aetherspellbooks.event;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.dungeon.DungeonVaults;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
+import net.neoforged.neoforge.event.BlockEntityTypeAddBlocksEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
@@ -18,6 +20,11 @@ public class ASModEvents {
      * Registers an optional built-in data pack (disabled by default) that adds Iron's Spells ice magic
      * to {@code aether:is_cold}, letting every ice spell hurt an unfrozen Sun Spirit.
      */
+    @SubscribeEvent
+    public static void addVaultBlocks(BlockEntityTypeAddBlocksEvent event) {
+        DungeonVaults.addToVaultBlockEntity(event);
+    }
+
     @SubscribeEvent
     public static void addPackFinders(AddPackFindersEvent event) {
         if (event.getPackType() != PackType.SERVER_DATA) {

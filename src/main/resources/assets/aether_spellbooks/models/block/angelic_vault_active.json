@@ -1,0 +1,10 @@
+{
+  "parent": "aether_spellbooks:block/template_dungeon_vault",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "bottom": "aether_spellbooks:block/angelic_vault_bottom",
+    "front": "aether_spellbooks:block/angelic_vault_front_active",
+    "side": "aether_spellbooks:block/angelic_vault_side_active",
+    "top": "aether_spellbooks:block/angelic_vault_top"
+  }
+}

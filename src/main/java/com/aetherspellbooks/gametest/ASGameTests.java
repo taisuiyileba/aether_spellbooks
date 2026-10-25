@@ -27,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -105,8 +106,16 @@ public class ASGameTests {
         helper.succeed();
     }
 
-    @GameTest(template = EMPTY, timeoutTicks = 80)
+    @GameTest(template = EMPTY, batch = "aether_spellbooks_crystal", timeoutTicks = 80)
     public static void frostboundCrystalFreezesSunSpirit(GameTestHelper helper) {
+        // Other spell tests leave fake players and projectiles in reused structure positions. Keep the crystal's
+        // real flight path isolated so it cannot strike an old player or compete with another spell's damage.
+        BlockPos corner = helper.absolutePos(BlockPos.ZERO);
+        AABB area = new AABB(Vec3.atLowerCornerOf(corner), Vec3.atLowerCornerOf(corner.offset(16, 12, 16)));
+        for (ServerPlayer previous : helper.getLevel().getEntitiesOfClass(ServerPlayer.class, area)) {
+            helper.getLevel().removePlayerImmediately(previous, Entity.RemovalReason.DISCARDED);
+        }
+        helper.getLevel().getEntitiesOfClass(Entity.class, area).forEach(Entity::discard);
         // Player at x=1 facing +X (yaw -90), Sun Spirit a few blocks east at the same height
         ServerPlayer player = casterAt(helper, 1.5, 2, 4.5, -90);
         SunSpirit spirit = helper.spawn(AetherEntityTypes.SUN_SPIRIT.get(), new BlockPos(6, 2, 4));
@@ -120,7 +129,11 @@ public class ASGameTests {
         cast(ASSpells.FROSTBOUND_CRYSTAL.get(), 1, player);
         List<IceCrystal> crystals = helper.getLevel().getEntitiesOfClass(IceCrystal.class, new AABB(helper.absolutePos(BlockPos.ZERO)).inflate(10));
         helper.assertTrue(!crystals.isEmpty() && crystals.get(0).getOwner() == player, "crystal should be owned by the caster");
-        helper.succeedWhen(() -> helper.assertTrue(spirit.isFrozen(), "sun spirit should be frozen by the crystal"));
+        helper.succeedWhen(() -> {
+            helper.assertTrue(spirit.isFrozen(), "sun spirit should be frozen by the crystal");
+            helper.getLevel().removePlayerImmediately(player, Entity.RemovalReason.DISCARDED);
+            helper.getLevel().getEntitiesOfClass(Entity.class, area).forEach(Entity::discard);
+        });
     }
 
     @GameTest(template = EMPTY)
