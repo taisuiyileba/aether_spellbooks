@@ -155,6 +155,8 @@ public class ClientRenderCheck {
             commands.addAll(List.of("kill @e[type=minecraft:armor_stand]", "kill @e[type=minecraft:item_frame]", "kill @e[type=minecraft:item]", "clear @p"));
             commands.add("fill " + (bx - 7) + " " + by + " " + (bz - 4) + " " + (bx + 7) + " " + (by + 4) + " " + (bz - 4) + " minecraft:smooth_quartz");
             commands.add("fill " + (bx + 2) + " " + (by - 1) + " " + (bz - 2) + " " + (bx + 5) + " " + (by - 1) + " " + (bz + 1) + " minecraft:water");
+        } else if ("wearables".equals(SCENE)) {
+            commands.add("difficulty peaceful");
         } else if ("accessories".equals(SCENE)) {
             // AccessoryRenderCheck equips through the real right-click and menu paths
         } else if ("slider".equals(SCENE) || "dungeon".equals(SCENE)) {
@@ -363,6 +365,10 @@ public class ClientRenderCheck {
         }
         if ("accessories".equals(SCENE)) {
             AccessoryRenderCheck.tick(mc, server, timer);
+            return;
+        }
+        if ("wearables".equals(SCENE)) {
+            AccessoryWearCheck.tick(mc, server, timer);
             return;
         }
         if ("dungeon".equals(SCENE)) {

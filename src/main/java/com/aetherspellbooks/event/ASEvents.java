@@ -1,17 +1,20 @@
 package com.aetherspellbooks.event;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.compat.AetherCuriosBridge;
 import com.aetherspellbooks.item.ZaniteFocusPendantItem;
 import com.aetherspellbooks.registry.ASItems;
 import com.aetherspellbooks.spells.FrostboundCrystalSpell;
 import com.aetherspellbooks.util.CloudSentinels;
 import io.redspace.ironsspellbooks.api.events.SpellOnCastEvent;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -19,6 +22,13 @@ import net.neoforged.fml.common.EventBusSubscriber;
 @EventBusSubscriber(modid = AetherSpellbooks.MODID)
 public class ASEvents {
     public static final float MANTLE_FALL_DAMAGE_MULTIPLIER = 0.5f;
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            AetherCuriosBridge.recoverGearFromRemainingSlots(player);
+        }
+    }
 
     /**
      * Every cast wears down an equipped Zanite Focus Pendant (raising its bonus),

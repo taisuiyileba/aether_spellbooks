@@ -1,6 +1,7 @@
 package com.aetherspellbooks.gametest;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.config.ASConfig;
 import com.aetherspellbooks.event.ASEvents;
 import com.aetherspellbooks.item.ZaniteFocusPendantItem;
 import com.aetherspellbooks.registry.ASItems;
@@ -33,7 +34,11 @@ import java.util.UUID;
 public class ASAccessoriesGameTests {
     @GameTest(template = "empty", batch = "aether_spellbooks_accessories", timeoutTicks = 60)
     public static void aetherAccessoriesGrantStatsAndPendantWears(GameTestHelper helper) {
-        checkEffects(helper, true, "aether:pendant_slot", "aether:cape_slot");
+        if (ASConfig.useCuriosSlots()) {
+            checkEffects(helper, false, "necklace", "back");
+        } else {
+            checkEffects(helper, true, "aether:pendant_slot", "aether:cape_slot");
+        }
     }
 
     /** Both accessory systems accept the matching slot and provide the same attributes. */
@@ -49,28 +54,32 @@ public class ASAccessoriesGameTests {
                 ASItems.GRAVITITE_CASTING_GLOVES.get(), List.of("aether:gloves_slot", "hands"),
                 ASItems.VALKYRIE_MANTLE.get(), List.of("aether:cape_slot", "back"));
         var curios = CuriosApi.getCuriosInventory(player).orElseThrow();
+        boolean usesCurios = ASConfig.useCuriosSlots();
         expected.forEach((item, slots) -> {
             String aetherSlot = slots.get(0);
             String curiosSlot = slots.get(1);
             var stack = new ItemStack(item);
             var types = AccessoriesAPI.getStackSlotTypes(player, stack).stream().map(t -> t.name()).toList();
-            helper.assertTrue(types.equals(List.of(aetherSlot)), item + " should fit the Aether slot " + aetherSlot + ", fits " + types);
+            helper.assertTrue(usesCurios ? !types.contains(aetherSlot) : types.equals(List.of(aetherSlot)),
+                    item + " has unexpected Accessories slots " + types);
             // Curios' generic curio slot deliberately accepts every tagged curio.
             CuriosApi.getSlots(level).keySet().stream().filter(id -> !id.equals("curio")).forEach(id -> helper.assertTrue(
                     CuriosApi.isStackValid(new SlotContext(id, player, 0, false, true), stack) == id.equals(curiosSlot),
                     item + " should fit only the Curios slot " + curiosSlot + ", checked " + id));
-            var equipped = inventory.attemptToEquipAccessory(stack.copy());
-            helper.assertTrue(equipped != null && equipped.slotName().equals(aetherSlot),
-                    item + " should equip into " + aetherSlot + ", went to " + (equipped == null ? "nothing" : equipped.slotName()));
-            var aetherModifiers = AccessoriesAPI.getAttributeModifiers(equipped.getStack(), equipped).getAttributeModifiers(true);
             var context = new SlotContext(curiosSlot, player, 0, false, true);
             var curiosModifiers = CuriosApi.getAttributeModifiers(context, CuriosApi.getSlotId(context), stack);
-            helper.assertTrue(!curiosModifiers.isEmpty() && curiosModifiers.size() == aetherModifiers.size(),
-                    item + " should grant attributes through both APIs; Curios=" + curiosModifiers + ", Accessories=" + aetherModifiers);
-            curiosModifiers.forEach((attribute, modifier) -> helper.assertTrue(
-                    aetherModifiers.get(attribute).stream().anyMatch(other ->
-                            Math.abs(other.amount() - modifier.amount()) < 1e-6 && other.operation() == modifier.operation()),
-                    item + " should grant the same " + attribute + " bonus in both systems"));
+            helper.assertTrue(!curiosModifiers.isEmpty(), item + " should grant Curios attributes");
+            if (!usesCurios) {
+                var equipped = inventory.attemptToEquipAccessory(stack.copy());
+                helper.assertTrue(equipped != null && equipped.slotName().equals(aetherSlot),
+                        item + " should equip into " + aetherSlot + ", went to " + (equipped == null ? "nothing" : equipped.slotName()));
+                var aetherModifiers = AccessoriesAPI.getAttributeModifiers(equipped.getStack(), equipped).getAttributeModifiers(true);
+                helper.assertTrue(curiosModifiers.size() == aetherModifiers.size(), item + " should grant the same number of modifiers");
+                curiosModifiers.forEach((attribute, modifier) -> helper.assertTrue(
+                        aetherModifiers.get(attribute).stream().anyMatch(other ->
+                                Math.abs(other.amount() - modifier.amount()) < 1e-6 && other.operation() == modifier.operation()),
+                        item + " should grant the same " + attribute + " bonus in both systems"));
+            }
             var handler = curios.getStacksHandler(curiosSlot).orElseThrow();
             helper.assertTrue(handler.getStacks().isItemValid(0, stack), item + " should be accepted by its Curios inventory slot");
             curios.setEquippedCurio(curiosSlot, 0, stack.copy());
@@ -183,7 +192,7 @@ public class ASAccessoriesGameTests {
     }
 
     /** A disconnected GameTest player has no connection tick; run vanilla doTick from its world tick. */
-    private static FakePlayer tickingPlayer(GameTestHelper helper) {
+    static FakePlayer tickingPlayer(GameTestHelper helper) {
         var player = new FakePlayer(helper.getLevel(), new GameProfile(UUID.randomUUID(), "asb-live-stats")) {
             @Override
             public void tick() {

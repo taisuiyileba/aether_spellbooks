@@ -1,4 +1,4 @@
-# Aether Spellbooks 1.2.0 — NeoForge 1.21.1
+# Aether Spellbooks 1.2.1 — NeoForge 1.21.1
 
 Forge 1.20.1 版本位于同仓库的 [`1.20.1` 分支](https://github.com/taisuiyileba/aether_spellbooks/tree/1.20.1)。本目录是独立的 Minecraft 1.21.1 移植工程，保留 16 个法术、两种施法生物、两座神殿、法术书、饰品、两套盔甲和法杖／法剑，并包含地牢宝库与守卫召回。
 
@@ -18,12 +18,20 @@ Forge 1.20.1 版本位于同仓库的 [`1.20.1` 分支](https://github.com/taisu
 | GeckoLib | 4.7.5.1 |
 | Curios API | 9.5.1+1.21.1 |
 | Player Animator | 2.0.1+1.21.1 |
-| Accessories | 1.1.0-beta.53+1.21.1 |
+| Accessories（天境内置） | 1.1.0-beta.48+1.21.1 |
 | owo-lib（NeoForge） | 0.12.15.1-beta.6+1.21 |
 
-Aether 自带 Nitrogen 和 Cumulus；需另装表中的 Accessories 新版以替换 Aether 内置的旧版（旧版在开发环境有 Mixin 兼容问题）。玩家安装时需要另外安装上表中的依赖（启动器通常会自动处理依赖）；务必选择 **1.21.1 NeoForge** 文件。
+运行时由天境提供 Accessories、Nitrogen 和 Cumulus。玩家需安装铁魔法、天境及其外部依赖（包括 owo-lib），启动器通常会自动处理依赖。请选择 **1.21.1 NeoForge** 文件。
 
-四件饰品同时支持天境饰品栏（Accessories）和对应的通用 Curios 槽：神能法戒支持天境戒指槽／Curios `ring`，紫晶律动项链支持天境吊坠槽／Curios `necklace`，重力晶施法护手支持天境手套槽／Curios `hands`，武神法者披风支持天境披风槽／Curios `back`。两套槽位中的属性、项链施法磨损及披风减伤均生效。天境界面只显示 Accessories 槽位；装备到 Curios 的饰品需通过 Curios 界面查看和取下。四件饰品也支持泛用 Curios `curio` 槽，在其中提供完整属性、项链磨损和披风减伤；不匹配的专用槽位不会触发这些效果。此兼容只声明物品适用的槽位，不额外增加玩家槽位，通用槽位需由其他模组或整合包配置提供。法术书仍使用 Curios 的 `spellbook` 槽。物品标签可由整合包覆盖。
+Gradle 的 `runClient` 单独使用 Accessories `1.1.0-beta.53+1.21.1`，适配开发环境重新编译后的实体渲染代码。
+
+新配置默认使用 Curios，天境饰品按钮会打开 Curios。天境的戒指、吊坠、手套、披风、杂项和护盾依次映射到 `ring`、`necklace`、`hands`、`back`、`charm` 和 `aether_shield`。使用天境六类物品标签的扩展饰品也能复用这套映射，包括 Deep Aether。法术书使用 Curios 的 `spellbook` 槽。
+
+要使用天境原有的 Accessories 饰品栏，可在 `config/aether_spellbooks-common.toml` 的 `[accessories]` 段把 `useCuriosSlots` 设为 `false`，然后重进单人存档或重启服务端。关闭后，神能法戒、紫晶律动项链、重力晶施法护手和武神法者披风也能使用整合包提供的对应 Curios 槽或泛用 `curio` 槽。两套槽位中的属性、项链施法磨损和披风减伤均生效。
+
+旧槽位取消时，已穿戴的装备和外观饰品会返还给玩家，取回后可重新穿戴。开启时使用天境内置的 Accessories 接口运行原有饰品效果。多人游戏以服务端配置为准。
+
+穿戴外观沿用天境的槽位分工。紫晶律动项链显示在胸前，重力晶施法护手显示在双手并随第一人称手臂移动，武神法者披风在背后随走路和潜行摆动。神能法戒以物品图标呈现。穿戴时优先采用天境槽的可见饰品，护手和项链会贴合法师甲，武神法者披风与法师甲共用一个背部显示位。
 
 ## 构建与运行
 
@@ -35,12 +43,12 @@ Aether 自带 Nitrogen 和 Cumulus；需另装表中的 Accessories 新版以替
 .\gradlew.bat runClient
 ```
 
-发布文件为 `build/libs/aether_spellbooks-1.21.1-1.2.0-neoforge.jar`。Linux/macOS 使用 `./gradlew`。
+发布文件为 `build/libs/aether_spellbooks-1.21.1-1.2.1-neoforge.jar`。Linux/macOS 使用 `./gradlew`。
 
 客户端截图检查沿用原工程：
 
 ```powershell
-$env:ASB_RENDER_CHECK = 'armor' # mobs / armor / weapons / items / books / spells / shrines / slider / dungeon / accessories
+$env:ASB_RENDER_CHECK = 'armor' # mobs / armor / weapons / items / books / spells / shrines / slider / dungeon / accessories / wearables
 .\gradlew.bat runClient
 Remove-Item Env:ASB_RENDER_CHECK
 ```
@@ -112,7 +120,7 @@ hammerDamagePerLevel = 2.0
 
 ## 验证
 
-本次 `build` 和全部 84 项必要 GameTest 通过（58 项其他测试、6 项饰品测试和 20 项地牢测试）；1.20.1 的构建与 85 项必要测试同样全部通过。地牢测试覆盖钥匙直接入包、跨维度及离线补发、背包已满、独立领奖与复活重置、房间保护、整座银牢恢复、滑行魔石防护和死者之王联动。此前的新增测试覆盖真实投掷施法和换手、各材质镐的投射物伤害与实际扣血、副手锋利附魔及物品快照、力量加成且不重复叠加工具伤害、工具筛选、普通法术仍被拒绝、幽冥锤唤醒与单次扣血、射程／墙体／实体遮挡、冒险与和平模式、地牢边界、移动目标、配置开关、原有挖矿和攻击时不挖方块。
+本版本的 `build` 和 86 项必要 GameTest 均已通过，包括 8 项饰品测试和 20 项地牢测试。地牢测试覆盖钥匙直接入包、跨维度及离线补发、背包已满、独立领奖与复活重置、房间保护、整座银牢恢复、滑行魔石防护和死者之王联动。此前的新增测试覆盖真实投掷施法和换手、各材质镐的投射物伤害与实际扣血、副手锋利附魔及物品快照、力量加成且不重复叠加工具伤害、工具筛选、普通法术仍被拒绝、幽冥锤唤醒与单次扣血、射程／墙体／实体遮挡、冒险与和平模式、地牢边界、移动目标、配置开关、原有挖矿和攻击时不挖方块。
 
 资源侧另有离线校验：`tools/` 下六个生成脚本的 `--check` 全部通过（法术书 3 本 2 模型、法剑与锻造 6 张、法杖 30 个文件、盔甲 27 个文件、生物与特效 31 个文件、地牢 33 张贴图与 14 个宝库模型），25 个 `.png.mcmeta` 的帧数、帧尺寸与帧序号均在图片范围内。
 

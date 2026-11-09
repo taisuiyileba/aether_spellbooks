@@ -6,10 +6,19 @@ group = mod_group_id
 version = "${minecraft_version}-${mod_version}-neoforge"
 base { archivesName = mod_id }
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+sourceSets {
+    devClient {
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
 neoForge {
     version = neo_version
     runs {
-        client { client(); gameDirectory = project.file('run-client') }
+        client {
+            client()
+            gameDirectory = project.file('run-client')
+            sourceSet = sourceSets.devClient
+        }
         server { server(); programArgument '--nogui' }
         gameTestServer { gameDirectory = project.file('run-gametest'); type = 'gameTestServer'; systemProperty 'asb.gametest', 'true' }
         configureEach { systemProperty 'neoforge.enabledGameTestNamespaces', mod_id }
@@ -27,7 +36,10 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    implementation 'maven.modrinth:accessories:Fb55Fgjz'
+    // Match the Accessories API that The Aether 1.5.10 supplies at runtime.
+    compileOnly 'maven.modrinth:accessories:Avp7HDTx'
+    // The recompiled dev client needs the newer entity renderer mixin.
+    devClientRuntimeOnly 'maven.modrinth:accessories:Fb55Fgjz'
     runtimeOnly 'maven.modrinth:owo-lib:aDarc4xa'
     compileOnly 'com.aetherteam.nitrogen:nitrogen_internals:1.21.1-1.1.25-neoforge'
     implementation 'maven.modrinth:irons-spells-n-spellbooks:slKLosTb'

@@ -46,6 +46,8 @@
   "death.attack.aether_spellbooks.summon_moa": "%1$s 被 %2$s 的恐鸟踩倒了",
   "death.attack.aether_spellbooks.summon_moa.item": "%1$s 被 %2$s 用 %3$s 召唤的恐鸟踩倒了",
   "pack.aether_spellbooks.ice_magic_is_cold": "天境魔法书：冰系魔法算作寒冷伤害（所有铁魔法冰系法术都能伤害烈阳巨灵）",
+  "pack.aether_spellbooks.aether_curios": "天境魔法书：将天境饰品槽切换为 Curios",
+  "curios.identifier.aether_shield": "天境护盾",
   "item.aether_spellbooks.gravitite_casting_gloves": "重力晶施法护手",
   "item.aether_spellbooks.gravitite_casting_gloves.desc": "佩戴在天境手套槽或 Curios 手部槽，也支持 Curios 泛用饰品槽。",
   "item.aether_spellbooks.valkyrie_mantle": "武神法者披风",

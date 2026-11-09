@@ -11,6 +11,7 @@ public class ASConfig {
     public static final ModConfigSpec.IntValue MOA_DISMOUNT_UNSUMMON_SECONDS;
     public static final ModConfigSpec.DoubleValue PENDANT_MIN_SPELL_POWER;
     public static final ModConfigSpec.DoubleValue PENDANT_MAX_SPELL_POWER;
+    public static final ModConfigSpec.BooleanValue USE_CURIOS_SLOTS;
     public static final ModConfigSpec.IntValue VALKYRIE_SORCERESS_SPAWN_WEIGHT;
     public static final ModConfigSpec.IntValue SOLAR_ACOLYTE_SPAWN_WEIGHT;
     public static final ModConfigSpec.BooleanValue THROWN_TOOLS_DAMAGE_SLIDER;
@@ -87,6 +88,9 @@ public class ASConfig {
         builder.pop();
 
         builder.push("accessories");
+        USE_CURIOS_SLOTS = builder
+                .comment("Move the player's six Aether accessory categories to Curios. Restart the server or reopen the world after changing this setting.")
+                .define("useCuriosSlots", true);
         PENDANT_MIN_SPELL_POWER = builder
                 .comment("Spell power bonus of the Zanite Focus Pendant when fully repaired (0.05 = +5%).")
                 .defineInRange("pendantMinSpellPower", 0.05, 0.0, 10.0);
@@ -158,5 +162,9 @@ public class ASConfig {
 
     public static boolean modifyIronsVaults() {
         return SPEC.isLoaded() && MODIFY_IRONS_VAULTS.get();
+    }
+
+    public static boolean useCuriosSlots() {
+        return SPEC.isLoaded() ? USE_CURIOS_SLOTS.get() : USE_CURIOS_SLOTS.getDefault();
     }
 }

@@ -10,7 +10,21 @@
     "SpectralHammerMixin",
     "VaultRewardsAccessor",
     "VaultEjectionMixin",
-    "DeadKingSoulMixin"
+    "DeadKingSoulMixin",
+    "AetherPlayerSlotsMixin",
+    "RemovedAccessorySlotsMixin",
+    "AetherEquipmentUtilMixin",
+    "AccessoriesApiMixin",
+    "SlotReferenceImplMixin",
+    "SlotReferenceMixin",
+    "PhoenixGlovesMixin",
+    "AetherDispenserMixin",
+    "OpenAetherAccessoriesMixin"
+  ],
+  "client": [
+    "PlayerHandsMixin",
+    "PlayerCapeMixin",
+    "AetherCapeMixin"
   ],
   "injectors": {
     "defaultRequire": 1

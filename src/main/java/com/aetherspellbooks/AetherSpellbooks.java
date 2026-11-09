@@ -1,5 +1,6 @@
 package com.aetherspellbooks;
 
+import com.aetherspellbooks.compat.AetherCuriosBridge;
 import com.aetherspellbooks.config.ASConfig;
 import com.aetherspellbooks.registry.ASBiomeModifiers;
 import com.aetherspellbooks.registry.ASBlocks;
@@ -35,6 +36,7 @@ public class AetherSpellbooks {
         ASBiomeModifiers.register(modBus);
         ASStructures.register(modBus);
         modBus.addListener(com.aetherspellbooks.compat.AccessoriesCompat::setup);
+        modBus.addListener(AetherCuriosBridge::registerCapabilities);
         modBus.addListener(ASEntities::onAttributeCreation);
         modBus.addListener(ASEntities::onSpawnPlacements);
         modBus.addListener(ASCreativeTabs::addToVanillaTabs);

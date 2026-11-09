@@ -1,6 +1,7 @@
 package com.aetherspellbooks.event;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.config.ASConfig;
 import com.aetherspellbooks.dungeon.DungeonVaults;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
@@ -33,5 +34,10 @@ public class ASModEvents {
         event.addPackFinders(AetherSpellbooks.id("datapacks/" + ICE_MAGIC_IS_COLD_PACK),
                 PackType.SERVER_DATA, Component.translatable("pack.aether_spellbooks.ice_magic_is_cold"),
                 PackSource.FEATURE, false, Pack.Position.TOP);
+        if (ASConfig.useCuriosSlots()) {
+            event.addPackFinders(AetherSpellbooks.id("datapacks/aether_curios"), PackType.SERVER_DATA,
+                    Component.translatable("pack.aether_spellbooks.aether_curios"), PackSource.BUILT_IN,
+                    true, Pack.Position.TOP);
+        }
     }
 }

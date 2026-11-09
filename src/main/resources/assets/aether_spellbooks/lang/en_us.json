@@ -46,6 +46,8 @@
   "death.attack.aether_spellbooks.summon_moa": "%1$s was trampled by %2$s's moa",
   "death.attack.aether_spellbooks.summon_moa.item": "%1$s was trampled by %2$s's moa using %3$s",
   "pack.aether_spellbooks.ice_magic_is_cold": "Aether Spellbooks: Ice Magic is Cold (all Iron's Spells ice spells can hurt the Sun Spirit)",
+  "pack.aether_spellbooks.aether_curios": "Aether Spellbooks: Aether Accessories in Curios",
+  "curios.identifier.aether_shield": "Aether Shield",
   "item.aether_spellbooks.gravitite_casting_gloves": "Gravitite Casting Gloves",
   "item.aether_spellbooks.gravitite_casting_gloves.desc": "Fits the Aether gloves or Curios hands slot or a generic Curios slot.",
   "item.aether_spellbooks.valkyrie_mantle": "Valkyrie Mantle",

@@ -45,6 +45,13 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "accessories"
 type = "required"
-versionRange = "[1.1.0-beta.53+1.21.1,)"
+versionRange = "[1.1.0-beta.48+1.21.1,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "curios"
+type = "required"
+versionRange = "[9.5.1+1.21.1,)"
 ordering = "AFTER"
 side = "BOTH"

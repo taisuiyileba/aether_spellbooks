@@ -1,6 +1,7 @@
 package com.aetherspellbooks.client;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.client.accessory.AccessoryWearLayer;
 import com.aetherspellbooks.client.armor.MageCapeLayer;
 import com.aetherspellbooks.client.mob.AetherCasterRenderer;
 import com.aetherspellbooks.client.mob.SolarHaloLayer;
@@ -12,6 +13,7 @@ import com.aetherspellbooks.registry.ASParticles;
 import com.aetherteam.aether.client.renderer.entity.FireMinionRenderer;
 import com.aetherteam.aether.client.renderer.entity.MoaRenderer;
 import io.redspace.ironsspellbooks.render.SpellBookCurioRenderer;
+import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
@@ -66,6 +68,7 @@ public class ASClient {
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
         for (var skin : event.getSkins()) {
             if (event.getSkin(skin) instanceof PlayerRenderer renderer) {
+                renderer.addLayer(new AccessoryWearLayer(renderer));
                 renderer.addLayer(new MageCapeLayer(renderer));
             }
         }
@@ -82,6 +85,13 @@ public class ASClient {
 
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> ASItems.SPELLBOOKS.forEach(book -> CuriosRendererRegistry.register(book.get(), SpellBookCurioRenderer::new)));
+        event.enqueueWork(() -> {
+            ASItems.SPELLBOOKS.forEach(book -> CuriosRendererRegistry.register(book.get(), SpellBookCurioRenderer::new));
+            // The player layers share one appearance across Accessories and Curios.
+            AccessoriesRendererRegistry.registerNoRenderer(ASItems.AMBROSIUM_RING.get());
+            AccessoriesRendererRegistry.registerNoRenderer(ASItems.ZANITE_FOCUS_PENDANT.get());
+            AccessoriesRendererRegistry.registerNoRenderer(ASItems.GRAVITITE_CASTING_GLOVES.get());
+            AccessoriesRendererRegistry.registerNoRenderer(ASItems.VALKYRIE_MANTLE.get());
+        });
     }
 }
