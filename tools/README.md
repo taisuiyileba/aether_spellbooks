@@ -12,6 +12,7 @@ python -m pip install -r tools/requirements.txt
 | --- | --- |
 | `build_spellbook_models.py` | 三本法术书图集与合书、展开模型 |
 | `item_art.py` | 法剑、锻造模板和空槽符文 |
+| `accessory_art.py` | 项链、护手和披风的穿戴贴图，与 `AccessoryModels` 的盒式 UV 对应 |
 | `staff_models.py` | 五把法杖的模型与图集 |
 | `armor_art.py` | 两套法师甲模型、动画、图集、披风及图标 |
 | `entity_art.py` | 施法生物、投射物、光环与粒子贴图 |

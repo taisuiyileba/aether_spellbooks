@@ -1,6 +1,7 @@
 package com.aetherspellbooks.client;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.client.accessory.AccessoryWearLayer;
 import com.aetherspellbooks.client.armor.MageCapeLayer;
 import com.aetherspellbooks.client.mob.AetherCasterRenderer;
 import com.aetherspellbooks.client.mob.SolarHaloLayer;
@@ -66,6 +67,7 @@ public class ASClient {
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
         for (String skin : event.getSkins()) {
             if (event.getSkin(skin) instanceof PlayerRenderer renderer) {
+                renderer.addLayer(new AccessoryWearLayer(renderer));
                 renderer.addLayer(new MageCapeLayer(renderer));
             }
         }

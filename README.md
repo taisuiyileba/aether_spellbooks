@@ -1,11 +1,11 @@
 # Aether Spellbooks（天境魔法书）
 
-Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.2.0 · MIT
+Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.2.1 · MIT
 
 - 本目录：Forge 1.20.1。
 - [NeoForge 1.21.1 移植版](https://github.com/taisuiyileba/aether_spellbooks/blob/1.21.1/README.md)：独立构建工程与依赖说明。
 
-项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，与模组版本号无关；当前模组版本为 1.2.0。
+项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，当前模组版本为 1.2.1。
 源码布局、工具入口和验证记录见 [开发文档索引](docs/README.md)，本次更新见 [更新记录](CHANGELOG.md)。
 
 ## 依赖
@@ -28,6 +28,7 @@ ASB_RENDER_CHECK=weapons ./gradlew runClient # 同上，展示法杖和法剑（
 ASB_RENDER_CHECK=books ./gradlew runClient   # 法术书与铁魔法参考对照、环绕、左右手及第三人称截图
 ASB_RENDER_CHECK=slider ./gradlew runClient  # 幽冥锤攻击滑行魔石的正面和侧面连续帧
 ASB_RENDER_CHECK=accessories ./gradlew runClient # 右键装备和天境饰品界面拖放检查
+ASB_RENDER_CHECK=wearables ./gradlew runClient   # 饰品的正面、背面与第一人称左右手检查
 ASB_RENDER_CHECK=items ./gradlew runClient   # 同上，生存背包里把本模组图标和铁魔法/Aether/原版的同类物品排在一起对比
 ASB_RENDER_CHECK=spells ./gradlew runClient  # 同上，对一排尸壳依次施放 v1.5 的法术并在关键时刻截图（asb_spell_*.png）
 ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结构生成），平坦世界里放置两座神殿，再去 Aether 找自然生成的神殿截图（asb_shrine_*.png）
@@ -40,11 +41,14 @@ ASB_RENDER_CHECK=dungeon ./gradlew runClient # 三种宝库（空闲/激活/俯�
 
 1.20.1 的天境饰品栏和通用饰品栏都通过 Curios 实现。四件饰品分别支持 `aether_ring`／`ring`、`aether_pendant`／`necklace`、`aether_gloves`／`hands`、`aether_cape`／`back`，可右键装备或在界面拖放；两套槽位提供相同属性，项链施法磨损和披风减伤均适用。天境界面只显示其自身槽位，通用槽位需通过 Curios 界面查看，且需由其他模组或整合包配置提供。四件饰品也支持泛用 `curio` 槽，在其中提供完整属性、项链磨损和披风减伤；不匹配的专用槽位不会触发这些效果。本附属只声明适用槽位；测试时提供的通用槽位数据包不会进入发布 JAR。
 
-当前资源由以下五个脚本重建；均支持 `--check`，仅校验已导出资源：
+穿戴外观沿用天境的槽位分工。紫晶律动项链显示在胸前，重力晶施法护手显示在双手并随第一人称手臂移动，武神法者披风在背后随走路和潜行摆动。神能法戒以物品图标呈现。穿戴时优先采用天境槽的可见饰品，护手和项链会贴合法师甲，武神法者披风与法师甲共用一个背部显示位。
+
+当前资源可用下列脚本重建。加上 `--check` 时仅校验已导出的资源。
 
 ```bash
 python tools/build_spellbook_models.py --check
 python tools/item_art.py --check
+python tools/accessory_art.py --check
 python tools/staff_models.py --check
 python tools/armor_art.py --check
 python tools/entity_art.py --check

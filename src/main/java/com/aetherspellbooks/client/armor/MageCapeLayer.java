@@ -1,5 +1,7 @@
 package com.aetherspellbooks.client.armor;
 
+import com.aetherspellbooks.client.accessory.AccessoryWearLayer;
+import com.aetherspellbooks.client.accessory.WearableSlot;
 import com.aetherspellbooks.item.AetherMageArmorItem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -15,12 +17,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.item.Items;
 import software.bernie.geckolib.cache.texture.AnimatableTexture;
 
 /**
- * The cape of a mage chestplate. It swings like the vanilla cape (same cloak physics) but hangs just behind
- * the chestplate's back plate instead of inside it, and is drawn with cutout so the phoenix cape's flames show.
- * Players with their own cape keep theirs.
+ * One cloak behind the chestplate, using vanilla cape motion for the mage capes and the wearable mantle.
  */
 public class MageCapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     /** How far behind the body the cape hangs, in blocks (the vanilla cape sits at 0.125, inside a chestplate). */
@@ -33,12 +34,16 @@ public class MageCapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     @Override
     public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, AbstractClientPlayer player, float limbSwing, float limbSwingAmount,
                        float partialTicks, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (!(player.getItemBySlot(EquipmentSlot.CHEST).getItem() instanceof AetherMageArmorItem armor)
-                || player.isInvisible() || !player.isModelPartShown(PlayerModelPart.CAPE) || player.getCloakTextureLocation() != null) {
+        var chest = player.getItemBySlot(EquipmentSlot.CHEST);
+        if (player.isInvisible() || !player.isModelPartShown(PlayerModelPart.CAPE) || chest.is(Items.ELYTRA)) {
+            return;
+        }
+        boolean mantle = WearableSlot.MANTLE.isVisible(player);
+        if (!mantle && (!(chest.getItem() instanceof AetherMageArmorItem) || player.getCloakTextureLocation() != null)) {
             return;
         }
         poseStack.pushPose();
-        poseStack.translate(0.0F, 0.0F, DEPTH);
+        poseStack.translate(0.0F, 0.0F, mantle && chest.isEmpty() ? 0.15f : DEPTH);
         double dx = Mth.lerp(partialTicks, player.xCloakO, player.xCloak) - Mth.lerp(partialTicks, player.xo, player.getX());
         double dy = Mth.lerp(partialTicks, player.yCloakO, player.yCloak) - Mth.lerp(partialTicks, player.yo, player.getY());
         double dz = Mth.lerp(partialTicks, player.zCloakO, player.zCloak) - Mth.lerp(partialTicks, player.zo, player.getZ());
@@ -57,12 +62,14 @@ public class MageCapeLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         poseStack.mulPose(Axis.XP.rotationDegrees(6.0F + swing / 2.0F + lift));
         poseStack.mulPose(Axis.ZP.rotationDegrees(sway / 2.0F));
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - sway / 2.0F));
-        ResourceLocation texture = armor.getCapeTexture();
-        // the capes are mcmeta-animated (phoenix hem flames, valkyrie sapphire glint); GeckoLib loads them as
-        // AnimatableTexture, which only advances when asked to
-        AnimatableTexture.setAndUpdate(texture);
-        VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutoutNoCull(texture));
-        getParentModel().renderCloak(poseStack, consumer, packedLight, OverlayTexture.NO_OVERLAY);
+        if (mantle) {
+            AccessoryWearLayer.renderMantle(poseStack, buffer, packedLight);
+        } else if (chest.getItem() instanceof AetherMageArmorItem armor) {
+            ResourceLocation texture = armor.getCapeTexture();
+            AnimatableTexture.setAndUpdate(texture);
+            VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutoutNoCull(texture));
+            getParentModel().renderCloak(poseStack, consumer, packedLight, OverlayTexture.NO_OVERLAY);
+        }
         poseStack.popPose();
     }
 }

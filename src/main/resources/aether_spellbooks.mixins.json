@@ -13,6 +13,10 @@
     "VaultEjectionMixin",
     "DeadKingSoulMixin"
   ],
+  "client": [
+    "PlayerHandsMixin",
+    "PlayerCapeMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

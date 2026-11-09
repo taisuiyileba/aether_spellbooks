@@ -18,8 +18,9 @@ public final class ASGameTestPacks {
 
     @SubscribeEvent
     public static void addPackFinders(AddPackFindersEvent event) {
+        String scene = System.getenv("ASB_RENDER_CHECK");
         if (event.getPackType() != PackType.SERVER_DATA
-                || !(Boolean.getBoolean("asb.gametest") || "accessories".equals(System.getenv("ASB_RENDER_CHECK")))) {
+                || !(Boolean.getBoolean("asb.gametest") || "accessories".equals(scene) || "wearables".equals(scene))) {
             return;
         }
         var path = ModList.get().getModFileById(AetherSpellbooks.MODID).getFile()
