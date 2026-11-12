@@ -14,12 +14,14 @@ import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.AccessoriesAPI;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -32,6 +34,50 @@ import java.util.UUID;
 @GameTestHolder(AetherSpellbooks.MODID)
 @PrefixGameTestTemplate(false)
 public class ASAccessoriesGameTests {
+    @GameTest(template = "empty", batch = "aether_spellbooks_accessories", timeoutTicks = 40)
+    public static void accessoriesEquipFromUseInCuriosSlots(GameTestHelper helper) {
+        var level = helper.getLevel();
+        var player = new FakePlayer(level, new GameProfile(UUID.randomUUID(), "asb-right-click"));
+        level.addNewPlayer(player);
+        var inventory = CuriosApi.getCuriosInventory(player).orElseThrow();
+        Map<Item, List<String>> expected = Map.of(
+                ASItems.AMBROSIUM_RING.get(), List.of("aether:ring_slot", "ring"),
+                ASItems.ZANITE_FOCUS_PENDANT.get(), List.of("aether:pendant_slot", "necklace"),
+                ASItems.GRAVITITE_CASTING_GLOVES.get(), List.of("aether:gloves_slot", "hands"),
+                ASItems.VALKYRIE_MANTLE.get(), List.of("aether:cape_slot", "back"));
+        expected.forEach((item, slots) -> {
+            // With the bridge disabled, occupy the native slot so Accessories cannot intercept use.
+            var nativeSlot = AccessoriesCapability.get(player).getContainers().get(slots.getFirst());
+            if (nativeSlot != null) {
+                for (int i = 0; i < nativeSlot.getSize(); i++) {
+                    nativeSlot.getAccessories().setItem(i, new ItemStack(item));
+                }
+            }
+            for (String target : List.of(slots.get(1), "curio")) {
+                inventory.getCurios().values().forEach(handler -> {
+                    for (int i = 0; i < handler.getSlots(); i++) {
+                        handler.getStacks().setStackInSlot(i, ItemStack.EMPTY);
+                    }
+                });
+                // Force the real right-click event to use this slot rather than another matching slot.
+                for (String other : List.of(slots.get(1), "curio")) {
+                    if (!other.equals(target)) {
+                        var occupied = inventory.getStacksHandler(other).orElseThrow().getStacks();
+                        for (int i = 0; i < occupied.getSlots(); i++) occupied.setStackInSlot(i, new ItemStack(item));
+                    }
+                }
+                player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(item));
+                var use = new PlayerInteractEvent.RightClickItem(player, InteractionHand.MAIN_HAND);
+                NeoForge.EVENT_BUS.post(use);
+                helper.assertTrue(use.isCanceled() && player.getMainHandItem().isEmpty()
+                                && inventory.getStacksHandler(target).orElseThrow().getStacks().getStackInSlot(0).is(item),
+                        item + " should equip from use into " + target + " and leave the survival hotbar");
+            }
+        });
+        level.removePlayerImmediately(player, Entity.RemovalReason.DISCARDED);
+        helper.succeed();
+    }
+
     @GameTest(template = "empty", batch = "aether_spellbooks_accessories", timeoutTicks = 60)
     public static void aetherAccessoriesGrantStatsAndPendantWears(GameTestHelper helper) {
         if (ASConfig.useCuriosSlots()) {

@@ -41,6 +41,11 @@ public class MultiSlotCurioItem extends CurioBaseItem {
     }
 
     @Override
+    public boolean canEquipFromUse(SlotContext slotContext, ItemStack stack) {
+        return appliesTo(slotContext);
+    }
+
+    @Override
     public Multimap<net.minecraft.core.Holder<Attribute>, AttributeModifier> getAttributeModifiers(SlotContext slotContext, ResourceLocation id, ItemStack stack) {
         if (!appliesTo(slotContext)) {
             return ImmutableMultimap.of();

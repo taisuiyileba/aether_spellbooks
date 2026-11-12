@@ -1,6 +1,6 @@
 # 开发文档索引
 
-本分支面向 Minecraft 1.21.1 / NeoForge，当前模组版本为 1.2.0。
+本分支面向 Minecraft 1.21.1 / NeoForge，当前模组版本为 1.2.2。
 
 - [玩法、依赖和构建](../README.md)
 - [更新记录](../CHANGELOG.md)

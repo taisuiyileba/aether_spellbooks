@@ -127,7 +127,8 @@ public final class AccessoryRenderCheck {
             if (s.mayPlace(stack)) {
                 accepts.append(s.index).append(':').append(s.getClass().getSimpleName()).append(' ');
                 // only real accessory slots: the crafting grid accepts anything
-                if (target == null && s.getItem().isEmpty() && s.getClass().getSimpleName().contains("Accessor")) target = s;
+                if (target == null && s.getItem().isEmpty() && (s.getClass().getSimpleName().contains("Accessor")
+                        || s.getClass().getSimpleName().contains("Curio"))) target = s;
             }
         }
         AetherSpellbooks.LOGGER.info("[ASB-ACC] drag {}: menu {} - slots that accept it client side: {}", key(item),
