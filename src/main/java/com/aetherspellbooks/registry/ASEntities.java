@@ -1,6 +1,9 @@
 package com.aetherspellbooks.registry;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.entity.AechorFlower;
+import com.aetherspellbooks.entity.ThornTrail;
+import com.aetherspellbooks.entity.AechorNeedle;
 import com.aetherspellbooks.entity.AetherWhirlwind;
 import com.aetherspellbooks.entity.GuardianSoul;
 import com.aetherspellbooks.entity.IcestoneMeteor;
@@ -35,6 +38,21 @@ import net.minecraftforge.registries.RegistryObject;
 
 public class ASEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, AetherSpellbooks.MODID);
+
+    public static final RegistryObject<EntityType<ThornTrail>> THORN_TRAIL = ENTITIES.register("thorn_trail",
+            () -> EntityType.Builder.<ThornTrail>of(ThornTrail::new, MobCategory.MISC)
+                    .sized(1, 1).noSave().clientTrackingRange(8)
+                    .build(AetherSpellbooks.id("thorn_trail").toString()));
+
+    public static final RegistryObject<EntityType<AechorFlower>> AECHOR_FLOWER = ENTITIES.register("aechor_flower",
+            () -> EntityType.Builder.<AechorFlower>of(AechorFlower::new, MobCategory.MISC)
+                    .sized(0.75f, 0.55f).noSave().clientTrackingRange(8).updateInterval(1)
+                    .build(AetherSpellbooks.id("aechor_flower").toString()));
+
+    public static final RegistryObject<EntityType<AechorNeedle>> AECHOR_NEEDLE = ENTITIES.register("aechor_needle",
+            () -> EntityType.Builder.<AechorNeedle>of(AechorNeedle::new, MobCategory.MISC)
+                    .sized(0.15f, 0.15f).noSave().clientTrackingRange(8).updateInterval(1)
+                    .build(AetherSpellbooks.id("aechor_needle").toString()));
 
     public static final RegistryObject<EntityType<StonebreakerShard>> STONEBREAKER_SHARD = ENTITIES.register("stonebreaker_shard",
             () -> EntityType.Builder.<StonebreakerShard>of(StonebreakerShard::new, MobCategory.MISC)

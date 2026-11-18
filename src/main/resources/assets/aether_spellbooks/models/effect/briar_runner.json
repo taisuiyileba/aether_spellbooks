@@ -1,0 +1,10 @@
+{
+  "loader": "forge:obj",
+  "model": "aether_spellbooks:models/effect/briar_runner.obj",
+  "flip_v": true,
+  "automatic_culling": false,
+  "shade_quads": true,
+  "textures": {
+    "particle": "aether_spellbooks:block/briar"
+  }
+}

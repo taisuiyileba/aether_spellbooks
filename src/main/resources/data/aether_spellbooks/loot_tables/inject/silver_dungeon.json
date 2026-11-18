@@ -25,12 +25,14 @@
                 "spells": [
                   "aether_spellbooks:aercloud_step",
                   "aether_spellbooks:stonebreaker_shard",
+                  "aether_spellbooks:thorn_spikes",
                   "aether_spellbooks:zephyr_blast",
                   "aether_spellbooks:thunder_crystal",
                   "aether_spellbooks:summon_moa",
                   "aether_spellbooks:valkyrie_lunge",
                   "aether_spellbooks:cloud_sentinels",
                   "aether_spellbooks:aether_whirlwind",
+                  "aether_spellbooks:aechor_flower",
                   "aether_spellbooks:radiant_javelin",
                   "aether_spellbooks:thunderhead",
                   "aether_spellbooks:aerwhale_song"

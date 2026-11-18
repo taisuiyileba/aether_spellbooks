@@ -1,11 +1,11 @@
 # Aether Spellbooks（天境魔法书）
 
-Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.2.1 · MIT
+Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.3.2 · MIT
 
 - 本目录：Forge 1.20.1。
 - [NeoForge 1.21.1 移植版](https://github.com/taisuiyileba/aether_spellbooks/blob/1.21.1/README.md)：独立构建工程与依赖说明。
 
-项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，当前模组版本为 1.2.1。
+项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，当前模组版本为 1.3.2。
 源码布局、工具入口和验证记录见 [开发文档索引](docs/README.md)，本次更新见 [更新记录](CHANGELOG.md)。
 
 ## 依赖
@@ -31,6 +31,8 @@ ASB_RENDER_CHECK=accessories ./gradlew runClient # 右键装备和天境饰品�
 ASB_RENDER_CHECK=wearables ./gradlew runClient   # 饰品的正面、背面与第一人称左右手检查
 ASB_RENDER_CHECK=items ./gradlew runClient   # 同上，生存背包里把本模组图标和铁魔法/Aether/原版的同类物品排在一起对比
 ASB_RENDER_CHECK=spells ./gradlew runClient  # 同上，对一排尸壳依次施放 v1.5 的法术并在关键时刻截图（asb_spell_*.png）
+ASB_RENDER_CHECK=nature ./gradlew runClient  # 录制两招自然法术的施法、命中及收招连续帧
+ASB_RENDER_CHECK=overhead ./gradlew runClient # 实机检查本地和远端施法者在移动时的头顶模型跟随
 ASB_RENDER_CHECK=shrines ./gradlew runClient # 同上（这个场景会开启结构生成），平坦世界里放置两座神殿，再去 Aether 找自然生成的神殿截图（asb_shrine_*.png）
 ASB_RENDER_CHECK=dungeon ./gradlew runClient # 三种宝库（空闲/激活/俯视）、日夜下的守卫之魂、召回仪式和背包图标（asb_dungeon_*.png）
 ```
@@ -56,10 +58,12 @@ python tools/entity_art.py --check
 
 省略 `--check` 即生成资源与 `build/art_preview/` 中的预览。早期美术和初始化数据脚本已归档至 `tools/legacy/`，会覆盖当前资源，不用于重建 1.1.0。神殿模板仍由 `tools/gen_structures.py` 管理。工具分类和依赖见 [工具说明](tools/README.md)。
 
-## 内容（1.1.0）
-### 法术（16 个）
+## 内容
+### 法术（18 个）
 | 法术 | 学派 | 地牢档次 | 要点 |
 |---|---|---|---|
+| 荆棘地刺 `thorn_spikes` | 自然 | 铜 | 三列荆棘向前推进 7～11 格，可以越过一格台阶。命中附带 1.5 秒减速 II，每个目标每次施法最多受击一次 |
+| 箭毒花 `aechor_flower` | 自然 | 银 | 在头顶跟随 8～12 秒，收拢花冠后向 7 格内可见的敌人连射两根毒针，优先瞄准施法者刚击中的目标。每针造成自然伤害并施加 2 秒醺毒 |
 | 云阶术 `aercloud_step` | 唤魔 | 铜 | 临时境云平台；3 级起中心为弹跳蓝云，4 级起附带缓降 |
 | 碎岩飞刃 `stonebreaker_shard` | 自然 | 铜 | 翻滚的圣石块；**能打滑行魔石**；命中减速；5/9 级齐射 2/3 发，7 级起穿透 |
 | 西风冲击 `zephyr_blast` | 唤魔 | 铜 | 风球爆开，范围击退，适合把敌人吹下浮岛 |
@@ -101,7 +105,7 @@ python tools/entity_art.py --check
 ![武神圣所](docs/screenshots/shrine_valkyrie_sanctum.png)
 ![烈阳祭坛](docs/screenshots/shrine_solar_altar.png)
 
-创造物品栏还提供全部 16 个法术从最低级到最高级的卷轴；生存模式下从对应档次的天境地牢战利品和部分生物掉落中获得。
+创造物品栏还提供全部 18 个法术从最低级到最高级的卷轴。生存模式下可从对应档次的天境地牢战利品和部分生物掉落中获得。
 
 ### 法师盔甲（v1.3）
 把 Aether 的武神套和凤凰套在锻造台上升级成铁魔法风格的法师套：**天境奥术升级锻造模板 + Aether 盔甲 + 符文**（武神用神圣符文，凤凰用炽焰符文），附魔和耐久会保留下来。
