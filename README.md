@@ -1,11 +1,11 @@
 # Aether Spellbooks（天境魔法书）
 
-Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.3.2 · MIT
+Iron's Spells 'n Spellbooks × The Aether 联动附属 · 版本 1.2.3 · MIT
 
 - 本目录：Forge 1.20.1。
 - [NeoForge 1.21.1 移植版](https://github.com/taisuiyileba/aether_spellbooks/blob/1.21.1/README.md)：独立构建工程与依赖说明。
 
-项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，当前模组版本为 1.3.2。
+项目原创代码和素材采用 [MIT License](LICENSE)。依赖模组及运行时引用的第三方素材仍遵循各自许可证。下文的 v1.2～v1.6 标记为开发阶段记录，当前模组版本为 1.2.3。
 源码布局、工具入口和验证记录见 [开发文档索引](docs/README.md)，本次更新见 [更新记录](CHANGELOG.md)。
 
 ## 依赖
