@@ -12,6 +12,7 @@ import com.aetherspellbooks.registry.ASItems;
 import com.aetherspellbooks.registry.ASParticles;
 import com.aetherteam.aether.client.renderer.entity.FireMinionRenderer;
 import com.aetherteam.aether.client.renderer.entity.MoaRenderer;
+import com.aetherteam.aether.client.renderer.entity.PoisonNeedleRenderer;
 import io.redspace.ironsspellbooks.render.SpellBookCurioRenderer;
 import io.wispforest.accessories.api.client.AccessoriesRendererRegistry;
 import net.minecraft.client.renderer.entity.NoopRenderer;
@@ -19,6 +20,7 @@ import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -29,7 +31,16 @@ import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
 public class ASClient {
 
     @SubscribeEvent
+    public static void registerBriarModels(ModelEvent.RegisterAdditional event) {
+        event.register(ThornTrailRenderer.HOOK);
+        event.register(ThornTrailRenderer.RUNNER);
+    }
+
+    @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ASEntities.THORN_TRAIL.get(), ThornTrailRenderer::new);
+        event.registerEntityRenderer(ASEntities.AECHOR_FLOWER.get(), AechorFlowerRenderer::new);
+        event.registerEntityRenderer(ASEntities.AECHOR_NEEDLE.get(), PoisonNeedleRenderer::new);
         event.registerEntityRenderer(ASEntities.STONEBREAKER_SHARD.get(), StonebreakerShardRenderer::new);
         event.registerEntityRenderer(ASEntities.THUNDER_CRYSTAL.get(), ThunderCrystalRenderer::new);
         event.registerEntityRenderer(ASEntities.ZEPHYR_ORB.get(), context -> new SpriteProjectileRenderer<>(context,

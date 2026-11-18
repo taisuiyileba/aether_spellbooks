@@ -25,6 +25,7 @@
                 "spells": [
                   "aether_spellbooks:aercloud_step",
                   "aether_spellbooks:stonebreaker_shard",
+                  "aether_spellbooks:thorn_spikes",
                   "aether_spellbooks:zephyr_blast"
                 ],
                 "force": true

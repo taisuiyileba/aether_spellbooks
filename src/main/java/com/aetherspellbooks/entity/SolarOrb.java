@@ -5,6 +5,7 @@ import com.aetherspellbooks.util.ASFx;
 import com.aetherteam.aether.client.AetherSoundEvents;
 import io.redspace.ironsspellbooks.util.ParticleHelper;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.EntityType;
@@ -18,7 +19,7 @@ import java.util.Optional;
 /**
  * A miniature Sun Spirit that hovers above its caster and rains homing sunfire bolts on nearby foes.
  */
-public class SolarOrb extends OwnedSpellEntity {
+public class SolarOrb extends OverheadSpellEntity {
     public static final float RANGE = 16f;
     private int fireInterval = 16;
 
@@ -29,26 +30,25 @@ public class SolarOrb extends OwnedSpellEntity {
     public SolarOrb(Level level, LivingEntity owner) {
         this(ASEntities.SOLAR_ORB.get(), level);
         setOwner(owner);
-        setPos(anchor(owner));
     }
 
     public void setFireInterval(int ticks) {
         this.fireInterval = Math.max(4, ticks);
     }
 
-    private static Vec3 anchor(LivingEntity owner) {
-        Vec3 back = owner.getLookAngle().multiply(1, 0, 1).normalize().scale(-0.6);
-        return owner.position().add(back.x, owner.getBbHeight() + 1.4, back.z);
+    @Override
+    protected Vec3 anchor(LivingEntity owner, Vec3 feet, float partialTick) {
+        float yaw = Mth.rotLerp(partialTick, owner.yRotO, owner.getYRot()) * Mth.DEG_TO_RAD;
+        double time = level().getGameTime() - 1 + (double) partialTick;
+        return feet.add(0.6 * Mth.sin(yaw), owner.getBbHeight() + 1.4 + 0.15 * Math.sin(time * 0.12),
+                -0.6 * Mth.cos(yaw));
     }
 
     @Override
     public void tick() {
         super.tick();
         LivingEntity owner = getOwner();
-        if (owner != null) {
-            Vec3 target = anchor(owner).add(0, Math.sin(tickCount * 0.12) * 0.15, 0);
-            setPos(position().lerp(target, 0.35));
-        }
+        if (isRemoved()) return;
         if (level().isClientSide) {
             if (random.nextInt(2) == 0) {
                 level().addParticle(ParticleHelper.EMBERS, getX() + (random.nextDouble() - 0.5) * 0.8, getY() + 0.3 + (random.nextDouble() - 0.5) * 0.8,

@@ -1,6 +1,8 @@
 package com.aetherspellbooks.registry;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.entity.AechorFlower;
+import com.aetherspellbooks.entity.AechorNeedle;
 import com.aetherspellbooks.entity.AetherWhirlwind;
 import com.aetherspellbooks.entity.GuardianSoul;
 import com.aetherspellbooks.entity.IcestoneMeteor;
@@ -14,6 +16,7 @@ import com.aetherspellbooks.entity.StonebreakerShard;
 import com.aetherspellbooks.entity.ZephyrOrbProjectile;
 import com.aetherspellbooks.entity.SummonedFireMinion;
 import com.aetherspellbooks.entity.SummonedMoa;
+import com.aetherspellbooks.entity.ThornTrail;
 import com.aetherspellbooks.entity.ThunderCrystalProjectile;
 import com.aetherspellbooks.entity.mob.AetherSpellcaster;
 import com.aetherspellbooks.entity.mob.SolarAcolyte;
@@ -34,6 +37,21 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 
 public class ASEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(BuiltInRegistries.ENTITY_TYPE, AetherSpellbooks.MODID);
+
+    public static final DeferredHolder<EntityType<?>, EntityType<ThornTrail>> THORN_TRAIL = ENTITIES.register("thorn_trail",
+            () -> EntityType.Builder.<ThornTrail>of(ThornTrail::new, MobCategory.MISC)
+                    .sized(1, 1).noSave().clientTrackingRange(8)
+                    .build(AetherSpellbooks.id("thorn_trail").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<AechorFlower>> AECHOR_FLOWER = ENTITIES.register("aechor_flower",
+            () -> EntityType.Builder.<AechorFlower>of(AechorFlower::new, MobCategory.MISC)
+                    .sized(0.75f, 0.55f).noSave().clientTrackingRange(8).updateInterval(1)
+                    .build(AetherSpellbooks.id("aechor_flower").toString()));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<AechorNeedle>> AECHOR_NEEDLE = ENTITIES.register("aechor_needle",
+            () -> EntityType.Builder.<AechorNeedle>of(AechorNeedle::new, MobCategory.MISC)
+                    .sized(0.15f, 0.15f).noSave().clientTrackingRange(8).updateInterval(1)
+                    .build(AetherSpellbooks.id("aechor_needle").toString()));
 
     public static final DeferredHolder<EntityType<?>, EntityType<StonebreakerShard>> STONEBREAKER_SHARD = ENTITIES.register("stonebreaker_shard",
             () -> EntityType.Builder.<StonebreakerShard>of(StonebreakerShard::new, MobCategory.MISC)

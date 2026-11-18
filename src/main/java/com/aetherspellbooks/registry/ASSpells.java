@@ -1,6 +1,8 @@
 package com.aetherspellbooks.registry;
 
 import com.aetherspellbooks.AetherSpellbooks;
+import com.aetherspellbooks.spells.AechorFlowerSpell;
+import com.aetherspellbooks.spells.ThornSpikesSpell;
 import com.aetherspellbooks.spells.AercloudStepSpell;
 import com.aetherspellbooks.spells.AerwhaleSongSpell;
 import com.aetherspellbooks.spells.IcestoneMeteorSpell;
@@ -26,6 +28,8 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 public class ASSpells {
     public static final DeferredRegister<AbstractSpell> SPELLS = DeferredRegister.create(SpellRegistry.SPELL_REGISTRY_KEY, AetherSpellbooks.MODID);
 
+    public static final DeferredHolder<AbstractSpell, AbstractSpell> THORN_SPIKES = SPELLS.register("thorn_spikes", ThornSpikesSpell::new);
+    public static final DeferredHolder<AbstractSpell, AbstractSpell> AECHOR_FLOWER = SPELLS.register("aechor_flower", AechorFlowerSpell::new);
     public static final DeferredHolder<AbstractSpell, AbstractSpell> AERCLOUD_STEP = SPELLS.register("aercloud_step", AercloudStepSpell::new);
     public static final DeferredHolder<AbstractSpell, AbstractSpell> STONEBREAKER_SHARD = SPELLS.register("stonebreaker_shard", StonebreakerShardSpell::new);
     public static final DeferredHolder<AbstractSpell, AbstractSpell> THUNDER_CRYSTAL = SPELLS.register("thunder_crystal", ThunderCrystalSpell::new);

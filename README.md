@@ -1,6 +1,6 @@
-# Aether Spellbooks 1.2.2 — NeoForge 1.21.1
+# Aether Spellbooks 1.2.3 — NeoForge 1.21.1
 
-Forge 1.20.1 版本位于同仓库的 [`1.20.1` 分支](https://github.com/taisuiyileba/aether_spellbooks/tree/1.20.1)。本目录是独立的 Minecraft 1.21.1 移植工程，保留 16 个法术、两种施法生物、两座神殿、法术书、饰品、两套盔甲和法杖／法剑，并包含地牢宝库与守卫召回。
+Forge 1.20.1 版本位于同仓库的 [`1.20.1` 分支](https://github.com/taisuiyileba/aether_spellbooks/tree/1.20.1)。本目录是独立的 Minecraft 1.21.1 移植工程，包含 18 个法术、两种施法生物、两座神殿、法术书、饰品、两套盔甲和法杖／法剑，并包含地牢宝库与守卫召回。
 
 原创代码及素材采用 [MIT License](LICENSE)。第三方模组、运行时引用的模型与纹理仍遵循各自许可证；本工程不将这些依赖打包进发布 JAR。
 
@@ -43,17 +43,28 @@ Gradle 的 `runClient` 单独使用 Accessories `1.1.0-beta.53+1.21.1`，适配�
 .\gradlew.bat runClient
 ```
 
-发布文件为 `build/libs/aether_spellbooks-1.21.1-1.2.2-neoforge.jar`。Linux/macOS 使用 `./gradlew`。
+发布文件为 `build/libs/aether_spellbooks-1.21.1-1.2.3-neoforge.jar`。Linux/macOS 使用 `./gradlew`。
 
 客户端截图检查沿用原工程：
 
 ```powershell
-$env:ASB_RENDER_CHECK = 'armor' # mobs / armor / weapons / items / books / spells / shrines / slider / dungeon / accessories / wearables
+$env:ASB_RENDER_CHECK = 'armor' # mobs / armor / weapons / items / books / spells / shrines / slider / dungeon / accessories / wearables / nature / overhead
 .\gradlew.bat runClient
 Remove-Item Env:ASB_RENDER_CHECK
 ```
 
 这些命令创建开发测试世界，截图写入 `run-client/screenshots/`。GameTest 类、空测试模板及测试世界数据包均不进入发布 JAR。
+
+使用 `nature` 录制两种自然法术的施法、命中和收招。使用 `overhead` 检查本地和远端施法者移动时的头顶模型跟随。
+
+## 新增自然法术
+
+| 法术 | 学派 | 卷轴来源 | 要点 |
+|---|---|---|---|
+| 荆棘地刺 `thorn_spikes` | 自然 | 铜 | 三列荆棘向前推进 7～11 格，可以越过一格台阶。命中附带 1.5 秒减速 II，每个目标每次施法最多受击一次 |
+| 箭毒花 `aechor_flower` | 自然 | 银 | 在头顶跟随 8～12 秒，收拢花冠后向 7 格内可见的敌人连射两根毒针，优先瞄准施法者刚击中的目标。每针造成自然伤害并施加 2 秒醺毒 |
+
+荆棘模型由 `tools/export_briar.py` 从 Blockbench 工程导出。卷轴图标与花冠贴图由 `tools/nature_spell_art.py` 生成。
 
 ## 贴图与模型（法术书之外）
 

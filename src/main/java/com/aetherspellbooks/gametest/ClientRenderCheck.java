@@ -101,7 +101,7 @@ public class ClientRenderCheck {
             new ShrineShot("asb_shrine_aether_solar_altar_near", "solar_altar", true, 0));
     private static int[] shrineChunk;
     private static final String[] SPELL_ENTITIES = {"radiant_javelin", "storm_cloud", "storm_bolt", "spectral_aerwhale", "icestone_meteor",
-            "thunder_crystal", "zephyr_orb", "solar_orb", "solar_bolt"};
+            "thunder_crystal", "zephyr_orb", "solar_orb", "solar_bolt", "aechor_flower", "aechor_needle"};
 
     private static final String[] STAFFS = {"zanite_staff", "aercloud_staff", "gravitite_staff", "valkyrie_scepter", "solar_scepter"};
     private static final String[] BLADES = {"sunfire_spellblade", "stormcaller_spellblade", "hallowed_spellblade", "sanguine_spellblade"};
@@ -348,8 +348,17 @@ public class ClientRenderCheck {
             timer = 0;
             mc.options.hideGui = true;
             origin = mc.player.position().add(0, 0, -6);
+            if ("nature".equals(SCENE) || "overhead".equals(SCENE)) return;
             shots = sceneShots();
             run(server, setupCommands().toArray(String[]::new));
+            return;
+        }
+        if ("overhead".equals(SCENE)) {
+            OverheadFollowCheck.tick(mc, server, timer);
+            return;
+        }
+        if ("nature".equals(SCENE)) {
+            NatureRenderCheck.tick(mc, server, origin, timer);
             return;
         }
         int shot = stage - 2;

@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import software.bernie.geckolib.cache.texture.AnimatableTexture;
 
@@ -24,6 +25,11 @@ public class SolarOrbRenderer extends EntityRenderer<SolarOrb> {
 
     public SolarOrbRenderer(EntityRendererProvider.Context context) {
         super(context);
+    }
+
+    @Override
+    public Vec3 getRenderOffset(SolarOrb entity, float partialTick) {
+        return entity.renderOffset(partialTick);
     }
 
     @Override
